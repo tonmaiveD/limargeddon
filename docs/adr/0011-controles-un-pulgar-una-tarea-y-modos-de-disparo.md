@@ -1,6 +1,6 @@
 # 0011. Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar"
 
-**Estado:** aceptada por el dueño del producto, Hito 3. Reemplaza la distribución del deck de las ADR 0008 y 0010.
+**Estado:** aceptada por el dueño del producto, Hito 3. Reemplaza la distribución del deck de las ADR 0008 y 0010. El selector temporal pasó a ser permanente en la ADR 0013.
 
 ## Contexto
 Con el layout de la ADR 0010, el pulgar izquierdo tenía que mantener el acelerador y girar a la vez. El dueño descartó el disparo automático porque le quitaba gracia, y pidió la opción con más enganche según buenas prácticas de juegos para celular.

@@ -16,3 +16,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0010](0010-layout-movil-y-deck-a-todo-el-ancho.md) | Layout móvil: canvas a todo el ancho y deck rediseñado | Aceptada |
 | [0011](0011-controles-un-pulgar-una-tarea-y-modos-de-disparo.md) | Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar" | Aceptada |
 | [0012](0012-vista-de-ancho-variable.md) | Vista de ancho variable: más ciudad a los costados | Aceptada |
+| [0013](0013-dos-modos-de-disparo-permanentes.md) | Dos modos de disparo permanentes | Aceptada |
