@@ -12,5 +12,6 @@ export function fitStage(game?: Phaser.Game): void {
   const w = (h * 9) / 16;
   stage.style.width = w + 'px';
   stage.style.height = h + 'px';
-  game?.scale.refresh();
+  // Phaser mide el padre en el siguiente cuadro, cuando el layout ya aplicó el tamaño nuevo
+  if (game) requestAnimationFrame(() => game.scale.refresh());
 }

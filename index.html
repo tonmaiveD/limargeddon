@@ -14,6 +14,38 @@
   <div id="app">
     <div id="stage">
       <button id="snd" aria-pressed="true" title="Sonido (M)">♪ SONIDO</button>
+      <div class="overlay" id="menu" hidden>
+        <p class="eyebrow" id="menuEyebrow"></p>
+        <h1>Limargeddon</h1>
+        <p class="boss">Jefe: <b id="menuBoss"></b></p>
+        <p class="tip" id="menuTip"></p>
+        <div class="powers" id="menuPowers" aria-label="Bonus"></div>
+        <div class="row" id="menuDiffs"></div>
+        <p class="keys desk">Flechas o WASD para manejar · Z conos · X aceite · C claxon · M sonido</p>
+      </div>
+      <div class="overlay" id="end" hidden>
+        <p class="eyebrow" id="endEyebrow"></p>
+        <h2 id="endTitle"></h2>
+        <dl class="stats" id="endStats"></dl>
+        <div class="badges" id="endBadges"></div>
+        <div class="row">
+          <button class="pick" id="again">Revancha</button>
+          <button class="pick alt" id="toMenu">Dificultad</button>
+        </div>
+      </div>
+    </div>
+    <div id="deck">
+      <div class="pad">
+        <button class="u" data-k="up" aria-label="Acelerar">▲</button>
+        <button class="l" data-k="left" aria-label="Izquierda">◀</button>
+        <button class="d" data-k="down" aria-label="Frenar">▼</button>
+        <button class="r" data-k="right" aria-label="Derecha">▶</button>
+      </div>
+      <div class="weap">
+        <button class="c1" data-k="cone" id="w-cone"><i>▲</i>CONOS</button>
+        <button class="c2" data-k="oil" id="w-oil"><i>●</i>ACEITE</button>
+        <button class="c3" data-k="horn" id="w-horn"><i>◉</i>CLAXON</button>
+      </div>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
