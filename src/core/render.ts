@@ -1,4 +1,4 @@
-import { H, W } from './constants';
+import { H, W, view } from './constants';
 import { drawCar } from './damage-render';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
@@ -68,7 +68,7 @@ function drawPickup(g: Gfx, G: Game, u: Pickup): void {
 
 function drawHUD(g: Gfx, G: Game): void {
   const b = G.b, p = G.p, cfg = G.cfg, phases = cfg.boss.phases, cur = phases.find((x) => x.id === b.phase) ?? phases[0];
-  g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(0, 0, W, 44);
+  g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(-view.extra, 0, W + 2 * view.extra, 44);
   g.textAlign = 'left'; g.fillStyle = C.pink; g.font = FONT(11); g.fillText(cfg.boss.name, 12, 16);
   g.textAlign = 'right'; g.fillStyle = C.muted; g.font = BODY(600, 9); g.fillText(cur.name, W - 12, 16);
   const bw = W - 24, r = b.hp / b.max;
@@ -85,7 +85,7 @@ function drawHUD(g: Gfx, G: Game): void {
   // multas
   if (G.fines > 0) { g.textAlign = 'right'; g.fillStyle = C.sky; g.font = BODY(800, 9); g.fillText('PAPELETAS -S/' + G.fines, W - 70, 62); }
   // jugador
-  g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(0, H - 26, W, 26);
+  g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(-view.extra, H - 26, W + 2 * view.extra, 26);
   g.textAlign = 'left'; g.fillStyle = C.yellow; g.font = FONT(10); g.fillText('TICO', 10, H - 9);
   // en celular el deck ya muestra armas y recargas: la barra de vida se alarga y no se muestran atajos de teclado
   const barW = ui.touch ? 210 : 110;

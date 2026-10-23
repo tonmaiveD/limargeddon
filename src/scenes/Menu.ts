@@ -67,6 +67,7 @@ export class MenuScene extends Phaser.Scene {
   update(_t: number, delta: number): void {
     const dt = Math.min(0.05, delta / 1000), def = STAGES[this.stageId];
     track.scroll += def.cfg.road.idleScroll * dt;
+    setupCamera(this); // la vista puede cambiar de ancho al rotar o redimensionar
     beginLayers(this.L); def.drawWorld(this.L.world, def.cfg, track.scroll, null); endLayers(this.L);
   }
 }
