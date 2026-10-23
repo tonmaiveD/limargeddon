@@ -10,3 +10,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0004](0004-controles-y-overlays-dom.md) | Controles táctiles y overlays en capa DOM | Aceptada |
 | [0005](0005-etapa-como-datos-y-jefe-por-fases.md) | Etapa como datos y jefe como máquina de estados por fases | Aceptada |
 | [0006](0006-prueba-de-paridad-con-el-prototipo.md) | Prueba de paridad determinista contra el prototipo | Aceptada |
+| [0007](0007-duracion-diferida-al-hito-3.md) | El ajuste de duración de la pelea pasa al Hito 3 | Aceptada |
