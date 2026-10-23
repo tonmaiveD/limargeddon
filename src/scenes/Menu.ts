@@ -42,7 +42,7 @@ export class MenuScene extends Phaser.Scene {
     setDeckAmmo(0, 0);
   }
 
-  // Selector temporal para comparar modos de disparo jugando; la elección se guarda en el dispositivo.
+  // Selector del modo de disparo (los dos son opciones permanentes, ADR 0013); la elección se guarda en el dispositivo.
   private setupFireSelector(enabled: boolean): void {
     const box = document.querySelector<HTMLElement>('.setting')!, tip = document.getElementById('fireTip')!;
     box.hidden = !enabled; tip.hidden = !enabled;
