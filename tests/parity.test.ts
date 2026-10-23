@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { loadPrototype } from './harness/prototype';
-import { startPort, stepPort } from './harness/port';
+import { PROTOTYPE_CFG, startPort, stepPort } from './harness/port';
 import { seedRandom } from './harness/rng';
 import { bot } from './harness/bot';
 
 const DT = 1 / 60;
 const snap = (G: any) => [G.t, G.b.hp, G.p.hp, G.b.x, G.b.y, G.b.state, G.b.phase, G.p.x, G.p.y, G.traffic.length, G.shots.length, G.pickups.length, G.fines, G.bonus, G.stats.right];
 
-// Misma semilla, mismo bot, mismo dt: el port debe reproducir el prototipo cuadro a cuadro.
+// Misma semilla, mismo bot, mismo dt: con la config original (tests/fixtures), el motor debe reproducir el prototipo cuadro a cuadro.
+// La config del juego ya está balanceada y usa modos nuevos, así que no se compara contra el prototipo.
 describe('paridad con prototipo/san-isidro-v3.html', () => {
   for (const dk of ['facil', 'normal', 'dificil'] as const) {
     for (const seed of [1, 7, 42]) {
@@ -22,7 +23,7 @@ describe('paridad con prototipo/san-isidro-v3.html', () => {
         restore = seedRandom(seed);
         const b: unknown[][] = [];
         try {
-          const G = startPort(dk);
+          const G = startPort(dk, PROTOTYPE_CFG);
           for (let i = 0; i < 60 * 180 && G.mode === 'play'; i++) { bot(G, G.keys); stepPort(G, DT); b.push(snap(G)); }
         } finally { restore(); }
         console.log(dk, seed, 'cuadros', a.length, 'gana', (a.at(-1) as any[])[1] === 0, 't', (a.at(-1) as any[])[0].toFixed(1));

@@ -21,7 +21,7 @@
         <p class="tip" id="menuTip"></p>
         <div class="powers" id="menuPowers" aria-label="Bonus"></div>
         <div class="row" id="menuDiffs"></div>
-        <p class="keys desk">Flechas o WASD para manejar · Z conos · X aceite · C claxon · M sonido</p>
+        <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · M sonido</p>
       </div>
       <div class="overlay" id="end" hidden>
         <p class="eyebrow" id="endEyebrow"></p>
@@ -32,14 +32,14 @@
           <button class="pick" id="again">Revancha</button>
           <button class="pick alt" id="toMenu">Dificultad</button>
         </div>
+        <button class="link" id="copyLog" type="button">Copiar registro</button>
       </div>
     </div>
     <div id="deck">
-      <div class="pad">
-        <button class="u" data-k="up" aria-label="Acelerar">▲</button>
-        <button class="l" data-k="left" aria-label="Izquierda">◀</button>
-        <button class="d" data-k="down" aria-label="Frenar">▼</button>
-        <button class="r" data-k="right" aria-label="Derecha">▶</button>
+      <div class="stick" id="stick" role="group" aria-label="Volante y acelerador: arriba acelera, a los lados gira">
+        <span class="gas" data-z="up">▲ ACELERAR</span>
+        <span class="l" data-z="left">◀</span>
+        <span class="r" data-z="right">▶</span>
       </div>
       <div class="weap">
         <button class="c1" data-k="cone" id="w-cone"><i>▲</i>CONOS</button>

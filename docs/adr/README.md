@@ -11,3 +11,5 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0005](0005-etapa-como-datos-y-jefe-por-fases.md) | Etapa como datos y jefe como máquina de estados por fases | Aceptada |
 | [0006](0006-prueba-de-paridad-con-el-prototipo.md) | Prueba de paridad determinista contra el prototipo | Aceptada |
 | [0007](0007-duracion-diferida-al-hito-3.md) | El ajuste de duración de la pelea pasa al Hito 3 | Aceptada |
+| [0008](0008-controles-acelerador-y-colision-con-el-jefe.md) | Acelerador sin freno y tráfico que se aparta del jefe | Aceptada |
+| [0009](0009-balance-de-duracion-y-registro.md) | Balance de duración, paridad contra la config original y registro de peleas | Aceptada |

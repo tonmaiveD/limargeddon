@@ -76,7 +76,7 @@ function spawnEscorts(G: Game, P: BossPhase): void {
   const b = G.b, e = P.escorts!, { left, right } = G.cfg.road;
   [-1, 1].forEach((s, i) => {
     G.traffic.push({ k: 'amiga', x: clamp(b.x + s * 70, left + 20, right - 20), y: -70, w: 32, h: 56, vy: 0, hp: e.hp, max: e.hp,
-      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: 10, selfDmg: 10 });
+      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: e.contactDmg ?? 10, selfDmg: 10 });
   });
 }
 

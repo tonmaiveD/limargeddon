@@ -1,0 +1,398 @@
+{
+  "id": "san-isidro",
+  "number": 2,
+  "district": "San Isidro",
+  "roadName": "AV. CAMINO REAL",
+  "eyebrow": "Etapa 2 · San Isidro · Av. Camino Real",
+  "tip": "Va hablando por celular y apenas ve sobre el timón. Atácala por la derecha: su punto ciego recibe el doble. Ojo con el serenazgo, cada roce es papeleta.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 900,
+      "spd": 230,
+      "freq": 1.33,
+      "tele": true
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 1200,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 1600,
+      "spd": 290,
+      "freq": 0.77,
+      "tele": false
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 300,
+    "turboSpeed": 430,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "libre",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.5,
+      2.4
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": false,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "sereno",
+        "weight": 0.18,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#1f4fbf"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0
+      },
+      {
+        "k": "scooter",
+        "weight": 0.18,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 4,
+        "selfDmg": 12
+      },
+      {
+        "k": "suv",
+        "weight": 0.34,
+        "w": 32,
+        "h": 56,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#1d1b22"
+        ],
+        "contactDmg": 8,
+        "selfDmg": 10
+      },
+      {
+        "k": "sedan",
+        "weight": 0.3,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#6c7a8c",
+          "#8a2f3f",
+          "#c9ccd3"
+        ],
+        "contactDmg": 8,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 5,
+    "every": [
+      9,
+      13
+    ],
+    "dmg": 3
+  },
+  "crossings": {
+    "first": 3,
+    "every": [
+      16,
+      20
+    ]
+  },
+  "streets": [
+    "AV. PARDO Y ALIAGA",
+    "AV. JORGE BASADRE",
+    "CALLE LAS BEGONIAS",
+    "CALLE CHOQUEHUANCA",
+    "AV. CONQUISTADORES",
+    "CALLE LOS LAURELES"
+  ],
+  "rewards": {
+    "win": 800,
+    "clean": 400,
+    "blindPct": 80
+  },
+  "boss": {
+    "id": "q6",
+    "name": "LA LOCA DEL Q6",
+    "title": "La Loca del Q6",
+    "w": 46,
+    "h": 84,
+    "startY": -140,
+    "baseY": 160,
+    "lane": 2,
+    "firstAction": 1.5,
+    "cruiseSpeed": 150,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.4,
+    "phoneOffAct": 0.3,
+    "contactDmg": 7,
+    "chargeContactDmg": 15,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · EL CELULAR",
+        "col": "#ff8a1f",
+        "bar": "#ffe14d",
+        "returnAct": 2.4,
+        "swapChance": 0.65,
+        "swapAct": 2.5,
+        "attack": "brake",
+        "tele": 0.6,
+        "dur": 0.5,
+        "speed": 380
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · EL ESTACIONAMIENTO",
+        "col": "#ff8a1f",
+        "bar": "#ff8a1f",
+        "returnAct": 2,
+        "swapChance": 0.45,
+        "swapAct": 2.2,
+        "attack": "reverse",
+        "tele": 0.8,
+        "teleOff": 0.05,
+        "dur": 1.1,
+        "speed": 300,
+        "park": 1.6,
+        "maxY": 490,
+        "valetEvery": 12
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · LA RABIA",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 2.2,
+        "swapChance": 0.3,
+        "swapAct": 1.4,
+        "attack": "ram",
+        "tele": 0.7,
+        "dur": 0.7,
+        "speed": 420,
+        "maxY": 510,
+        "hornFirst": 2,
+        "hornEvery": 5,
+        "hornRadius": 150,
+        "stun": 1,
+        "escorts": {
+          "life": 15,
+          "hp": 60,
+          "cols": [
+            "#ffb3d1",
+            "#a8f0d6"
+          ]
+        }
+      }
+    ],
+    "lines": {
+      "1": [
+        "Aló, ¿amiga? Espérame...",
+        "¿Sabes quién es mi papá?",
+        "Ay no, se me rayó la uña",
+        "¡Estoy hablando por teléfono!",
+        "Reservé en Las Begonias a la 1"
+      ],
+      "2": [
+        "¡Yo estaciono donde quiero!",
+        "Le voy a decir a mi esposo",
+        "¿Dónde está el valet?",
+        "Solo son cinco minutitos",
+        "Mi papá es socio del Golf"
+      ],
+      "3": [
+        "¡Ahora sí me molesté!",
+        "¡Mi Q6 cuesta más que tu casa!",
+        "¡Amigas, ayúdenme!",
+        "¡Te voy a denunciar!",
+        "¡Llamen al serenazgo!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Ay! ¿Qué te pasa?",
+      "oil": "¡Ay, mi Q6!",
+      "combi": "¡¿Una combi?! ¡Qué asco!",
+      "metro": "¿Y ese tren? ¡Aquí no pasa el Metro!",
+      "valet": "¿Dónde está el valet?"
+    }
+  }
+}

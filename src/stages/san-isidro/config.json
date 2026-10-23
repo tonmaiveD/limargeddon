@@ -6,9 +6,9 @@
   "eyebrow": "Etapa 2 · San Isidro · Av. Camino Real",
   "tip": "Va hablando por celular y apenas ve sobre el timón. Atácala por la derecha: su punto ciego recibe el doble. Ojo con el serenazgo, cada roce es papeleta.",
   "difficulties": {
-    "facil": { "label": "Fácil", "hp": 900, "spd": 230, "freq": 1.33, "tele": true },
-    "normal": { "label": "Normal", "hp": 1200, "spd": 260, "freq": 1, "tele": true },
-    "dificil": { "label": "Difícil", "hp": 1600, "spd": 290, "freq": 0.77, "tele": false }
+    "facil": { "label": "Fácil", "hp": 1350, "spd": 230, "freq": 1.33, "tele": true },
+    "normal": { "label": "Normal", "hp": 1800, "spd": 260, "freq": 1, "tele": true },
+    "dificil": { "label": "Difícil", "hp": 2400, "spd": 290, "freq": 0.77, "tele": false }
   },
   "road": {
     "left": 50,
@@ -23,6 +23,7 @@
     "lane": 1, "y": 530, "w": 28, "h": 48, "hp": 100,
     "accelX": 240, "accelY": 210, "response": 9, "minY": 250, "bottomMargin": 36,
     "turboMult": 1.5,
+    "throttle": "acelerador", "cruiseReturn": 170,
     "bossPush": 220, "bossHitCd": 0.5,
     "trafficPush": 180, "trafficHitCd": 0.6
   },
@@ -48,12 +49,13 @@
   },
   "traffic": {
     "first": 1.4, "every": [1.5, 2.4], "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
     "killBonus": 20,
     "types": [
       { "k": "sereno", "weight": 0.18, "w": 30, "h": 52, "vy": [110, 140], "hp": 999, "cols": ["#1f4fbf"], "invulnerable": true, "contactDmg": 0 },
-      { "k": "scooter", "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 4, "selfDmg": 12 },
-      { "k": "suv", "weight": 0.34, "w": 32, "h": 56, "vy": [130, 170], "hp": 36, "cols": ["#1d1b22"], "contactDmg": 8, "selfDmg": 10 },
-      { "k": "sedan", "weight": 0.30, "w": 28, "h": 50, "vy": [130, 170], "hp": 36, "cols": ["#6c7a8c", "#8a2f3f", "#c9ccd3"], "contactDmg": 8, "selfDmg": 10 }
+      { "k": "scooter", "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 3, "selfDmg": 12 },
+      { "k": "suv", "weight": 0.34, "w": 32, "h": 56, "vy": [130, 170], "hp": 36, "cols": ["#1d1b22"], "contactDmg": 6, "selfDmg": 10 },
+      { "k": "sedan", "weight": 0.30, "w": 28, "h": 50, "vy": [130, 170], "hp": 36, "cols": ["#6c7a8c", "#8a2f3f", "#c9ccd3"], "contactDmg": 6, "selfDmg": 10 }
     ]
   },
   "fines": { "amount": 50, "contact": "PAPELETA", "shot": "AGRESIÓN" },
@@ -72,8 +74,8 @@
     "slipMult": 1.5,
     "laneSwapAimChance": 0.4,
     "phoneOffAct": 0.3,
-    "contactDmg": 7,
-    "chargeContactDmg": 15,
+    "contactDmg": 5,
+    "chargeContactDmg": 11,
     "phases": [
       {
         "id": 1, "from": 1, "name": "FASE 1 · EL CELULAR", "col": "#ff8a1f", "bar": "#ffe14d", "returnAct": 2.4,
@@ -91,7 +93,7 @@
         "swapChance": 0.3, "swapAct": 1.4,
         "attack": "ram", "tele": 0.7, "dur": 0.7, "speed": 420, "maxY": 510,
         "hornFirst": 2, "hornEvery": 5, "hornRadius": 150, "stun": 1,
-        "escorts": { "life": 15, "hp": 60, "cols": ["#ffb3d1", "#a8f0d6"] }
+        "escorts": { "life": 15, "hp": 60, "cols": ["#ffb3d1", "#a8f0d6"], "contactDmg": 7 }
       }
     ],
     "lines": {
