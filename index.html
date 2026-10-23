@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#0e0a16">
   <title>Limargeddon</title>
+  <!-- Instalable en la pantalla de inicio: se abre a pantalla completa, sin barras del navegador -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Limargeddon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
@@ -13,15 +20,30 @@
 <body>
   <div id="app">
     <div id="stage">
-      <button id="snd" aria-pressed="true" title="Sonido (M)">♪ SONIDO</button>
+      <button id="pauseBtn" hidden aria-label="Pausa (P)" title="Pausa (P)">II</button>
       <div class="overlay" id="menu" hidden>
         <p class="eyebrow" id="menuEyebrow"></p>
         <h1>Limargeddon</h1>
         <p class="boss">Jefe: <b id="menuBoss"></b></p>
         <p class="tip" id="menuTip"></p>
         <div class="powers" id="menuPowers" aria-label="Bonus"></div>
+        <div class="setting" role="radiogroup" aria-labelledby="fireLabel">
+          <span id="fireLabel">Disparo <em>(prueba)</em></span>
+          <button class="seg" type="button" role="radio" data-fire="toque">Por toque</button>
+          <button class="seg" type="button" role="radio" data-fire="acelerar">Acelerar es atacar</button>
+        </div>
+        <p class="tip small" id="fireTip"></p>
         <div class="row" id="menuDiffs"></div>
-        <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · M sonido</p>
+        <button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido: sí</button>
+        <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
+      </div>
+      <div class="overlay" id="pause" hidden>
+        <h2>Pausa</h2>
+        <div class="row">
+          <button class="pick" id="resume" type="button">Continuar</button>
+          <button class="pick alt" id="quit" type="button">Salir al menú</button>
+        </div>
+        <button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido: sí</button>
       </div>
       <div class="overlay" id="end" hidden>
         <p class="eyebrow" id="endEyebrow"></p>
@@ -36,15 +58,15 @@
       </div>
     </div>
     <div id="deck">
-      <div class="stick" id="stick" role="group" aria-label="Volante y acelerador: arriba acelera, a los lados gira">
-        <span class="gas" data-z="up">&#x25B2;&#xFE0E; ACELERAR</span>
-        <span class="l" data-z="left" aria-label="Izquierda">&#x25C0;&#xFE0E;</span>
-        <span class="r" data-z="right" aria-label="Derecha">&#x25B6;&#xFE0E;</span>
+      <div class="stick" id="stick" role="group" aria-label="Volante: mitad izquierda gira a la izquierda, mitad derecha a la derecha">
+        <span class="l" data-z="left">&#x25C0;&#xFE0E;</span>
+        <span class="r" data-z="right">&#x25B6;&#xFE0E;</span>
       </div>
       <div class="weap">
         <button class="c2" data-k="oil" id="w-oil"><i>&#x25CF;&#xFE0E;</i>ACEITE</button>
         <button class="c3" data-k="horn" id="w-horn"><i>&#x25C9;&#xFE0E;</i>CLAXON</button>
-        <button class="c1" data-k="cone" id="w-cone"><i>&#x25B2;&#xFE0E;</i>CONOS</button>
+        <button class="gas" data-k="up" id="w-gas"><i>&#x25B2;&#xFE0E;</i>ACELERAR</button>
+        <button class="c1" data-k="cone" id="w-cone"><i>&#x25B2;&#xFE0E;</i>CONOS<b class="ammo" id="ammo" aria-hidden="true"></b></button>
       </div>
     </div>
   </div>

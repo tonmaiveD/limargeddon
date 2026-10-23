@@ -145,7 +145,7 @@ export function update(G: Game, dt: number): boolean {
 
 export interface Summary {
   win: boolean; time: string; seconds: number; rightPct: number; powers: number; fines: number; pay: number;
-  blind: boolean; clean: boolean; honest: boolean;
+  blind: boolean; clean: boolean; honest: boolean; bestCombo: number; fireMode: Game['fireMode'];
 }
 
 export function summarize(G: Game): Summary {
@@ -154,5 +154,5 @@ export function summarize(G: Game): Summary {
   const clean = win && !s.dmgP3, blind = win && pct >= R.blindPct, honest = G.fines === 0;
   const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus : G.bonus, pay = Math.max(0, gross - G.fines);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
-  return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest };
+  return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode };
 }

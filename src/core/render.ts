@@ -9,6 +9,9 @@ import { C, clamp } from './util';
 
 export interface Layers { world: Gfx; ents: Gfx; fx: Gfx; ui: Gfx }
 
+// Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
+export const ui = { touch: false };
+
 function drawTraffic(g: Gfx, G: Game, c: Car): void {
   if (c.k === 'scooter') {
     g.save(); g.translate(c.x, c.y); g.rotate(Math.sin(c.zz!) * 0.25);
@@ -84,15 +87,23 @@ function drawHUD(g: Gfx, G: Game): void {
   // jugador
   g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(0, H - 26, W, 26);
   g.textAlign = 'left'; g.fillStyle = C.yellow; g.font = FONT(10); g.fillText('TICO', 10, H - 9);
-  g.fillStyle = '#2b2238'; g.fillRect(50, H - 17, 110, 8);
-  g.fillStyle = p.hp > 35 ? C.green : C.pink; g.fillRect(50, H - 17, (110 * p.hp) / p.max, 8);
-  const Wp = cfg.weapons;
-  ([['cone', Wp.cone.cd, C.orange, 'Z', 'CONOS'], ['oil', Wp.oil.cd, C.green, 'X', 'ACEITE'], ['horn', Wp.horn.cd, C.yellow, 'C', 'CLAXON']] as const).forEach(([k, max, col, key, lab], i) => {
-    const x = 200 + i * 52, f = clamp(p.cd[k] / max, 0, 1);
-    g.fillStyle = '#2b2238'; g.fillRect(x, H - 19, 46, 12);
-    g.fillStyle = col; g.globalAlpha = f > 0 ? 0.35 : 1; g.fillRect(x, H - 19, 46 * (1 - f), 12); g.globalAlpha = 1;
-    g.fillStyle = f > 0 ? C.muted : C.bg; g.font = BODY(800, 8); g.textAlign = 'center'; g.fillText(key + ' ' + lab, x + 23, H - 10);
-  });
+  // en celular el deck ya muestra armas y recargas: la barra de vida se alarga y no se muestran atajos de teclado
+  const barW = ui.touch ? 210 : 110;
+  g.fillStyle = '#2b2238'; g.fillRect(50, H - 17, barW, 8);
+  g.fillStyle = p.hp > 35 ? C.green : C.pink; g.fillRect(50, H - 17, (barW * p.hp) / p.max, 8);
+  if (G.combo.n >= 2) { g.textAlign = 'right'; g.fillStyle = C.green; g.font = FONT(10); g.fillText(`x${G.combo.n}`, W - 10, H - 9); }
+  if (!ui.touch) {
+    const Wp = cfg.weapons, tap = G.fireMode === 'toque', maxAmmo = Wp.cone.ammo ?? 0;
+    ([['cone', Wp.cone.cd, C.orange, 'Z', 'CONOS'], ['oil', Wp.oil.cd, C.green, 'X', 'ACEITE'], ['horn', Wp.horn.cd, C.yellow, 'C', 'CLAXON']] as const).forEach(([k, max, col, key, lab], i) => {
+      const x = 170 + i * 52;
+      // por toque, la barra de los conos muestra la reserva en vez del cooldown
+      const f = k === 'cone' && tap ? 1 - p.ammo / maxAmmo : clamp(p.cd[k] / max, 0, 1);
+      const label = k === 'cone' && G.fireMode === 'acelerar' ? '↑ CONOS' : key + ' ' + lab;
+      g.fillStyle = '#2b2238'; g.fillRect(x, H - 19, 46, 12);
+      g.fillStyle = col; g.globalAlpha = f > 0 ? 0.35 : 1; g.fillRect(x, H - 19, 46 * (1 - f), 12); g.globalAlpha = 1;
+      g.fillStyle = f > 0 ? C.muted : C.bg; g.font = BODY(800, 8); g.textAlign = 'center'; g.fillText(label, x + 23, H - 10);
+    });
+  }
   if (b.state === 'enter') { g.textAlign = 'center'; g.fillStyle = C.yellow; g.font = FONT(22); g.fillText('¡AHÍ VIENE!', W / 2, H / 2 - 40); }
   if (G.announce) {
     const a = G.announce; g.globalAlpha = clamp(a.life * 2, 0, 1); g.textAlign = 'center'; g.font = FONT(18);
@@ -125,8 +136,8 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
   for (const r of G.rings) { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; }
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
-  f.textAlign = 'center'; f.font = FONT(10);
-  for (const t of G.floats) { f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
+  f.textAlign = 'center';
+  for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
   drawBubble(L.ui, G); drawHUD(L.ui, G);
 }
 

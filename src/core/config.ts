@@ -1,6 +1,11 @@
 // Tipos del config.json de cada etapa. Una etapa nueva es un JSON con esta forma, no código nuevo.
 
 export type DiffKey = 'facil' | 'normal' | 'dificil';
+// Cómo se lanzan los conos. 'mantener': mantener el botón dispara a cadencia fija (prototipo v3).
+// 'toque': cada toque lanza un cono, con una reserva que se recarga. 'acelerar': se disparan solos mientras se acelera.
+export type FireMode = 'mantener' | 'toque' | 'acelerar';
+export const FIRE_MODES: readonly FireMode[] = ['toque', 'acelerar'];
+
 export type PowerKey = 'turbo' | 'cancha' | 'soat' | 'combi' | 'picaron' | 'metro';
 
 export interface Difficulty { label: string; hp: number; spd: number; freq: number; tele: boolean }
@@ -46,7 +51,12 @@ export interface StageConfig {
     bossPush: number; bossHitCd: number; trafficPush: number; trafficHitCd: number;
   };
   weapons: {
-    cone: { cd: number; vy: number; r: number; dmg: number; trafficDmg: number };
+    cone: {
+      cd: number; vy: number; r: number; dmg: number; trafficDmg: number;
+      mode?: FireMode; ammo?: number; reload?: number; tapGap?: number;
+      // combo de punto ciego: cada cono seguido que pega por la derecha suma `step` al multiplicador, hasta `maxSteps`
+      combo?: { step: number; maxSteps: number; hitstop: number };
+    };
     oil: { cd: number; vy: number; r: number; dmg: number; slip: number; trafficSpin: number };
     horn: { cd: number; ring: number; reach: number; dmg: number; phoneOff: number; trafficRadius: number; trafficPush: number };
     cancha: { cd: number; vy: number; spread: number; jitter: number; r: number; dmg: number; trafficDmg: number };

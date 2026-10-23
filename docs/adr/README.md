@@ -14,3 +14,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0008](0008-controles-acelerador-y-colision-con-el-jefe.md) | Acelerador sin freno y tráfico que se aparta del jefe | Aceptada |
 | [0009](0009-balance-de-duracion-y-registro.md) | Balance de duración, paridad contra la config original y registro de peleas | Aceptada |
 | [0010](0010-layout-movil-y-deck-a-todo-el-ancho.md) | Layout móvil: canvas a todo el ancho y deck rediseñado | Aceptada |
+| [0011](0011-controles-un-pulgar-una-tarea-y-modos-de-disparo.md) | Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar" | Aceptada |

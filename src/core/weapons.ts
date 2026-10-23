@@ -1,6 +1,6 @@
 import { Sfx } from './audio/sfx';
 import { C, rnd } from './util';
-import { burst, dmgBoss, fine, say, type Game } from './state';
+import { burst, dmgBoss, fine, floatText, say, type Game } from './state';
 
 /* Armas del Tico: conos, aceite, claxon y la canchita del bonus. Cooldowns y daño salen del JSON. */
 
@@ -11,7 +11,7 @@ export function fire(G: Game): void {
     [-c.spread, c.spread].forEach((vx) => G.shots.push({ k: 'kernel', x: p.x + vx / 12, y: p.y - 26, vx: vx + rnd(-c.jitter, c.jitter), vy: c.vy, r: c.r }));
     Sfx.play('kernel');
   }
-  if (k.cone && p.cd.cone <= 0) { p.cd.cone = Wp.cone.cd; G.shots.push({ k: 'cone', x: p.x, y: p.y - 28, vx: 0, vy: Wp.cone.vy, r: Wp.cone.r }); Sfx.play('cone'); }
+  fireCone(G);
   if (k.oil && p.cd.oil <= 0) { p.cd.oil = Wp.oil.cd; G.shots.push({ k: 'oil', x: p.x, y: p.y - 28, vx: 0, vy: Wp.oil.vy, r: Wp.oil.r }); Sfx.play('oil'); }
   if (k.horn && p.cd.horn <= 0) {
     const h = Wp.horn; p.cd.horn = h.cd;
@@ -21,6 +21,51 @@ export function fire(G: Game): void {
     }
     G.traffic.forEach((c) => { if (Math.hypot(c.x - p.x, c.y - p.y) < h.trafficRadius) c.x += Math.sign(c.x - p.x || 1) * h.trafficPush; });
   }
+}
+
+function launchCone(G: Game): void {
+  const p = G.p, c = G.cfg.weapons.cone;
+  G.shots.push({ k: 'cone', x: p.x, y: p.y - 28, vx: 0, vy: c.vy, r: c.r }); Sfx.play('cone');
+}
+
+// Conos según el modo de disparo elegido (ver FireMode en config.ts).
+function fireCone(G: Game): void {
+  const p = G.p, k = G.keys, c = G.cfg.weapons.cone;
+  if (G.fireMode === 'toque') {
+    // un cono por toque: solo cuenta el momento de presionar, y se gasta la reserva
+    const pressed = k.cone && !p.coneHeld;
+    if (pressed && p.ammo >= 1 && p.cd.cone <= 0) { p.ammo--; p.cd.cone = c.tapGap ?? 0.08; launchCone(G); }
+  } else if (G.fireMode === 'acelerar') {
+    if (k.up && p.cd.cone <= 0) { p.cd.cone = c.cd; launchCone(G); }
+  } else if (k.cone && p.cd.cone <= 0) { p.cd.cone = c.cd; launchCone(G); }
+  p.coneHeld = k.cone;
+}
+
+// La reserva de conos del modo por toque se recarga de a uno, aunque el Tico esté aturdido.
+export function reloadCones(G: Game, dt: number): void {
+  const p = G.p, c = G.cfg.weapons.cone, max = c.ammo ?? 0;
+  if (G.fireMode !== 'toque' || p.ammo >= max) { p.reloadT = 0; return; }
+  p.reloadT += dt;
+  if (p.reloadT >= (c.reload ?? 0.5)) { p.reloadT = 0; p.ammo++; }
+}
+
+// Combo de punto ciego: conos seguidos por la derecha suben el multiplicador; un fallo o un golpe por la izquierda lo corta.
+function coneHit(G: Game, fromRight: boolean, x: number, y: number): void {
+  const combo = G.cfg.weapons.cone.combo, base = G.cfg.weapons.cone.dmg;
+  if (!combo || G.fireMode === 'mantener') { dmgBoss(G, base, fromRight); return; }
+  if (!fromRight) { breakCombo(G); dmgBoss(G, base, false); return; }
+  const n = ++G.combo.n; G.combo.best = Math.max(G.combo.best, n);
+  const mult = 1 + combo.step * Math.min(n - 1, combo.maxSteps);
+  dmgBoss(G, base * mult, true, n >= 2 ? 14 : undefined);
+  if (n >= 2) {
+    floatText(G, x, y - 46, `¡x${n} PUNTO CIEGO!`, C.green, n >= 5 ? 13 : 11);
+    G.hitstop = Math.max(G.hitstop, combo.hitstop);
+    Sfx.play('combo', Math.min(n, 8));
+  }
+}
+function breakCombo(G: Game): void {
+  if (G.combo.n >= 3) floatText(G, G.p.x, G.p.y - 46, 'COMBO CORTADO', C.muted);
+  G.combo.n = 0;
 }
 
 export function updateShots(G: Game, dt: number): void {
@@ -34,7 +79,7 @@ export function updateShots(G: Game, dt: number): void {
     }
     if (!s.dead && !s.hit && b.state !== 'enter' && Math.abs(s.x - b.x) < b.w / 2 + s.r && Math.abs(s.y - b.y) < b.h / 2) {
       const fr = s.x > b.x;
-      if (s.k === 'cone') { s.dead = true; dmgBoss(G, Wp.cone.dmg, fr); burst(G, s.x, s.y, C.orange, 6, 120); }
+      if (s.k === 'cone') { s.dead = true; s.hitBoss = true; coneHit(G, fr, s.x, s.y); burst(G, s.x, s.y, C.orange, 6, 120); }
       else if (s.k === 'kernel') { s.dead = true; dmgBoss(G, Wp.cancha.dmg, fr); burst(G, s.x, s.y, '#fff3c2', 3, 80); }
       else if (s.k === 'picaron') { s.hit = true; dmgBoss(G, Wp.picaron.dmg, fr); burst(G, s.x, s.y, '#e0954a', 8, 120); Sfx.play('hit'); }
       else { s.dead = true; b.slip = Wp.oil.slip; dmgBoss(G, Wp.oil.dmg, fr); burst(G, s.x, s.y, '#5a4a2a', 16, 140); say(G, G.cfg.boss.quips.oil); Sfx.play('skid'); }
@@ -49,5 +94,7 @@ export function updateShots(G: Game, dt: number): void {
       }
     }
   }
+  // un cono que no le pegó al jefe (se perdió arriba o chocó tráfico) corta el combo
+  if (G.combo.n > 0) for (const s of G.shots) if (s.k === 'cone' && !s.hitBoss && (s.dead || s.y <= -60)) { breakCombo(G); break; }
   G.shots = G.shots.filter((s) => !s.dead && s.y > -60 && s.y < 640 + 40);
 }

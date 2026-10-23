@@ -1,4 +1,4 @@
-import type { DiffKey } from './config';
+import type { DiffKey, FireMode } from './config';
 
 /*
  * Guardado local con versión de esquema. Por ahora solo registra cada pelea para calibrar el balance con
@@ -10,8 +10,10 @@ const KEY = 'limargeddon.save';
 const VERSION = 1;
 const MAX_FIGHTS = 300;
 
-export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string }
-interface SaveV1 { v: 1; fights: FightRecord[] }
+export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number }
+export interface Settings { fireMode?: FireMode }
+// v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
+interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings }
 
 function load(): SaveV1 {
   try {
@@ -35,12 +37,17 @@ export function recordFight(f: Omit<FightRecord, 'at'>): void {
 
 export interface FightStats { played: number; wins: number; median: number | null }
 
-// Resumen de las peleas registradas en este dispositivo para una etapa y dificultad.
-export function fightStats(stage: string, dk: DiffKey): FightStats {
-  const all = load().fights.filter((f) => f.stage === stage && f.dk === dk);
+// Resumen de las peleas registradas en este dispositivo para una etapa y dificultad (y modo de disparo, si se indica).
+export function fightStats(stage: string, dk: DiffKey, fireMode?: FireMode): FightStats {
+  const all = load().fights.filter((f) => f.stage === stage && f.dk === dk && (!fireMode || f.fireMode === fireMode));
   const ts = all.filter((f) => f.win).map((f) => f.t).sort((a, b) => a - b);
   return { played: all.length, wins: ts.length, median: ts.length ? ts[ts.length >> 1] : null };
 }
 
 // Todo el registro, para copiarlo y compartirlo al calibrar.
 export const exportFights = (): FightRecord[] => load().fights;
+
+export function getSettings(): Settings { return load().settings ?? {}; }
+export function setSettings(patch: Settings): void {
+  const data = load(); data.settings = { ...data.settings, ...patch }; store(data);
+}

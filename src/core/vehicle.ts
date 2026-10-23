@@ -1,7 +1,7 @@
 import { Sfx } from './audio/sfx';
 import { C, clamp, pick, rnd } from './util';
 import { playerMaxY, type Game } from './state';
-import { fire } from './weapons';
+import { fire, reloadCones } from './weapons';
 
 /* Manejo del Tico: aceleración suavizada, límites de pista, estela del turbo y motor. */
 
@@ -28,6 +28,7 @@ export function updatePlayer(G: Game, dt: number): void {
   if (p.pw.turbo > 0 && Math.random() < 0.8) {
     G.parts.push({ x: p.x + rnd(-6, 6), y: p.y + p.h / 2, vx: rnd(-20, 20), vy: rnd(120, 220), life: 0.3, max: 0.3, col: pick([C.orange, C.yellow, C.pink]), size: rnd(3, 5) });
   }
-  if (p.stun <= 0) fire(G);
+  reloadCones(G, dt);
+  if (p.stun <= 0) fire(G); else p.coneHeld = k.cone;
   Sfx.engine(0.5 + (k.up ? 0.3 : 0) + (p.pw.turbo > 0 ? 0.5 : 0));
 }
