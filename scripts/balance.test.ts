@@ -1,5 +1,5 @@
 import { it } from 'vitest';
-import type { DiffKey, StageConfig } from '../src/core/config';
+import type { DiffKey, FireMode, StageConfig } from '../src/core/config';
 import { PROTOTYPE_CFG, startPort, stepPort } from '../tests/harness/port';
 import { seedRandom } from '../tests/harness/rng';
 import { bot } from '../tests/harness/bot';
@@ -16,13 +16,19 @@ function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil
 const BOTS = [['experto', bot], ['medio', medio], ['casual', casual]] as const;
 const SEEDS = 30;
 
-function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey) {
+function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?: FireMode) {
   const ts: number[] = []; let wins = 0;
   for (let s = 1; s <= SEEDS; s++) {
     const r = seedRandom(s * 97);
     try {
       const G = startPort(dk, cfg);
-      for (let i = 0; i < 60 * 300 && G.mode === 'play'; i++) { fn(G, G.keys); stepPort(G, 1 / 60); }
+      if (mode) G.fireMode = mode;
+      for (let i = 0; i < 60 * 300 && G.mode === 'play'; i++) {
+        fn(G, G.keys);
+        // por toque: el bot toca el botón unas 10 veces por segundo mientras quiere disparar
+        if (G.fireMode === 'toque' && G.keys.cone) G.keys.cone = i % 6 === 0;
+        stepPort(G, 1 / 60);
+      }
       if (G.result?.win) { wins++; ts.push(G.t); }
     } finally { r(); }
   }
@@ -33,9 +39,11 @@ function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey) {
 
 it('duraciones', () => {
   const rows: string[] = [];
-  for (const [label, cfg] of [['prototipo', PROTOTYPE_CFG], ['juego', STAGES['san-isidro'].cfg]] as const) {
+  const game = STAGES['san-isidro'].cfg;
+  const variants: [string, StageConfig, FireMode | undefined][] = [['prototipo', PROTOTYPE_CFG, undefined], ['toque', game, 'toque'], ['acelerar', game, 'acelerar']];
+  for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {
-      rows.push(`${label.padEnd(10)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk)}`);
+      rows.push(`${label.padEnd(10)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);
     }
   }
   console.log('\n' + rows.join('\n'));

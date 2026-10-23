@@ -28,7 +28,9 @@
     "trafficPush": 180, "trafficHitCd": 0.6
   },
   "weapons": {
-    "cone": { "cd": 0.55, "vy": -560, "r": 6, "dmg": 12, "trafficDmg": 12 },
+    "cone": { "cd": 0.55, "vy": -560, "r": 6, "dmg": 12, "trafficDmg": 12,
+      "mode": "toque", "ammo": 3, "reload": 0.7, "tapGap": 0.08,
+      "combo": { "step": 0.1, "maxSteps": 3, "hitstop": 0.04 } },
     "oil": { "cd": 4, "vy": -430, "r": 9, "dmg": 8, "slip": 2, "trafficSpin": 1.5 },
     "horn": { "cd": 6, "ring": 200, "reach": 210, "dmg": 20, "phoneOff": 1.5, "trafficRadius": 200, "trafficPush": 25 },
     "cancha": { "cd": 0.14, "vy": -640, "spread": 50, "jitter": 20, "r": 3, "dmg": 3, "trafficDmg": 4 },

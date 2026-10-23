@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import { W, H, ZOOM } from './core/constants';
 import { fitStage } from './core/layout';
 import { installInput } from './core/input';
+import { ui } from './core/render';
 import { BootScene } from './scenes/Boot';
 import { MenuScene } from './scenes/Menu';
 import { StageScene } from './scenes/Stage';
 import { ResultsScene } from './scenes/Results';
 
+ui.touch = matchMedia('(pointer: coarse)').matches;
 installInput();
 fitStage();
 

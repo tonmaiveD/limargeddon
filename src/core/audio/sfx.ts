@@ -2,7 +2,7 @@
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
-  | 'block' | 'phase' | 'turbo' | 'combi' | 'picaron' | 'metro' | 'skid' | 'win' | 'lose' | 'say';
+  | 'block' | 'phase' | 'turbo' | 'combi' | 'picaron' | 'metro' | 'skid' | 'win' | 'lose' | 'say' | 'combo';
 
 let ac: AudioContext | null = null;
 let master: GainNode, music: GainNode, noiseBuf: AudioBuffer;
@@ -67,7 +67,8 @@ export const Sfx = {
     eng.frequency.setTargetAtTime(42 + level * 55, t, 0.1);
     engFilt.frequency.setTargetAtTime(260 + level * 400, t, 0.1);
   },
-  play(n: SfxName): void {
+  // lvl: nivel del combo, sube el tono un tono entero por paso
+  play(n: SfxName, lvl = 0): void {
     if (!ac || !on) return;
     switch (n) {
       case 'cone': tone(700, 0.07, 'square', 0.1, 350); break;
@@ -90,6 +91,7 @@ export const Sfx = {
       case 'win': [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, 0.16, 'square', 0.14, null, i * 0.13)); break;
       case 'lose': [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'square', 0.14, null, i * 0.18)); break;
       case 'say': tone(880, 0.05, 'triangle', 0.06); tone(990, 0.05, 'triangle', 0.06, null, 0.06); break;
+      case 'combo': { const f = 660 * Math.pow(2, (lvl * 2) / 12); tone(f, 0.08, 'square', 0.1); tone(f * 1.5, 0.1, 'triangle', 0.08, null, 0.05); break; }
     }
   },
 };

@@ -1,4 +1,4 @@
-import type { DiffKey, Difficulty, PowerKey, StageConfig } from './config';
+import type { DiffKey, Difficulty, FireMode, PowerKey, StageConfig } from './config';
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, rnd, reduceMotion } from './util';
@@ -13,6 +13,7 @@ export interface Player {
   x: number; y: number; w: number; h: number; vx: number; vy: number; hp: number; max: number;
   stun: number; hitCd: number; flash: number;
   cd: Record<WeaponKey, number>; pw: Record<TimedPower, number>;
+  ammo: number; reloadT: number; coneHeld: boolean;
 }
 
 export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn';
@@ -27,12 +28,12 @@ export interface Car {
   spin: number; seed: number; flash?: number;
   zz?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number;
 }
-export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean }
+export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
-export interface Float { x: number; y: number; text: string; col: string; life: number }
+export interface Float { x: number; y: number; text: string; col: string; life: number; size?: number }
 
 // Contrato que cumple la IA de cada jefe (src/bosses/*).
 export interface BossAI {
@@ -41,7 +42,9 @@ export interface BossAI {
 }
 
 export interface Game {
-  cfg: StageConfig; dk: DiffKey; d: Difficulty; keys: Keys; ai: BossAI;
+  cfg: StageConfig; dk: DiffKey; d: Difficulty; keys: Keys; ai: BossAI; fireMode: FireMode;
+  // combo de punto ciego y congelamiento de impacto (la escena lo consume; la simulación no se detiene)
+  combo: { n: number; best: number }; hitstop: number;
   t: number; mode: 'play' | 'over'; shake: number; bonus: number; fines: number; speed: number;
   announce: { t: string; col: string; life: number } | null;
   p: Player; b: Boss;
@@ -58,13 +61,14 @@ export const laneX = (cfg: StageConfig, i: number) => cfg.road.left + cfg.road.l
 export const laneOf = (cfg: StageConfig, x: number) =>
   Math.max(0, Math.min(cfg.road.lanes - 1, Math.floor((x - cfg.road.left) / cfg.road.laneWidth)));
 
-export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI): Game {
+export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI, fireMode?: FireMode): Game {
   const d = cfg.difficulties[dk], pc = cfg.player, bc = cfg.boss;
   for (const k in keys) keys[k as keyof Keys] = false;
+  const cone = cfg.weapons.cone;
   return {
-    cfg, dk, d, keys, ai, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null,
+    cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null,
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
-      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 } },
+      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
       state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
     traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
@@ -82,16 +86,17 @@ export function burst(G: Game, x: number, y: number, col: string, n = 10, sp = 1
     G.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rnd(0.3, 0.7), max: 0.7, col, size: rnd(2, 4) });
   }
 }
-export function floatText(G: Game, x: number, y: number, text: string, col: string): void { G.floats.push({ x, y, text, col, life: 0.9 }); }
+export function floatText(G: Game, x: number, y: number, text: string, col: string, size?: number): void { G.floats.push({ x, y, text, col, life: 0.9, size }); }
 export function shake(G: Game, v: number): void { if (!reduceMotion) G.shake = Math.max(G.shake, v); }
 export function announce(G: Game, t: string, col: string): void { G.announce = { t, col, life: 1.3 }; }
 
-export function dmgBoss(G: Game, amount: number, fromRight: boolean): void {
+export function dmgBoss(G: Game, amount: number, fromRight: boolean, size?: number): number {
   const b = G.b, bc = G.cfg.boss;
   let m = fromRight ? bc.weakSideMult : 1; if (b.slip > 0) m *= bc.slipMult;
   const v = Math.round(amount * m); b.hp = Math.max(0, b.hp - v); b.hitFlash = 0.12;
   G.stats.total += v; if (fromRight) G.stats.right += v;
-  floatText(G, b.x + rnd(-14, 14), b.y - 30, '-' + v, fromRight ? C.green : C.ink);
+  floatText(G, b.x + rnd(-14, 14), b.y - 30, '-' + v, fromRight ? C.green : C.ink, size);
+  return v;
 }
 export function hurt(G: Game, d: number): void {
   const p = G.p;

@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
 import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
-import { setDeckCooldowns } from '../core/input';
+import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
+import { FIRE_MODES, type FireMode } from '../core/config';
+import { getSettings, setSettings } from '../core/save';
 import { Sfx } from '../core/audio/sfx';
 import { DEFAULT_STAGE, STAGES, track } from '../stages';
 
@@ -33,9 +35,33 @@ export class MenuScene extends Phaser.Scene {
       });
       diffs.appendChild(b);
     });
+    this.setupFireSelector(cfg.weapons.cone.mode !== undefined);
     $('menu').hidden = false;
     Sfx.engine(0);
     setDeckCooldowns({ cone: 0, oil: 0, horn: 0 });
+    setDeckAmmo(0, 0);
+  }
+
+  // Selector temporal para comparar modos de disparo jugando; la elección se guarda en el dispositivo.
+  private setupFireSelector(enabled: boolean): void {
+    const box = document.querySelector<HTMLElement>('.setting')!, tip = document.getElementById('fireTip')!;
+    box.hidden = !enabled; tip.hidden = !enabled;
+    if (!enabled) return;
+    const TIPS: Record<FireMode, string> = {
+      toque: 'Cada toque lanza un cono; tienes 3 y se recargan de a uno. Seguidos por la derecha suben el combo.',
+      acelerar: 'Mientras aceleras, el Tico lanza conos solo. Atacar te obliga a acercarte.',
+      mantener: '',
+    };
+    const current = (): FireMode => { const m = getSettings().fireMode; return m && FIRE_MODES.includes(m) ? m : 'toque'; };
+    const paint = () => {
+      const m = current();
+      box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.fire === m)));
+      tip.textContent = TIPS[m]; setDeckMode(m);
+    };
+    box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => {
+      b.onclick = () => { setSettings({ fireMode: b.dataset.fire as FireMode }); paint(); };
+    });
+    paint();
   }
 
   update(_t: number, delta: number): void {
