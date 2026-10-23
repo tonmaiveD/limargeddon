@@ -1,7 +1,7 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, type Game } from './state';
+import { burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, type Car, type Game } from './state';
 import { updatePlayer } from './vehicle';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
@@ -21,6 +21,20 @@ export function spawnCar(G: Game): void {
     k: t.k, x: laneX(G.cfg, lane), y: -60, w: t.w, h: t.h, vy, hp: t.hp, max: t.hp, col,
     spin: 0, seed: Math.random() * 100, invulnerable: t.invulnerable, contactDmg: t.contactDmg, selfDmg: t.selfDmg, zz,
   });
+}
+
+// El jefe se abre paso: el tráfico se aparta hacia el lado con espacio en vez de pasarle por debajo.
+// Si no cabe a ningún lado, queda atascado detrás (o empujado delante si el jefe lo embiste en reversa o carga).
+function yieldToBoss(G: Game, c: Car): void {
+  const b = G.b, { left, right } = G.cfg.road;
+  if (b.state === 'enter' || !overlap(c, b)) return;
+  const half = (c.w + b.w) / 2, toLeft = b.x - half, toRight = b.x + half;
+  const fitsL = toLeft >= left + c.w / 2, fitsR = toRight <= right - c.w / 2;
+  const preferRight = c.x >= b.x;
+  if (preferRight ? fitsR : fitsL) c.x = preferRight ? toRight : toLeft;
+  else if (preferRight ? fitsL : fitsR) c.x = preferRight ? toLeft : toRight;
+  else c.y = c.y < b.y ? b.y - (c.h + b.h) / 2 : b.y + (c.h + b.h) / 2;
+  if (c.spin <= 0 && !c.invulnerable) c.spin = 0.25; // pequeño coletazo al ser empujado
 }
 
 export function updateWorld(G: Game, dt: number): void {
@@ -57,6 +71,7 @@ export function updateWorld(G: Game, dt: number): void {
     } else { c.y += (c.vy + extra) * dt; if (c.k === 'scooter') { c.zz! += dt * 3; c.x += Math.sin(c.zz!) * 50 * dt; } }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
     const inValet = c.k === 'valet' && c.enter! > 0;
+    if (cfg.traffic.yieldToBoss && !inValet) yieldToBoss(G, c);
     c.x = clamp(c.x, inValet ? -40 : cfg.road.left + c.w / 2, inValet ? W + 40 : cfg.road.right - c.w / 2);
     if (play && overlap(p, c)) {
       const dx = p.x - c.x, dy = p.y - c.y, ox = (p.w + c.w) / 2 - Math.abs(dx), oy = (p.h + c.h) / 2 - Math.abs(dy), push = cfg.player.trafficPush;

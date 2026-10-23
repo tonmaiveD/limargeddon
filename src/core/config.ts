@@ -22,7 +22,7 @@ export interface BossPhase {
   park?: number; maxY?: number;
   valetEvery?: number;
   hornFirst?: number; hornEvery?: number; hornRadius?: number; stun?: number;
-  escorts?: { life: number; hp: number; cols: string[] };
+  escorts?: { life: number; hp: number; cols: string[]; contactDmg?: number };
 }
 
 export interface BossConfig {
@@ -41,6 +41,8 @@ export interface StageConfig {
   player: {
     lane: number; y: number; w: number; h: number; hp: number;
     accelX: number; accelY: number; response: number; minY: number; bottomMargin: number; turboMult: number;
+    // 'libre': cuatro direcciones con freno (prototipo v3). 'acelerador': se sube manteniendo el acelerador y al soltar vuelve a la línea de crucero.
+    throttle: 'libre' | 'acelerador'; cruiseReturn: number;
     bossPush: number; bossHitCd: number; trafficPush: number; trafficHitCd: number;
   };
   weapons: {
@@ -53,7 +55,8 @@ export interface StageConfig {
   };
   powers: Record<PowerKey, PowerDef>;
   pickups: { first: number; every: [number, number]; fall: number; rare: PowerKey[]; rareReroll: number; rerollTo: PowerKey[] };
-  traffic: { first: number; every: [number, number]; lastPhaseMult: number; killBonus: number; types: TrafficType[] };
+  // yieldToBoss: el tráfico se aparta del jefe en vez de pasarle por debajo (el prototipo no lo hacía)
+  traffic: { first: number; every: [number, number]; lastPhaseMult: number; yieldToBoss: boolean; killBonus: number; types: TrafficType[] };
   fines: { amount: number; contact: string; shot: string };
   bumps: { first: number; every: [number, number]; dmg: number };
   crossings: { first: number; every: [number, number] };

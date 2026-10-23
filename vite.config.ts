@@ -6,5 +6,5 @@ export default defineConfig({
   base: './',
   build: { target: 'es2022', chunkSizeWarningLimit: 1600 },
   // npm run balance usa BALANCE=1 para correr solo el reporte de duración
-  test: { include: process.env.BALANCE ? ['scripts/*.test.ts'] : ['tests/**/*.test.ts'] },
+  test: { include: process.env.BALANCE ? ['scripts/**/*.test.ts'] : ['tests/**/*.test.ts'] },
 });

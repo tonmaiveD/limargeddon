@@ -40,6 +40,45 @@ export function installInput(): void {
     (['pointerup', 'pointercancel', 'lostpointercapture'] as const).forEach((t) => b.addEventListener(t, off));
     b.addEventListener('contextmenu', (e) => e.preventDefault());
   });
+  installStick();
+}
+
+/*
+ * Volante y acelerador para el pulgar izquierdo, en una sola zona con un solo puntero:
+ * mitad superior acelera, mitad inferior gira a izquierda o derecha, y los bordes de la franja superior
+ * aceleran y giran a la vez, así el pulgar se desliza en diagonal sin levantarse.
+ */
+function installStick(): void {
+  const el = document.getElementById('stick');
+  if (!el) return;
+  const parts = { up: el.querySelector('[data-z="up"]'), left: el.querySelector('[data-z="left"]'), right: el.querySelector('[data-z="right"]') };
+  let active: number | null = null, downAt = 0;
+  const set = (up: boolean, left: boolean, right: boolean) => {
+    keys.up = up; keys.left = left; keys.right = right;
+    parts.up?.classList.toggle('on', up); parts.left?.classList.toggle('on', left); parts.right?.classList.toggle('on', right);
+  };
+  const read = (e: PointerEvent) => {
+    const r = el.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width, ny = (e.clientY - r.top) / r.height;
+    const gas = ny < 0.5, edge = 0.22;
+    const left = gas ? nx < edge : nx < 0.5, right = gas ? nx > 1 - edge : nx >= 0.5;
+    set(gas, left, right);
+  };
+  el.addEventListener('pointerdown', (e) => {
+    if (active !== null) return;
+    e.preventDefault(); Sfx.init(); active = e.pointerId; downAt = performance.now();
+    try { el.setPointerCapture(e.pointerId); } catch { /* sin captura */ }
+    read(e);
+  });
+  el.addEventListener('pointermove', (e) => { if (e.pointerId === active) read(e); });
+  const end = (e: PointerEvent) => {
+    if (e.pointerId !== active) return;
+    active = null;
+    const wait = MIN_HOLD - (performance.now() - downAt), t0 = downAt;
+    const release = () => { if (active === null && downAt === t0) set(false, false, false); };
+    if (wait > 0) setTimeout(release, wait); else release();
+  };
+  (['pointerup', 'pointercancel', 'lostpointercapture'] as const).forEach((t) => el.addEventListener(t, end));
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 // Sombra de cooldown sobre los botones de armas del deck (0 = listo, 1 = recién usado).

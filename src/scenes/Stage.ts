@@ -7,6 +7,7 @@ import { beginLayers, createLayers, endLayers, renderEntities, type Layers } fro
 import { createGame, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
+import { recordFight } from '../core/save';
 import { DEFAULT_STAGE, STAGES, track, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
@@ -38,6 +39,7 @@ export class StageScene extends Phaser.Scene {
     if (G.mode === 'play') {
       if (update(G, dt)) {
         const summary = summarize(G);
+        recordFight({ stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds });
         this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk }));
       }
     } else { G.t += dt; updateWorld(G, dt); }

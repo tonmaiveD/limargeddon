@@ -36,6 +36,7 @@ h2{font-size:clamp(22px,7vw,30px);color:var(--yellow);text-shadow:2px 2px 0 var(
 button.pick{font:400 13px/1 var(--display);color:var(--bg);background:var(--yellow);border:0;border-radius:4px;padding:12px 14px;cursor:pointer}
 button.pick.alt{background:transparent;color:var(--yellow);box-shadow:inset 0 0 0 2px var(--yellow)}
 button.pick:hover{filter:brightness(1.1)}
+.link{background:none;border:0;color:var(--muted);font:600 11px/1 var(--body);text-decoration:underline;cursor:pointer;padding:4px}
 .keys{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
 .stats{display:grid;grid-template-columns:auto auto;gap:6px 16px;font-size:14px;text-align:left;font-variant-numeric:tabular-nums;margin:0}
 .stats dt{color:var(--muted)} .stats dd{margin:0;font-weight:800;text-align:right}
@@ -46,13 +47,14 @@ button.pick:hover{filter:brightness(1.1)}
 /* Deck táctil debajo del canvas, solo en punteros gruesos */
 #deck{display:none;width:100%;max-width:420px;justify-content:space-between;align-items:center;gap:12px;flex:none}
 @media (pointer:coarse){#deck{display:flex} .keys.desk{display:none}}
-.pad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px}
-.pad button,.weap button{border:0;border-radius:8px;background:var(--panel);color:var(--ink);font:400 16px/1 var(--display);touch-action:none;position:relative;overflow:hidden}
-.pad button.on{background:#2c2240}
-.pad .u{grid-column:2;grid-row:1} .pad .l{grid-column:1;grid-row:2} .pad .d{grid-column:2;grid-row:2} .pad .r{grid-column:3;grid-row:2}
+.stick{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6px;width:150px;height:102px;touch-action:none;flex:none}
+.stick span{display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--panel);color:var(--ink);font:400 16px/1 var(--display);pointer-events:none}
+.stick .gas{grid-column:1/3;font-size:11px;letter-spacing:.06em;color:var(--orange)}
+.stick span.on{background:#2c2240}
+.weap button{border:0;border-radius:8px;background:var(--panel);color:var(--ink);font:400 16px/1 var(--display);touch-action:none;position:relative;overflow:hidden}
 .weap{display:grid;grid-template-columns:repeat(3,62px);gap:6px}
 .weap button{height:102px;font-size:10px;letter-spacing:.04em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .weap button i{font-style:normal;font-size:22px}
 .weap button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(var(--cd,0)*100%);background:rgba(0,0,0,.55);pointer-events:none}
 .weap .c1{color:var(--orange)} .weap .c2{color:var(--green)} .weap .c3{color:var(--yellow)}
-@media (max-width:400px){.pad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px)} .weap{grid-template-columns:repeat(3,56px)} #deck{gap:8px}}
+@media (max-width:400px){.stick{width:140px} .weap{grid-template-columns:repeat(3,56px)} #deck{gap:8px}}
