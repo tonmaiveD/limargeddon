@@ -11,3 +11,6 @@ dist/
 .vscode/
 .idea/
 *.log
+
+# Caché de Vite y Vitest
+.vite/
