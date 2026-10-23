@@ -45,7 +45,7 @@ export function installInput(): void {
 
 /*
  * Volante y acelerador para el pulgar izquierdo, en una sola zona con un solo puntero:
- * mitad superior acelera, mitad inferior gira a izquierda o derecha, y los bordes de la franja superior
+ * franja superior acelera, franja inferior gira a izquierda o derecha, y los bordes de la franja superior
  * aceleran y giran a la vez, así el pulgar se desliza en diagonal sin levantarse.
  */
 function installStick(): void {
@@ -59,7 +59,7 @@ function installStick(): void {
   };
   const read = (e: PointerEvent) => {
     const r = el.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width, ny = (e.clientY - r.top) / r.height;
-    const gas = ny < 0.5, edge = 0.22;
+    const gas = ny < 0.46, edge = 0.22; // la franja de acelerar ocupa el 44% superior (ver .stick en style.css)
     const left = gas ? nx < edge : nx < 0.5, right = gas ? nx > 1 - edge : nx >= 0.5;
     set(gas, left, right);
   };
