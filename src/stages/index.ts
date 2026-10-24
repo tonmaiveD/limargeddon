@@ -5,8 +5,11 @@ import { PhaseBoss } from '../bosses/phase-boss';
 import { drawQ8 } from '../bosses/q8-render';
 import { drawSerenazgo } from '../bosses/serenazgo-render';
 import { drawRochabus } from '../bosses/rochabus-render';
+import { drawCombiAsesina } from '../bosses/combi-render';
 import centroConfig from './centro/config.json';
 import { drawWorld as centroWorld } from './centro/scenery';
+import javierPradoConfig from './javier-prado/config.json';
+import { drawWorld as javierPradoWorld } from './javier-prado/scenery';
 import mirafloresConfig from './miraflores/config.json';
 import { drawWorld as mirafloresWorld } from './miraflores/scenery';
 import sanIsidroConfig from './san-isidro/config.json';
@@ -22,6 +25,7 @@ export interface StageDef {
 
 export const STAGES: Record<string, StageDef> = {
   centro: { cfg: centroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawRochabus, drawWorld: centroWorld },
+  'javier-prado': { cfg: javierPradoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCombiAsesina, drawWorld: javierPradoWorld },
   miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
   'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
 };

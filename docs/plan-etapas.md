@@ -65,7 +65,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Hito 4, Miraflores | M | Etapa tutorial, jefe genérico por fases, selector mínimo de etapa | Hecho (ADR 0015) |
 | Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, parada entre etapas | Hecho (ADR 0017 y 0018) |
 | Centro | M | Paisaje, marchas como muro móvil, Rochabús | Hecho (ADR 0016) |
-| Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Pendiente |
+| Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Hecho (ADR 0021) |
 | Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Pendiente |
 | Callao | M | Contenedores que caen, tráiler | Pendiente |
 | Vía Expresa | L | Saltos y rampas (motor), bus articulado | Pendiente |

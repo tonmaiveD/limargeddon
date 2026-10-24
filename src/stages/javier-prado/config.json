@@ -1,0 +1,605 @@
+{
+  "id": "javier-prado",
+  "number": 4,
+  "district": "Javier Prado",
+  "roadName": "AV. JAVIER PRADO",
+  "eyebrow": "Etapa 4 · Javier Prado · By-pass en obra",
+  "tip": "En la Javier Prado las combis van en manada y la obra del by-pass nunca termina. Cuando el cobrador saque el brazo, muévete, que lanza monedas. Su punto ciego también está a la derecha.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1500,
+      "spd": 240,
+      "freq": 1.3,
+      "tele": true,
+      "dmgMult": 0.8
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 2000,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 2400,
+      "spd": 290,
+      "freq": 0.88,
+      "tele": false,
+      "dmgMult": 1.1
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 300,
+    "turboSpeed": 430,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.7,
+      2.6
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "sereno",
+        "weight": 0.1,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#1f4fbf"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "panel": "#fff",
+          "siren": true,
+          "label": "SERENAZGO",
+          "labelCol": "#1f4fbf"
+        }
+      },
+      {
+        "k": "combi",
+        "weight": 0.26,
+        "w": 30,
+        "h": 60,
+        "vy": [
+          120,
+          160
+        ],
+        "hp": 44,
+        "cols": [
+          "#f2c230",
+          "#f4f1e6"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#1f9e5a",
+          "band": "#d93b3b",
+          "label": "JAVIER PRADO",
+          "labelCol": "#1f9e5a",
+          "labelY": 0.5,
+          "labelSize": 5
+        }
+      },
+      {
+        "k": "delivery",
+        "killBonus": 0,
+        "weight": 0.12,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto",
+          "box": "#ffd23f"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        }
+      },
+      {
+        "k": "camioneta",
+        "weight": 0.18,
+        "w": 32,
+        "h": 56,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 40,
+        "cols": [
+          "#1d1b22",
+          "#c9ccd3"
+        ],
+        "contactDmg": 7,
+        "selfDmg": 10
+      },
+      {
+        "k": "taxi",
+        "weight": 0.34,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "combi",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 18,
+      "every": [
+        20,
+        26
+      ],
+      "count": [
+        3,
+        5
+      ],
+      "formation": "diagonal",
+      "gap": 64,
+      "label": "¡COMBIS EN MANADA!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "crater",
+      "kind": "hueco",
+      "style": "crater",
+      "first": 7,
+      "every": [
+        10,
+        15
+      ],
+      "lanes": 1,
+      "h": 22,
+      "col": "#2a2632",
+      "col2": "#15111d",
+      "dmg": 4
+    },
+    {
+      "k": "camion-obra",
+      "kind": "bloque",
+      "style": "caja",
+      "first": 12,
+      "every": [
+        14,
+        20
+      ],
+      "lanes": 1,
+      "w": 46,
+      "h": 34,
+      "col": "#ff8a1f",
+      "col2": "#15111d",
+      "label": "OBRA",
+      "labelCol": "#15111d",
+      "dmg": 3
+    },
+    {
+      "k": "bypass",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 22,
+      "every": [
+        26,
+        34
+      ],
+      "lanes": 2,
+      "h": 12,
+      "col": "#ffe14d",
+      "col2": "#15111d",
+      "label": "PRONTO, PARA TU COMODIDAD",
+      "labelCol": "#15111d",
+      "dmg": 3
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 5,
+    "every": [
+      12,
+      18
+    ],
+    "dmg": 3
+  },
+  "crossings": {
+    "first": 3,
+    "every": [
+      16,
+      20
+    ]
+  },
+  "streets": [
+    "AV. AREQUIPA",
+    "AV. PETIT THOUARS",
+    "AV. REPÚBLICA DE PANAMÁ",
+    "AV. PASEO DE LA REPÚBLICA",
+    "AV. GUARDIA CIVIL",
+    "AV. SAN LUIS",
+    "AV. AVIACIÓN"
+  ],
+  "rewards": {
+    "win": 1000,
+    "clean": 500,
+    "blindPct": 80,
+    "item": {
+      "id": "casco",
+      "name": "Casco de obra",
+      "desc": "el primer proyectil de cada pelea no te hace daño",
+      "effect": "shotHit",
+      "icon": "C",
+      "col": "#ffe14d"
+    },
+    "defeatTip": "Cuando el cobrador saque el brazo, cambia de carril y déjale las monedas al aire. Frena en seco para recoger pasajeros, no te le pegues por detrás."
+  },
+  "boss": {
+    "id": "combi-asesina",
+    "name": "LA COMBI ASESINA",
+    "title": "La Combi Asesina",
+    "w": 50,
+    "h": 92,
+    "startY": -150,
+    "baseY": 170,
+    "lane": 2,
+    "firstAction": 2,
+    "cruiseSpeed": 140,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.5,
+    "phoneOffAct": 0.3,
+    "contactDmg": 6,
+    "chargeContactDmg": 13,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · SUBE, SUBE",
+        "col": "#ffe14d",
+        "bar": "#ffe14d",
+        "returnAct": 2.3,
+        "swapChance": 0.55,
+        "swapAct": 2.2,
+        "attack": "brake",
+        "attacks": [
+          {
+            "k": "brake",
+            "weight": 1
+          },
+          {
+            "k": "throw",
+            "weight": 1
+          }
+        ],
+        "tele": 0.65,
+        "dur": 0.55,
+        "speed": 340,
+        "throw": {
+          "tele": 0.75,
+          "count": 3,
+          "spread": 0.5,
+          "speed": 240,
+          "dmg": 2,
+          "r": 5,
+          "col": "#ffd23f",
+          "text": "¡SU VUELTO!",
+          "park": 1.0
+        }
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · CARRERA CON LA OTRA",
+        "col": "#1f9e5a",
+        "bar": "#1f9e5a",
+        "returnAct": 2.0,
+        "swapChance": 0.45,
+        "swapAct": 1.9,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "ram",
+            "weight": 1
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.7,
+        "speed": 370,
+        "maxY": 500,
+        "throw": {
+          "tele": 0.75,
+          "count": 3,
+          "spread": 0.6,
+          "speed": 240,
+          "dmg": 2,
+          "r": 5,
+          "col": "#ffd23f",
+          "text": "¡SU VUELTO!",
+          "park": 1.0
+        },
+        "summon": {
+          "type": "combi",
+          "every": 16,
+          "from": "arriba",
+          "count": 1,
+          "say": "¡Pégate, que nos gana la otra!"
+        }
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · ÚLTIMO PARADERO",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 1.9,
+        "swapChance": 0.3,
+        "swapAct": 1.6,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.75,
+        "speed": 410,
+        "maxY": 510,
+        "throw": {
+          "tele": 0.75,
+          "count": 4,
+          "spread": 0.75,
+          "speed": 240,
+          "dmg": 3,
+          "r": 5,
+          "col": "#ffd23f",
+          "text": "¡SU VUELTO!",
+          "park": 1.0
+        },
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 150,
+        "stun": 0.8,
+        "hornSound": "bossHorn",
+        "hornCol": "#ffe14d",
+        "hornText": "¡BOCINAZO!"
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Sube, sube, que hay asiento!",
+        "¡Todo Javier Prado, todo Javier Prado!",
+        "¡Paradero es donde yo diga!",
+        "¡Pégate a la derecha, que va a bajar!",
+        "¡Avanza, avanza, que atrás hay sitio!"
+      ],
+      "2": [
+        "¡Esa combi nos está ganando los pasajeros!",
+        "¡Métele, que el semáforo es decorativo!",
+        "¡Por el carril de la obra, que no hay nadie!",
+        "¡A la otra ni la dejes pasar!",
+        "¡Con permiso, voy de emergencia... de pasajeros!"
+      ],
+      "3": [
+        "¡Último paradero, todos abajo!",
+        "¡Bájate en marcha, no tengo tiempo!",
+        "¡La papeleta la paga el dueño!",
+        "¡Este taxi me quitó la ruta!",
+        "¡Sin frenos, pero con fe!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Más fuerte toca mi bocina!",
+      "oil": "¡Patinamos! ¡Agárrense de donde puedan!",
+      "combi": "¡Esa combi es de la competencia!",
+      "metro": "¡El Metro no para en la Javier Prado!",
+      "valet": ""
+    }
+  }
+}

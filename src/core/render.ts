@@ -5,6 +5,7 @@ import { BODY, FONT, Gfx } from './gfx';
 import type { Car, Game, Pickup } from './state';
 import type { VehicleLook } from './config';
 import { jetZone } from '../bosses/phase-boss';
+import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
@@ -105,6 +106,15 @@ function drawObstacles(g: Gfx, G: Game): void {
       g.fillText(o.label, ob.x, o.style === 'conos' ? ob.y - 11 : ob.y + 4);
     }
   }
+}
+
+// Aviso del lanzamiento (ataque 'throw'): línea punteada parpadeante desde el costado del jefe hacia el Tico.
+function drawThrow(g: Gfx, G: Game): void {
+  const b = G.b, T = phaseDef(G.cfg.boss.phases, b.phase).throw;
+  if (b.state !== 'teleThrow' || !T) return;
+  const x0 = b.x + b.w / 2, y0 = b.y + b.h / 4, dx = G.p.x - x0, dy = G.p.y - y0, d = Math.hypot(dx, dy) || 1;
+  g.fillStyle = Math.floor(G.t * 10) % 2 ? (T.col ?? '#ffe14d') : '#ffffff';
+  for (let s = 20; s < d - 30; s += 22) g.fillRect(x0 + (dx / d) * s - 2, y0 + (dy / d) * s - 2, 4, 4);
 }
 
 // Chorro del jefe (ataque 'jet'): aviso con línea punteada sobre el carril y luego la columna de agua.
@@ -236,7 +246,13 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
       g.strokeStyle = 'rgba(120,60,20,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 7, 0, 3); g.stroke(); g.restore();
     } else { g.fillStyle = '#3b2f17'; g.beginPath(); g.ellipse(s.x, s.y, 8, 6, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(61,255,154,.5)'; g.beginPath(); g.arc(s.x - 2, s.y - 2, 2, 0, 7); g.fill(); }
   }
-  drawJet(g, G); drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
+  drawJet(g, G); drawThrow(g, G);
+  for (const f of G.foes) {
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(f.x + 2, f.y + 2, f.r, 0, 7); g.fill();
+    g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
+  }
+  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
   for (const r of G.rings) { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; }
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';

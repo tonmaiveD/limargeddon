@@ -24,6 +24,7 @@ describe('objetos de victoria', () => {
     expect(wonItems(1)).toEqual([]);
     expect(wonItems(2).map((x) => x.id)).toEqual(['silbato']);
     expect(wonItems(4).map((x) => x.id)).toEqual(['silbato', 'bolso', 'poncho']);
+    expect(wonItems(5).map((x) => x.id)).toEqual(['silbato', 'bolso', 'poncho', 'casco']);
   });
 
   it('el Silbato perdona el primer roce con un intocable, no los disparos', () => withSeed(1, () => {
@@ -63,7 +64,7 @@ describe('objetos de victoria', () => {
   it('cada objeto declara un efecto conocido y textos sin puntuación delatora', () => {
     for (const { cfg } of Object.values(STAGES)) {
       const it = cfg.rewards.item!;
-      expect(['contactFine', 'anyFine', 'jetHit']).toContain(it.effect);
+      expect(['contactFine', 'anyFine', 'jetHit', 'shotHit']).toContain(it.effect);
       expect(`${it.name} ${it.desc}`).not.toMatch(/[:;—]/);
     }
   });
