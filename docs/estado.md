@@ -66,6 +66,13 @@ Ordenado como se acordó: primero datos reales y balance, después la etapa secr
    - Meta de ahorro elegida.
    - Bot con restricciones de pulgar.
    - Las propuestas aplazadas (gracia de aceleración, pagos por fase, repetición mejor pagada) solo si los datos lo piden.
-8. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
-9. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
-10. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
+8. **Nombre del jugador y ranking** (pedido del dueño, 24 de octubre de 2026):
+   - El jugador pone su nombre: hasta 12 caracteres, solo letras y números.
+   - Ranking de los 12 mejores con su puntaje.
+   - Por decidir:
+     - Cómo se calcula el puntaje.
+     - Si el ranking es por dispositivo (posible hoy, sin servidor) o compartido entre todos los jugadores. Esto último necesita un servicio externo, porque GitHub Pages es estático, y obliga a pensar en privacidad y en nombres ofensivos.
+9. **Empezar de nuevo:** una opción en el menú para borrar el progreso y volver a la Etapa 1, con confirmación, para quien quedó a medio camino y quiere recomenzar. Hoy solo se puede borrando los datos del navegador.
+10. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
+11. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
+12. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
