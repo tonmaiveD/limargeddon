@@ -1,0 +1,637 @@
+{
+  "id": "callao",
+  "number": 6,
+  "district": "Callao",
+  "roadName": "AV. COLONIAL",
+  "eyebrow": "Etapa 6 · Callao · Av. Colonial",
+  "tip": "En el Callao los contenedores van mal amarrados y la pista está llena de charcos y obras. Cuando se abra la puerta del tráiler, busca el hueco entre los contenedores. Su punto ciego también está a la derecha.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1500,
+      "spd": 240,
+      "freq": 1.3,
+      "tele": true,
+      "dmgMult": 0.8
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 2000,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 2400,
+      "spd": 290,
+      "freq": 0.88,
+      "tele": false,
+      "dmgMult": 1.1
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 300,
+    "turboSpeed": 430,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.8,
+      2.7
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "patrullero",
+        "weight": 0.1,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#f4f6fb"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "roof": "#2f6b3f",
+          "panel": "#2f6b3f",
+          "siren": true,
+          "label": "POLICÍA",
+          "labelCol": "#f4f6fb"
+        }
+      },
+      {
+        "k": "mototaxi",
+        "killBonus": 0,
+        "weight": 0.18,
+        "w": 22,
+        "h": 34,
+        "vy": [
+          150,
+          190
+        ],
+        "hp": 20,
+        "cols": [
+          "#d93b3b",
+          "#2a7de1",
+          "#1f9e5a",
+          "#f2c230"
+        ],
+        "contactDmg": 4,
+        "selfDmg": 10,
+        "look": {
+          "kind": "mototaxi",
+          "roof": "rgba(0,0,0,.3)",
+          "label": "MOTOTAXI",
+          "labelCol": "#ffe14d",
+          "labelSize": 4
+        },
+        "move": {
+          "zigzag": {
+            "amp": 14,
+            "freq": 1.6
+          }
+        }
+      },
+      {
+        "k": "combi",
+        "weight": 0.26,
+        "w": 30,
+        "h": 60,
+        "vy": [
+          120,
+          160
+        ],
+        "hp": 44,
+        "cols": [
+          "#f2c230",
+          "#f4f1e6"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#2a7de1",
+          "band": "#ffe14d",
+          "label": "CALLAO",
+          "labelCol": "#2a7de1",
+          "labelY": 0.5,
+          "labelSize": 5
+        }
+      },
+      {
+        "k": "carcocha",
+        "weight": 0.2,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          100,
+          140
+        ],
+        "hp": 30,
+        "cols": [
+          "#8a5a3a",
+          "#6c7a5a",
+          "#7a4a4a"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#4a3a2e",
+          "shades": false
+        }
+      },
+      {
+        "k": "taxi",
+        "weight": 0.26,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "combi",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 20,
+      "every": [
+        20,
+        26
+      ],
+      "count": [
+        3,
+        4
+      ],
+      "formation": "diagonal",
+      "gap": 66,
+      "label": "¡COMBIS ASESINAS!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "charco",
+      "kind": "hueco",
+      "style": "crater",
+      "first": 7,
+      "every": [
+        10,
+        14
+      ],
+      "lanes": 1,
+      "h": 24,
+      "col": "#2a5a7a",
+      "col2": "#7fd4ff",
+      "dmg": 4,
+      "hitText": "¡CHARCO!"
+    },
+    {
+      "k": "camion-obra",
+      "kind": "bloque",
+      "style": "caja",
+      "first": 12,
+      "every": [
+        14,
+        20
+      ],
+      "lanes": 1,
+      "w": 48,
+      "h": 38,
+      "col": "#ff8a1f",
+      "col2": "#15111d",
+      "label": "OBRA",
+      "labelCol": "#15111d",
+      "dmg": 3
+    },
+    {
+      "k": "saneamiento",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 24,
+      "every": [
+        26,
+        34
+      ],
+      "lanes": 2,
+      "h": 12,
+      "col": "#3a7bff",
+      "col2": "#f4f6fb",
+      "label": "DESVÍO · SANEAMIENTO",
+      "labelCol": "#15111d",
+      "dmg": 3
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 5,
+    "every": [
+      12,
+      18
+    ],
+    "dmg": 3
+  },
+  "crossings": {
+    "first": 3,
+    "every": [
+      16,
+      20
+    ]
+  },
+  "streets": [
+    "AV. ARGENTINA",
+    "AV. FAUCETT",
+    "AV. SÁENZ PEÑA",
+    "AV. GUARDIA CHALACA",
+    "AV. BUENOS AIRES",
+    "AV. CONTRALMIRANTE MORA"
+  ],
+  "rewards": {
+    "win": 1200,
+    "clean": 600,
+    "blindPct": 80,
+    "item": {
+      "id": "llanta",
+      "name": "Llanta de remolcador",
+      "desc": "la primera embestida del jefe en cada pelea no te hace daño",
+      "effect": "ramHit",
+      "icon": "L",
+      "col": "#3a7bff"
+    },
+    "defeatTip": "Cuando se abra la puerta del tráiler, ponte entre las líneas por donde caen los contenedores. Si brilla el claxon, sal de su carril antes de la embestida."
+  },
+  "boss": {
+    "id": "trailer",
+    "name": "EL TRÁILER DEL PUERTO",
+    "title": "El Tráiler del Puerto",
+    "w": 56,
+    "h": 104,
+    "startY": -180,
+    "baseY": 170,
+    "lane": 2,
+    "firstAction": 2,
+    "cruiseSpeed": 100,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.45,
+    "phoneOffAct": 0.3,
+    "contactDmg": 6,
+    "chargeContactDmg": 13,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · CARGA SUELTA",
+        "col": "#ff8a1f",
+        "bar": "#ff8a1f",
+        "returnAct": 2.5,
+        "swapChance": 0.5,
+        "swapAct": 2.4,
+        "attack": "brake",
+        "attacks": [
+          {
+            "k": "brake",
+            "weight": 1
+          },
+          {
+            "k": "throw",
+            "weight": 1
+          }
+        ],
+        "tele": 0.75,
+        "dur": 0.5,
+        "speed": 300,
+        "throw": {
+          "tele": 0.9,
+          "count": 2,
+          "spread": 0.5,
+          "speed": 170,
+          "dmg": 4,
+          "r": 9,
+          "cols": [
+            "#d93b3b",
+            "#3a7bff",
+            "#1f9e5a",
+            "#ff8a1f"
+          ],
+          "text": "¡SE SOLTÓ!",
+          "park": 1.2,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "contenedor"
+        }
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · SIN AMARRES",
+        "col": "#3a7bff",
+        "bar": "#3a7bff",
+        "returnAct": 2.2,
+        "swapChance": 0.4,
+        "swapAct": 2.0,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "ram",
+            "weight": 1
+          }
+        ],
+        "tele": 0.8,
+        "dur": 0.8,
+        "speed": 340,
+        "maxY": 480,
+        "throw": {
+          "tele": 0.9,
+          "count": 3,
+          "spread": 0.8,
+          "speed": 190,
+          "dmg": 4,
+          "r": 9,
+          "cols": [
+            "#d93b3b",
+            "#3a7bff",
+            "#1f9e5a",
+            "#ff8a1f"
+          ],
+          "text": "¡SE SOLTÓ!",
+          "park": 1.2,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "contenedor"
+        },
+        "summon": {
+          "type": "combi",
+          "every": 15,
+          "from": "arriba",
+          "count": 1,
+          "say": "¡Combi, ábreme paso al muelle!"
+        }
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · ZARPE FORZOSO",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 2.0,
+        "swapChance": 0.3,
+        "swapAct": 1.7,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.75,
+        "dur": 0.8,
+        "speed": 370,
+        "maxY": 490,
+        "throw": {
+          "tele": 0.9,
+          "count": 3,
+          "spread": 1.0,
+          "speed": 210,
+          "dmg": 5,
+          "r": 9,
+          "cols": [
+            "#d93b3b",
+            "#3a7bff",
+            "#1f9e5a",
+            "#ff8a1f"
+          ],
+          "text": "¡SE SOLTÓ!",
+          "park": 1.2,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "contenedor"
+        },
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 160,
+        "stun": 0.8,
+        "hornSound": "bossHorn",
+        "hornCol": "#ff2e88",
+        "hornText": "¡SIRENA!"
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Abran cancha, que el puerto no espera!",
+        "¡Los amarres son opcionales!",
+        "¡Voy por la Colonial como si fuera mía!",
+        "¡Cuarenta toneladas y los frenos sin revisar!",
+        "¡Si se cae algo, es oferta!"
+      ],
+      "2": [
+        "¡Se soltó otro, qué raro!",
+        "¡Esta pista ya tenía huecos, yo solo los agrando!",
+        "¿Revisión técnica? En trámite desde hace años.",
+        "¡Paso por donde quepa, y si no, igual!",
+        "¡Este contenedor viene con sorpresa!"
+      ],
+      "3": [
+        "¡Zarpe forzoso, todos a un lado!",
+        "¡No freno ni en el muelle!",
+        "¡Que suene la sirena del puerto!",
+        "¡Este tráiler no retrocede, solo avanza!",
+        "¡Por tu culpa se me va el barco!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Mi sirena es más fuerte que tu claxon!",
+      "oil": "¡Cuarenta toneladas patinando!",
+      "combi": "¡Esa combi no tiene seguro!",
+      "metro": "¡El Metro no llega al Callao!",
+      "valet": ""
+    }
+  }
+}

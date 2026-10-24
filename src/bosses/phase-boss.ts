@@ -202,7 +202,8 @@ export const PhaseBoss: BossAI = {
       if (p.hitCd <= 0) {
         p.hitCd = pc.bossHitCd; const fromRight = dx > 0;
         dmgBoss(G, G.cfg.weapons.ram.dmg * (p.pw.turbo > 0 ? pc.turboMult : 1), fromRight);
-        hurt(G, b.state === 'ram' || b.state === 'rev' ? bc.chargeContactDmg : bc.contactDmg);
+        const charge = b.state === 'ram' || b.state === 'rev';
+        if (!charge || !usePerk(G, 'ramHit')) hurt(G, charge ? bc.chargeContactDmg : bc.contactDmg);
         burst(G, (p.x + b.x) / 2, (p.y + b.y) / 2, C.yellow, 14);
       }
     }

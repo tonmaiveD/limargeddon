@@ -33,7 +33,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number } }
 // Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
 // shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit';
+// ramHit: la primera embestida o reversa del jefe no hace daño.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -82,10 +83,10 @@ export interface BossJet { tele: number; dur: number; w: number; push: number; d
 // Lanzamiento: tras un aviso, el jefe lanza `count` proyectiles en abanico (`spread` en radianes) hacia el Tico (monedas de la combi).
 // park: segundos que se queda detenido después de lanzar, la ventana para castigarlo.
 // from: sale de la puerta derecha (por defecto) o de atrás. aim: apunta al Tico (por defecto) o cae recto hacia abajo.
-// look: moneda (por defecto) o rollo de tela.
+// look: moneda (por defecto), rollo de tela o contenedor.
 export interface BossThrow {
   tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number;
-  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo'; cols?: string[];
+  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo' | 'contenedor'; cols?: string[];
 }
 
 // Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
