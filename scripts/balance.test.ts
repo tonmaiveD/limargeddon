@@ -3,22 +3,13 @@ import type { DiffKey, FireMode, StageConfig } from '../src/core/config';
 import { PROTOTYPE_CFG, startPort, stepPort } from '../tests/harness/port';
 import { seedRandom } from '../tests/harness/rng';
 import { bot } from '../tests/harness/bot';
+import { evitaCuerpo } from '../tests/harness/evita';
 import { STAGES } from '../src/stages';
 import { applyUpgrades } from '../src/garage/upgrades';
 
 // Reporte de duración de la pelea con bots de tres niveles (30 semillas cada uno). No es un test de CI: npm run balance.
 // Compara la config del prototipo con la del juego. Las personas tardan más que los bots: validar con el registro del dispositivo.
 
-// esquiva el cuerpo de la serpiente (Costa Verde): si un segmento le queda cerca por delante, suelta el acelerador y se corre.
-// En las demás etapas no hay cadenas y no cambia nada.
-export function evitaCuerpo(G: any, k: any) {
-  const p = G.p;
-  for (const ch of G.chains ?? []) for (const s of [...ch.segs, ...(ch.lead ? [ch.lead] : [])]) {
-    if (Math.abs(s.x - p.x) < (s.w + p.w) / 2 + 14 && s.y < p.y + 20 && p.y - s.y < 110) {
-      k.up = false; const away = p.x >= s.x ? 1 : -1; k.right = away > 0; k.left = away < 0; return;
-    }
-  }
-}
 // bot "casual": solo conos, detrás del jefe, sin aceite ni claxon
 function casual(G: any, k: any) { bot(G, k); const tx = G.b.x; k.left = tx < G.p.x - 6; k.right = tx > G.p.x + 6; k.oil = false; k.horn = false; }
 // bot "medio": como el experto pero claxon y aceite solo a veces (reacción tardía)

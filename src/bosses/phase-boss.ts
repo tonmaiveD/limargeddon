@@ -142,7 +142,7 @@ const STATES: StateTable<Game> = {
     const { x: x0, y: y0 } = throwOrigin(G), aim = T.aim === 'abajo' ? Math.PI / 2 : Math.atan2(G.p.y - y0, G.p.x - x0);
     for (let i = 0; i < T.count; i++) {
       const a = aim + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0), col = T.cols ? T.cols[i % T.cols.length] : T.col ?? C.yellow;
-      G.foes.push({ x: x0, y: y0, vx: Math.cos(a) * T.speed, vy: Math.sin(a) * T.speed, r: T.r, dmg: T.dmg, col, look: T.look });
+      G.foes.push({ x: x0, y: y0, vx: Math.cos(a) * T.speed, vy: Math.sin(a) * T.speed, r: T.r, dmg: T.dmg, col, look: T.look, stun: T.stun });
     }
     if (T.text) floatText(G, x0, y0 - 20, T.text, T.col ?? C.yellow);
     Sfx.play('kernel');
@@ -196,7 +196,8 @@ export const PhaseBoss: BossAI = {
       b.phase = next; const P = ph(G);
       shake(G, 0.45); say(G, bc.lines[next][0]); Sfx.play('phase'); announce(G, P.name, P.col);
       if (P.valetEvery) { spawnValet(G); b.valetT = P.valetEvery * G.d.freq; }
-      if (P.escorts) { spawnEscorts(G, P); b.hornT = P.hornFirst ?? 2; }
+      if (P.escorts) spawnEscorts(G, P);
+      if (P.hornEvery) b.hornT = P.hornFirst ?? 2; // el primer claxon de la fase respeta su config, con o sin escoltas
       b.summonT = P.summon ? 0 : Infinity;
     }
     if (b.slip > 0) { b.slip -= dt; b.x += Math.sin(G.t * 22) * 90 * dt; b.ang = Math.sin(G.t * 11) * 0.35; }
