@@ -1,7 +1,8 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, type Car, type Game } from './state';
+import { announce, burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, type Car, type Game } from './state';
+import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
@@ -13,21 +14,47 @@ export function spawnCar(G: Game): void {
   const T = G.cfg.traffic.types, lane = Math.floor(Math.random() * G.cfg.road.lanes);
   let r = Math.random(), t = T[T.length - 1];
   for (const ty of T) { if (r < ty.weight) { t = ty; break; } r -= ty.weight; }
-  // mismo orden de sorteos que el prototipo: velocidad, color (si hay varios), zigzag, semilla
+  G.traffic.push(makeCar(t, laneX(G.cfg, lane), -60));
+}
+
+// Crea un vehículo de un tipo del JSON. Mismo orden de sorteos que el prototipo: velocidad, color (si hay varios), zigzag, semilla.
+export function makeCar(t: TrafficType, x: number, y: number): Car {
   const vy = rnd(t.vy[0], t.vy[1]);
   const col = t.cols.length > 1 ? pick(t.cols) : t.cols[0];
-  const zz = t.k === 'scooter' ? Math.random() * 6 : undefined;
-  G.traffic.push({
-    k: t.k, x: laneX(G.cfg, lane), y: -60, w: t.w, h: t.h, vy, hp: t.hp, max: t.hp, col,
+  const zz = t.move?.zigzag ? Math.random() * 6 : undefined;
+  return {
+    k: t.k, x, y, w: t.w, h: t.h, vy, hp: t.hp, max: t.hp, col,
     spin: 0, seed: Math.random() * 100, invulnerable: t.invulnerable, contactDmg: t.contactDmg, selfDmg: t.selfDmg, zz,
-  });
+    look: t.look, move: t.move,
+  };
+}
+
+// Un enjambre entra por arriba en formación. Comparten la fase del zigzag para moverse como grupo.
+export function spawnSwarm(G: Game, i: number): void {
+  const S = G.cfg.swarms![i], t = G.cfg.traffic.types.find((ty) => ty.k === S.type);
+  if (!t) return;
+  const lanes = G.cfg.road.lanes, n = Math.round(rnd(S.count[0], S.count[1])), lane = Math.floor(Math.random() * lanes), zz = Math.random() * 6;
+  for (let j = 0; j < n; j++) {
+    let x = laneX(G.cfg, lane), y = -60 - j * S.gap;
+    if (S.formation === 'v') { const side = j % 2 ? 1 : -1, row = Math.ceil(j / 2); x += side * row * S.gap * 0.6; y = -60 - row * S.gap; }
+    else if (S.formation === 'diagonal') x = laneX(G.cfg, (lane + j) % lanes);
+    const c = makeCar(t, x, y);
+    if (c.zz !== undefined) c.zz = zz + j * 0.3;
+    G.traffic.push(c);
+  }
+  if (S.label) announce(G, S.label, C.orange);
 }
 
 // El jefe se abre paso: el tráfico se aparta hacia el lado con espacio en vez de pasarle por debajo.
 // Si no cabe a ningún lado, queda atascado detrás (o empujado delante si el jefe lo embiste en reversa o carga).
 function yieldToBoss(G: Game, c: Car): void {
-  const b = G.b, { left, right } = G.cfg.road;
-  if (b.state === 'enter' || !overlap(c, b)) return;
+  if (G.b.state === 'enter' || !overlap(c, G.b)) return;
+  pushAside(G, c, G.b);
+}
+
+// Saca a un auto de encima de una caja: al lado con espacio, o delante/detrás si no cabe.
+function pushAside(G: Game, c: Car, b: { x: number; y: number; w: number; h: number }): void {
+  const { left, right } = G.cfg.road;
   const half = (c.w + b.w) / 2, toLeft = b.x - half, toRight = b.x + half;
   const fitsL = toLeft >= left + c.w / 2, fitsR = toRight <= right - c.w / 2;
   const preferRight = c.x >= b.x;
@@ -35,6 +62,38 @@ function yieldToBoss(G: Game, c: Car): void {
   else if (preferRight ? fitsL : fitsR) c.x = preferRight ? toLeft : toRight;
   else c.y = c.y < b.y ? b.y - (c.h + b.h) / 2 : b.y + (c.h + b.h) / 2;
   if (c.spin <= 0 && !c.invulnerable) c.spin = 0.25; // pequeño coletazo al ser empujado
+}
+
+function spawnObstacle(G: Game, i: number): void {
+  const o = G.cfg.obstacles![i], { lanes, laneWidth, left } = G.cfg.road;
+  const n = Math.min(o.lanes, lanes), first = Math.floor(Math.random() * (lanes - n + 1));
+  const w = n * laneWidth - 10, x = left + first * laneWidth + (n * laneWidth) / 2;
+  G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false });
+}
+
+// Obstáculos: avanzan con el asfalto. Los bloques empujan al Tico y al tráfico; los huecos castigan al pasar.
+function updateObstacles(G: Game, dt: number): void {
+  const p = G.p, play = G.mode === 'play', defs = G.cfg.obstacles ?? [];
+  for (const ob of G.obstacles) {
+    ob.y += G.speed * dt;
+    const o = defs[ob.i];
+    if (o.kind === 'bloque') {
+      if (play && overlap(p, ob)) {
+        const dx = p.x - ob.x, dy = p.y - ob.y, ox = (p.w + ob.w) / 2 - Math.abs(dx), oy = (p.h + ob.h) / 2 - Math.abs(dy);
+        if (ox < oy) { p.x += Math.sign(dx || 1) * ox; p.vx = Math.sign(dx || 1) * 160; } else { p.y += Math.sign(dy || 1) * oy; p.vy = Math.sign(dy || 1) * 160; }
+        if (!ob.hit && p.hitCd <= 0) {
+          ob.hit = true; p.hitCd = G.cfg.player.trafficHitCd;
+          if (p.pw.turbo > 0) { floatText(G, ob.x, ob.y - 10, '¡FUERA!', C.orange); burst(G, ob.x, ob.y, o.col, 12); ob.y = 9999; }
+          else { if (o.dmg) hurt(G, o.dmg); if (o.fine) fine(G, p.x, p.y, o.fine, 'PAPELETA'); burst(G, p.x, p.y - p.h / 2, o.col, 8); }
+        }
+      }
+    } else if (play && !ob.hit && overlap(p, ob)) {
+      ob.hit = true;
+      if (p.pw.turbo > 0) { floatText(G, p.x, p.y - 46, '¡VUELA!', C.orange); burst(G, p.x, p.y, C.orange, 8); }
+      else { hurt(G, o.dmg); floatText(G, p.x, p.y - 46, '¡HUECO!', C.yellow); shake(G, 0.35); Sfx.play('bump'); }
+    }
+  }
+  G.obstacles = G.obstacles.filter((ob) => ob.y < 640 + 60);
 }
 
 export function updateWorld(G: Game, dt: number): void {
@@ -46,6 +105,16 @@ export function updateWorld(G: Game, dt: number): void {
     G.trafficT -= dt; if (G.trafficT <= 0 && b.state !== 'enter') { spawnCar(G); G.trafficT = rnd(...cfg.traffic.every) * (lastPhase ? cfg.traffic.lastPhaseMult : 1); }
     G.pickT -= dt; if (G.pickT <= 0 && b.state !== 'enter') { spawnPickup(G); G.pickT = rnd(...cfg.pickups.every); }
     G.bumpT -= dt; if (G.bumpT <= 0) { G.bumps.push({ y: -10, hitP: false, hitB: false }); G.bumpT = rnd(...cfg.bumps.every); }
+    G.swarmT.forEach((t, i) => {
+      if (!isFinite(t) || b.state === 'enter') return;
+      G.swarmT[i] = t - dt;
+      if (G.swarmT[i] <= 0) { spawnSwarm(G, i); G.swarmT[i] = rnd(...G.cfg.swarms![i].every); }
+    });
+    G.obsT.forEach((t, i) => {
+      if (!isFinite(t) || b.state === 'enter') return;
+      G.obsT[i] = t - dt;
+      if (G.obsT[i] <= 0) { spawnObstacle(G, i); G.obsT[i] = rnd(...G.cfg.obstacles![i].every); }
+    });
     G.crossT -= dt; if (G.crossT <= 0) { G.cross.push({ y: -40, name: cfg.streets[G.streetI++ % cfg.streets.length] }); G.crossT = rnd(...cfg.crossings.every); }
   }
   // rompemuelles y cruces
@@ -61,6 +130,7 @@ export function updateWorld(G: Game, dt: number): void {
   }
   G.bumps = G.bumps.filter((m) => m.y < H + 20);
   for (const c of G.cross) c.y += G.speed * dt; G.cross = G.cross.filter((c) => c.y < H + 60);
+  updateObstacles(G, dt);
   // tráfico
   for (const c of G.traffic) {
     if (c.k === 'valet') { if (c.enter! > 0) { c.enter! -= dt; c.x += (c.tx! - c.x) * Math.min(1, dt * 5); } else c.y += (70 + extra) * dt; }
@@ -68,10 +138,20 @@ export function updateWorld(G: Game, dt: number): void {
       c.life! -= dt; c.phase! += dt;
       if (c.life! > 0) { c.y += ((240 + Math.sin(c.phase!) * 40) - c.y) * Math.min(1, dt * 1.5); c.x += step(p.x - c.x, 45 * dt); }
       else c.y -= 240 * dt;
-    } else { c.y += (c.vy + extra) * dt; if (c.k === 'scooter') { c.zz! += dt * 3; c.x += Math.sin(c.zz!) * 50 * dt; } }
+    } else {
+      c.y += (c.vy + extra) * dt;
+      const zig = c.move?.zigzag; if (zig) { c.zz! += dt * zig.freq; c.x += Math.sin(c.zz!) * zig.amp * dt; }
+    }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
     const inValet = c.k === 'valet' && c.enter! > 0;
-    if (cfg.traffic.yieldToBoss && !inValet) yieldToBoss(G, c);
+    // los bloques (obras, conos, barreras) también desvían al tráfico; si un auto queda apretado entre un bloque
+    // y el jefe, se resuelve en pocas pasadas y el jefe va al final (lo más visible es que no le pase por debajo)
+    if (!inValet) for (let pass = 0; pass < 3; pass++) {
+      for (const ob of G.obstacles) if (cfg.obstacles![ob.i].kind === 'bloque' && overlap(c, ob)) pushAside(G, c, ob);
+      if (cfg.traffic.yieldToBoss) yieldToBoss(G, c);
+    }
+    // si sigue atrapado entre un bloque y el jefe, se queda esperando detrás del bloque
+    if (!inValet) for (const ob of G.obstacles) if (cfg.obstacles![ob.i].kind === 'bloque' && overlap(c, ob)) c.y = ob.y - (c.h + ob.h) / 2;
     c.x = clamp(c.x, inValet ? -40 : cfg.road.left + c.w / 2, inValet ? W + 40 : cfg.road.right - c.w / 2);
     if (play && overlap(p, c)) {
       const dx = p.x - c.x, dy = p.y - c.y, ox = (p.w + c.w) / 2 - Math.abs(dx), oy = (p.h + c.h) / 2 - Math.abs(dy), push = cfg.player.trafficPush;

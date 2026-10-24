@@ -199,7 +199,13 @@
           "#1f4fbf"
         ],
         "invulnerable": true,
-        "contactDmg": 0
+        "contactDmg": 0,
+        "look": {
+          "panel": "#fff",
+          "siren": true,
+          "label": "SERENAZGO",
+          "labelCol": "#1f4fbf"
+        }
       },
       {
         "k": "scooter",
@@ -215,7 +221,16 @@
           "#2fd0c0"
         ],
         "contactDmg": 4,
-        "selfDmg": 12
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        }
       },
       {
         "k": "suv",

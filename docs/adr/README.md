@@ -17,3 +17,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0011](0011-controles-un-pulgar-una-tarea-y-modos-de-disparo.md) | Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar" | Aceptada |
 | [0012](0012-vista-de-ancho-variable.md) | Vista de ancho variable: más ciudad a los costados | Aceptada |
 | [0013](0013-dos-modos-de-disparo-permanentes.md) | Dos modos de disparo permanentes | Aceptada |
+| [0014](0014-motor-comun-vehiculos-enjambres-obstaculos.md) | Motor común: vehículos declarativos, enjambres y obstáculos | Aceptada |
