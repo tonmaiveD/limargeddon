@@ -103,3 +103,13 @@ button.pick[hidden]{display:none}
 .upg button:disabled{background:#2c2240;color:var(--muted);cursor:default}
 .row.sticky{width:100%;flex:none}
 .row.sticky .pick:first-child{flex:1}
+
+/* jugador, ranking y reinicio (ADR 0029) */
+.overlay.dialog{z-index:5;background:rgba(14,10,22,.97)}
+#nameInput{font:400 20px/1 var(--display);text-align:center;width:min(260px,80%);padding:12px;border:0;border-radius:6px;background:var(--panel);color:var(--yellow);text-transform:uppercase}
+.ranking{list-style:none;margin:0;padding:0;width:min(300px,100%);display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.ranking li{display:grid;grid-template-columns:2em 1fr auto;gap:8px;align-items:center;padding:6px 10px;border-radius:4px;background:var(--panel);font-size:13px;text-align:left}
+.ranking li b{font-family:var(--display);font-weight:400;color:var(--muted)}
+.ranking li.me{box-shadow:inset 3px 0 0 var(--yellow)}
+.ranking li span:last-child{color:var(--yellow);font-weight:800}
+.ranking .empty{display:block;background:none;color:var(--muted);text-align:center}

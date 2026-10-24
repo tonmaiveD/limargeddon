@@ -5,7 +5,8 @@ import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../c
 import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { getSettings, setSettings, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, getPlayerName, getSettings, setSettings, unlockedStage } from '../core/save';
+import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
 import { DEFAULT_STAGE, STAGES, STAGE_ORDER, TEST_MODE, stageForUnlocked, stageNumber, track } from '../stages';
 
@@ -24,6 +25,18 @@ export class MenuScene extends Phaser.Scene {
     this.stageId = TEST_MODE ? (saved && STAGES[saved] ? saved : DEFAULT_STAGE) : stageForUnlocked(unlockedStage(stageNumber));
     this.setupStageSelector();
     this.showStage();
+    this.setupPlayer();
+  }
+
+  // Jugador (ADR 0029): nombre, ranking y empezar de nuevo. La primera vez se pide el nombre antes de jugar.
+  private setupPlayer(): void {
+    const name = document.getElementById('toName')!;
+    const label = () => { name.textContent = `Jugador · ${getPlayerName() ?? DEFAULT_NAME}`; };
+    label();
+    name.onclick = () => openName(false, label);
+    document.getElementById('toRanking')!.onclick = () => openRanking();
+    document.getElementById('toReset')!.onclick = () => openReset(() => this.scene.restart());
+    if (!getPlayerName()) openName(true, label);
   }
 
   // Selector de etapa, solo en modo prueba (?prueba en la dirección). Recuerda la última elegida.

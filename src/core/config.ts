@@ -175,7 +175,8 @@ export interface StageConfig {
   crossings: { first: number; every: [number, number] };
   streets: string[];
   // item: objeto de victoria de la etapa; defeatTip: consejo al perder; winLine: remate al ganar (la etapa final)
-  rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string; winLine?: string };
+  // scoreTref: tiempo de referencia del puntaje en s (por defecto 120); ganar en ese tiempo o menos da el máximo del tramo de tiempo
+  rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string; winLine?: string; scoreTref?: number };
   // garúa (ADR 0025): oleadas de neblina que tapan la parte de arriba de la pantalla (depth: fracción del alto)
   weather?: { fog?: { first: number; every: [number, number]; dur: [number, number]; depth: number } };
   // nivel de búsqueda (ADR 0025): cada falta suma una estrella y baja una cada `decay` s sin faltas.

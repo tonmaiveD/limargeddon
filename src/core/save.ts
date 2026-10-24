@@ -16,11 +16,12 @@ export interface FightRecord {
   build?: string; test?: boolean; upgrades?: Record<string, number>; bossPct?: number;
   gross?: number; fines?: number; earned?: number; replay?: boolean;
 }
-export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey }
+export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
 // garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)
-interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number> } }
+// scores: mejor puntaje de cada jugador en cada etapa, { nombre: { etapa: puntos } } (ADR 0029)
+interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number> }; scores?: Record<string, Record<string, number>> }
 
 function load(): SaveV1 {
   try {
@@ -118,4 +119,48 @@ export function settleFight(f: Omit<FightRecord, 'at'>, stageNumber: number, pay
   const wallet = addEarnings(earned);
   if (f.win) unlockNext(stageNumber, numberOf);
   return { earned, replay, wallet };
+}
+
+/* Jugador y ranking local (ADR 0029). */
+export const DEFAULT_NAME = 'TAXISTA';
+export const NAME_MAX = 12;
+export const RANKING_SIZE = 12;
+
+// Hasta 12 letras o números (con tildes y ñ); todo lo demás se descarta.
+export function cleanName(raw: string): string {
+  return Array.from(raw.normalize('NFC').replace(/[^\p{L}\p{N}]/gu, '')).slice(0, NAME_MAX).join('');
+}
+export const getPlayerName = (): string | null => getSettings().playerName ?? null;
+export function setPlayerName(raw: string): string {
+  const name = cleanName(raw) || DEFAULT_NAME;
+  setSettings({ playerName: name });
+  return name;
+}
+
+// Guarda el puntaje si es el mejor de ese jugador en esa etapa. Repetir una pelea igual no suma.
+export function recordScore(name: string, stageId: string, points: number): { best: number; record: boolean } {
+  const data = load(), all = data.scores ?? {}, mine = { ...(all[name] ?? {}) };
+  const prev = mine[stageId] ?? 0, record = points > prev;
+  if (record) { mine[stageId] = points; data.scores = { ...all, [name]: mine }; store(data); }
+  return { best: Math.max(prev, points), record };
+}
+
+export interface RankRow { name: string; total: number; stages: number }
+// Los 12 mejores del dispositivo: suma del mejor puntaje de cada etapa; a igual total, más etapas ganadas.
+export function ranking(): RankRow[] {
+  const all = load().scores ?? {};
+  return Object.entries(all)
+    .map(([name, st]) => ({ name, total: Object.values(st).reduce((a, b) => a + b, 0), stages: Object.keys(st).length }))
+    .filter((r) => r.total > 0)
+    .sort((a, b) => b.total - a.total || b.stages - a.stages)
+    .slice(0, RANKING_SIZE);
+}
+
+// Empezar de nuevo: vuelve a la Etapa 1 con la billetera en cero y sin mejoras. Conserva nombre, ranking y registro de peleas.
+export function resetProgress(): void {
+  const data = load();
+  data.progress = { unlocked: 1 }; // explícito: si faltara, el progreso se reconstruiría desde el registro de peleas
+  data.garage = { wallet: 0, levels: {} };
+  if (data.settings) delete data.settings.stageId;
+  store(data);
 }

@@ -8,7 +8,8 @@ import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { getGarage, getSettings, settleFight, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, getGarage, getPlayerName, getSettings, recordScore, settleFight, unlockedStage } from '../core/save';
+import { scoreFight } from '../core/score';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -93,8 +94,11 @@ export class StageScene extends Phaser.Scene {
             { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
               build: __BUILD__, test: TEST_MODE || undefined, upgrades: getGarage().levels, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines },
             G.cfg.number, summary.pay, stageNumber);
+          // puntaje (ADR 0029): solo las victorias, y el modo prueba no entra al ranking
+          const points = scoreFight(G);
+          const score = points ? { points, test: TEST_MODE, ...(TEST_MODE ? { best: points, record: false } : recordScore(getPlayerName() ?? DEFAULT_NAME, this.data0.stageId, points)) } : null;
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
-          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk, earned, replay, wallet }));
+          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk, earned, replay, wallet, score }));
         }
       } else { G.t += dt; updateWorld(G, dt); }
     }

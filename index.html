@@ -35,7 +35,8 @@
         </div>
         <p class="tip small" id="fireTip"></p>
         <div class="row" id="menuDiffs"></div>
-        <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button></div>
+        <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="link" id="toRanking" type="button">Ranking</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button></div>
+        <div class="row"><button class="link" id="toName" type="button">Jugador</button><button class="link" id="toReset" type="button">Empezar de nuevo</button></div>
         <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
       </div>
       <div class="overlay garage" id="garage" hidden>
@@ -48,6 +49,24 @@
           <button class="pick" id="gGo" type="button">Seguir</button>
           <button class="pick alt" id="gMenu" type="button">Menú</button>
         </div>
+      </div>
+      <!-- jugador, ranking y reinicio (ADR 0029): van encima del menú -->
+      <form class="overlay dialog" id="nameDlg" hidden>
+        <h2>¿Cómo te llamas?</h2>
+        <p class="tip">Así apareces en el ranking. Hasta 12 letras o números.</p>
+        <input id="nameInput" type="text" maxlength="12" autocomplete="nickname" autocapitalize="characters" spellcheck="false" aria-label="Nombre del jugador">
+        <div class="row"><button class="pick" type="submit">Listo</button><button class="pick alt" id="nameCancel" type="button">Volver</button></div>
+      </form>
+      <div class="overlay dialog" id="rankDlg" hidden>
+        <h2>Ranking</h2>
+        <p class="tip small">Los 12 mejores de este dispositivo. Suma la mejor pelea de cada etapa.</p>
+        <ol class="ranking" id="rankList"></ol>
+        <button class="pick" id="rankClose" type="button">Volver</button>
+      </div>
+      <div class="overlay dialog" id="resetDlg" hidden>
+        <h2 id="resetTitle">Empezar de nuevo</h2>
+        <p class="tip" id="resetText"></p>
+        <div class="row"><button class="pick" id="resetNo" type="button">Volver</button><button class="pick alt" id="resetYes" type="button"></button></div>
       </div>
       <div class="overlay" id="pause" hidden>
         <h2>Pausa</h2>

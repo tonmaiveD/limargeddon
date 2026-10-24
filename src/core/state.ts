@@ -79,7 +79,8 @@ export interface Game {
   swarmT: number[]; // un temporizador por enjambre activo en esta dificultad (Infinity si no aplica)
   obstacles: Obstacle[]; obsT: number[];
   allyT: number; privilegeT: number; // Socio de la Combi y aviso del sticker (mejoras de lujo)
-  stats: { right: number; total: number; dmgP3: boolean; powers: number };
+  // infractions: faltas antes de perdones (puntaje); dmgTaken: daño recibido (la reparación no lo borra)
+  stats: { right: number; total: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number };
   result: null | { win: boolean };
 }
 
@@ -109,7 +110,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
     allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,
     obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
-    stats: { right: 0, total: 0, dmgP3: false, powers: 0 },
+    stats: { right: 0, total: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0 },
     result: null,
   };
 }
@@ -139,6 +140,7 @@ export function hurt(G: Game, d: number): void {
   if (p.pw.soat > 0) { floatText(G, p.x, p.y - 30, 'SOAT', C.green); Sfx.play('block'); return; }
   if (G.d.dmgMult) d = Math.max(1, Math.round(d * G.d.dmgMult));
   if (G.cfg.player.armor) d = Math.max(1, Math.round(d * (1 - G.cfg.player.armor)));
+  G.stats.dmgTaken += Math.min(d, p.hp);
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
   floatText(G, p.x, p.y - 30, '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
 }
@@ -160,6 +162,7 @@ export function addStar(G: Game): void {
 
 // contact: la papeleta viene de un roce con un intocable (la perdona el Silbato antes que el Bolso).
 export function fine(G: Game, x: number, y: number, amt: number, why: string, contact = false): void {
+  G.stats.infractions++; // cuenta para el puntaje aunque después la perdonen
   // Sticker "Mi papá es socio del Golf": nadie le pone papeletas
   if (G.cfg.player.privilege) {
     if (G.privilegeT <= 0) { floatText(G, x, y - 34, '¿Usted sabe quién soy yo?', C.yellow); G.privilegeT = 2; }
