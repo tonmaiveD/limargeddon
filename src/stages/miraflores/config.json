@@ -4,7 +4,11 @@
   "district": "Miraflores",
   "roadName": "MALECÓN DE MIRAFLORES",
   "eyebrow": "Etapa 1 · Miraflores · Malecón y Av. Larco",
-  "tip": "En Miraflores hasta el claxon tiene multa. La camioneta del serenazgo también tiene punto ciego a la derecha. Atácala por ahí, pero no choques a los serenos ni a los turistas, que cada roce es papeleta.",
+  "hints": [
+    { "at": 1.5, "text": "Suelta el acelerador para esquivar" },
+    { "at": 6, "text": "Pégale por la derecha, duele el doble" }
+  ],
+  "tip": "En Miraflores chocar a un sereno o a los turistas que se toman fotos es papeleta. La camioneta del serenazgo también tiene punto ciego a la derecha. Suelta el acelerador para esquivar y atácala por ahí.",
   "difficulties": {
     "facil": {
       "label": "Fácil",
@@ -220,6 +224,7 @@
       },
       {
         "k": "ciclista",
+        "killBonus": 0,
         "weight": 0.2,
         "w": 12,
         "h": 22,
@@ -248,6 +253,7 @@
       },
       {
         "k": "delivery",
+        "killBonus": 0,
         "weight": 0.18,
         "w": 12,
         "h": 24,

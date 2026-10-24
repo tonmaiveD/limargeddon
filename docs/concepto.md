@@ -15,7 +15,7 @@ Taxista informal con un Tico destartalado y una deuda imposible. Para saldarla a
 | # | Distrito / vía | Mecánica distintiva | Jefe |
 |---|---|---|---|
 | 1 | Miraflores, Malecón y Av. Larco | Tutorial; ciclistas y serenazgo | Camioneta de serenazgo |
-| 2 | San Isidro, Av. Camino Real | Serenazgo con papeletas, rompemuelles, valets | **La Loca del Q6** (prototipado) |
+| 2 | San Isidro, Av. Camino Real | Serenazgo con papeletas, rompemuelles, valets | **La Loca del Q8** |
 | 3 | Centro de Lima, Abancay | Calles angostas, ambulantes, marchas | Rochabús |
 | 4 | Javier Prado | Tráfico denso, combis en enjambre | La Combi Asesina con cobrador |
 | 5 | Vía Expresa (el Zanjón) | Alta velocidad, puentes, rampas | Bus del Metropolitano |
@@ -70,11 +70,13 @@ El serenazgo no se deforma (invulnerable). En producción, la deformación se ma
 - Garúa y neblina en etapas avanzadas.
 - Música sintetizada por distrito: cumbia chicha, criolla, salsa (composiciones originales).
 
-## Jefe Etapa 2: La Loca del Q6
+## Jefe Etapa 2: La Loca del Q8
+
+Los valores vigentes de todas las etapas están en `src/stages/<distrito>/config.json`; esta tabla se mantiene al día con ellos.
 
 | Atributo | Fácil | Normal | Difícil |
 |---|---|---|---|
-| Vida | 900 | 1200 | 1600 |
+| Vida | 1350 | 1800 | 2400 |
 | Velocidad máx. | 230 | 260 | 290 |
 | Frecuencia de ataques | -25% | base | +30%, sin aviso de reversa |
 
@@ -86,6 +88,6 @@ Punto débil: lateral derecho, daño x2; derrapando por aceite, x1.5 adicional.
 | 2. El estacionamiento | 66 a 33% | Doble fila, reversa a 300 px/s, valet | Luces blancas 0.8 s | Esquivar la reversa y golpear detenida |
 | 3. La rabia | 33 a 0% | Embestida cada 4 s, claxon aturde 1 s en 150 px, dos SUVs escolta 15 s | Ícono de claxon, sacudida | Nitro lateral, aceite |
 
-Recompensa: S/ 800, +S/ 400 sin daño en fase 3, Bolso de Diseñador (anula una papeleta por etapa). Logros: Ni la vio venir (80% del daño por la derecha), Sin rayones, Vecino ejemplar (cero papeletas).
+Recompensa: S/ 800, +S/ 400 sin daño en fase 3, Bolso de Diseñador (desde la etapa siguiente, anula la primera papeleta de cada pelea). Logros: Ni la vio venir (80% del daño por la derecha), Sin rayones, Vecino ejemplar (cero papeletas).
 
 San Isidro, paisaje: Huaca Huallamarca, Lima Golf, Bosque El Olivar, torres de vidrio. Cruces: Pardo y Aliaga, Jorge Basadre, Las Begonias, Choquehuanca, Conquistadores, Los Laureles.

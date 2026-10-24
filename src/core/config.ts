@@ -33,6 +33,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number } }
 export interface TrafficType {
   k: string; weight: number; w: number; h: number; vy: [number, number]; hp: number; cols: string[];
   invulnerable?: boolean; contactDmg: number; selfDmg?: number;
+  // lo que paga sacarlo de la pista; si falta, vale traffic.killBonus (ciclistas y Delivery pagan 0)
+  killBonus?: number;
   look?: VehicleLook; move?: VehicleMove;
 }
 
@@ -98,6 +100,8 @@ export interface BossConfig {
 
 export interface StageConfig {
   id: string; number: number; district: string; roadName: string; eyebrow: string; tip: string;
+  // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
+  hints?: { at: number; text: string }[];
   difficulties: Record<DiffKey, Difficulty>;
   road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number };
   player: {

@@ -21,6 +21,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Tráfico** (`traffic.types`): tamaño, velocidad, vida, colores, peso de aparición, daño de contacto, si es invulnerable y genera papeleta (serenazgo).
   - `look`: `kind` ("auto", "moto" o "bici"), `roof`, `panel`, `siren`, `label`, `labelCol`, `labelSize`, `labelY`, `band` (combis), `box` (caja de reparto), `shades`.
   - `move.zigzag`: `{ "amp": 50, "freq": 3 }`.
+  - `killBonus`: lo que paga sacarlo de la pista. Si falta, vale `traffic.killBonus`. Ciclistas y Delivery van con 0, para no premiar atropellar a quien trabaja o pedalea.
 - **Enjambres** (`swarms`): `type` (un `k` de `traffic.types`), `diffs`, `first`, `every`, `count`, `formation` ("columna", "v" o "diagonal"), `gap` y `label`, un aviso en pantalla.
 - **Obstáculos** (`obstacles`):
   - `kind` "bloque": sólido, empuja y desvía al tráfico. Estilo "conos", "barrera" o "caja".
@@ -34,6 +35,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
   - `escorts`: con `look`, `w` y `h` propios.
   - Claxon (`hornEvery`, `hornSound`, `hornCol`, `hornText`) y valets (solo San Isidro).
   - Frases (`lines`) y réplicas (`quips`).
+- **Ayudas** (`hints`): frases cortas sobre el Tico en los primeros segundos, `{ "at": 1.5, "text": "..." }`. Pensadas para el tutorial, máximo unas ocho palabras.
 - **Dificultades:** vida del jefe, velocidad, frecuencia de ataques y `dmgMult`, el multiplicador del daño que recibe el Tico.
 - **Recompensas:** pago, bono sin daño, `item` (premio que se muestra al ganar) y `defeatTip` (consejo al perder).
 - **Armas, bonus, papeletas, rompemuelles, cruces, calles y recompensas.**

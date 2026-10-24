@@ -56,7 +56,7 @@
     "types": [
       { "k": "sereno", "weight": 0.18, "w": 30, "h": 52, "vy": [110, 140], "hp": 999, "cols": ["#1f4fbf"], "invulnerable": true, "contactDmg": 0,
         "look": { "panel": "#fff", "siren": true, "label": "SERENAZGO", "labelCol": "#1f4fbf" } },
-      { "k": "delivery", "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 3, "selfDmg": 12,
+      { "k": "delivery", "killBonus": 0, "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 3, "selfDmg": 12,
         "look": { "kind": "moto", "box": "#ffd23f" }, "move": { "zigzag": { "amp": 50, "freq": 3 } } },
       { "k": "suv", "weight": 0.34, "w": 32, "h": 56, "vy": [130, 170], "hp": 36, "cols": ["#1d1b22"], "contactDmg": 6, "selfDmg": 10 },
       { "k": "sedan", "weight": 0.30, "w": 28, "h": 50, "vy": [130, 170], "hp": 36, "cols": ["#6c7a8c", "#8a2f3f", "#c9ccd3"], "contactDmg": 6, "selfDmg": 10 }

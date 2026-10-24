@@ -60,7 +60,8 @@ describe('registro de peleas', () => {
     recordFight({ stage: 'san-isidro', dk: 'normal', win: false, t: 40 });
     recordFight({ stage: 'san-isidro', dk: 'normal', win: true, t: 90 });
     recordFight({ stage: 'san-isidro', dk: 'facil', win: true, t: 60 });
-    expect(fightStats('san-isidro', 'normal')).toEqual({ played: 3, wins: 2, median: 100 });
+    // con un número par de victorias la mediana promedia las dos del medio
+    expect(fightStats('san-isidro', 'normal')).toEqual({ played: 3, wins: 2, median: 95 });
     expect(exportFights()).toHaveLength(4);
   });
 
