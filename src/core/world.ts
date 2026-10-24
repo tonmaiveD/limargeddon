@@ -1,7 +1,7 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { announce, burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, usePerk, type Car, type Game } from './state';
+import { addStar, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateShots } from './weapons';
@@ -64,11 +64,17 @@ function pushAside(G: Game, c: Car, b: { x: number; y: number; w: number; h: num
   if (c.spin <= 0 && !c.invulnerable) c.spin = 0.25; // pequeño coletazo al ser empujado
 }
 
-function spawnObstacle(G: Game, i: number): void {
+// Barrera de un carril del peaje: cada carril con su desfase, para que siempre haya alguna abierta.
+export function gateClosed(G: Game, ob: Obstacle, lane: number): boolean {
+  const period = G.cfg.obstacles![ob.i].gatePeriod ?? 2;
+  return ((G.t / period + lane * 0.37 + (ob.ph ?? 0)) % 1) < 0.5;
+}
+
+export function spawnObstacle(G: Game, i: number): void {
   const o = G.cfg.obstacles![i], { lanes, laneWidth, left } = G.cfg.road;
   const n = Math.min(o.lanes, lanes), first = Math.floor(Math.random() * (lanes - n + 1));
   const w = Math.min(o.w ?? Infinity, n * laneWidth - 10), x = left + first * laneWidth + (n * laneWidth) / 2;
-  G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false, bx: x, ph: o.drift ? Math.random() * 6 : undefined });
+  G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false, bx: x, ph: o.drift || o.kind === 'peaje' ? Math.random() * 6 : undefined });
 }
 
 // Obstáculos: avanzan con el asfalto. Los bloques empujan al Tico y al tráfico; los huecos castigan al pasar.
@@ -91,6 +97,15 @@ function updateObstacles(G: Game, dt: number): void {
       continue;
     }
     if (p.air > 0) continue; // en el aire pasa por encima de bloques y huecos
+    if (o.kind === 'peaje') {
+      // peaje: cada carril tiene su barrera; pasar por una cerrada la rompe, hace daño y suma una estrella
+      if (play && !ob.hit && overlap(p, ob) && gateClosed(G, ob, laneOf(G.cfg, p.x))) {
+        ob.hit = true; burst(G, p.x, p.y - p.h / 2, '#ff3355', 12); shake(G, 0.35); Sfx.play('hit');
+        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg);
+        floatText(G, p.x, p.y - 46, o.hitText ?? '¡BARRERA!', C.yellow); addStar(G);
+      }
+      continue;
+    }
     if (o.kind === 'bloque') {
       if (play && overlap(p, ob)) {
         const dx = p.x - ob.x, dy = p.y - ob.y, ox = (p.w + ob.w) / 2 - Math.abs(dx), oy = (p.h + ob.h) / 2 - Math.abs(dy);
@@ -207,7 +222,7 @@ export function updateWorld(G: Game, dt: number): void {
     f.x += f.vx * dt; f.y += f.vy * dt;
     if (play && Math.hypot(f.x - p.x, f.y - p.y) < f.r + p.w / 2) {
       f.dead = true; burst(G, f.x, f.y, f.col, 6, 120);
-      if (p.pw.soat > 0 || !usePerk(G, 'shotHit')) hurt(G, f.dmg); // con SOAT, hurt lo bloquea sin gastar el casco
+      if (p.pw.soat > 0 || !usePerk(G, 'shotHit')) { hurt(G, f.dmg); if (f.stun && p.pw.soat <= 0) { p.stun = Math.max(p.stun, f.stun); floatText(G, p.x, p.y - 46, '¡PINCHAZO!', C.yellow); } }
     }
   }
   G.foes = G.foes.filter((f) => !f.dead && f.y < H + 20 && f.y > -40 && f.x > -40 && f.x < W + 40);
@@ -237,6 +252,7 @@ export function updateWorld(G: Game, dt: number): void {
     }
     return c.y < H + 80 && c.y > -140;
   });
+  if (play) { updateFog(G, dt); updateWanted(G, dt); }
   for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.96; q.vy *= 0.96; q.life -= dt; }
   G.parts = G.parts.filter((q) => q.life > 0);
   for (const r of G.rings) { r.r += (r.max / r.life) * dt * 0.9; r.life -= dt; } G.rings = G.rings.filter((r) => r.life > 0);
@@ -292,4 +308,33 @@ export function summarize(G: Game): Summary {
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
   return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
     bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross };
+}
+
+// Garúa: espera, entra una oleada que dura un rato y se despeja. La intensidad sube y baja suave para el dibujo.
+function updateFog(G: Game, dt: number): void {
+  const F = G.cfg.weather?.fog, f = G.fog;
+  if (!F) return;
+  if (f.on > 0) f.on -= dt;
+  else { f.t -= dt; if (f.t <= 0) { f.on = rnd(...F.dur); f.t = rnd(...F.every); } }
+  f.k = clamp(f.k + (f.on > 0 ? dt : -dt) * 0.8, 0, 1);
+}
+
+// Nivel de búsqueda: las estrellas bajan solas sin faltas; cada estrella nueva trae un patrullero que persigue,
+// y desde blockAt estrellas aparecen bloqueos en la pista.
+function updateWanted(G: Game, dt: number): void {
+  const Wd = G.cfg.wanted;
+  if (!Wd) return;
+  if (G.stars > 0) { G.starT -= dt; if (G.starT <= 0) { G.stars--; G.starT = Wd.decay; } }
+  const t = G.cfg.traffic.types.find((x) => x.k === Wd.chaser);
+  for (; G.chaseQ > 0; G.chaseQ--) if (t) {
+    // entra por abajo en el carril de al lado, para que adelante al Tico y no lo atraviese
+    const side = G.p.x < (G.cfg.road.left + G.cfg.road.right) / 2 ? 1 : -1;
+    const c = makeCar(t, clamp(G.p.x + side * G.cfg.road.laneWidth, G.cfg.road.left + 20, G.cfg.road.right - 20), H + 40);
+    c.life = Wd.chaseLife; c.phase = Math.random() * 6; G.traffic.push(c);
+  }
+  if (G.stars >= Wd.blockAt) {
+    G.blockT -= dt;
+    const i = (G.cfg.obstacles ?? []).findIndex((o) => o.k === Wd.block);
+    if (G.blockT <= 0 && i >= 0) { spawnObstacle(G, i); G.blockT = Wd.blockEvery; floatText(G, W / 2, 90, '¡BLOQUEO POLICIAL!', C.sky, 12); }
+  } else G.blockT = 0;
 }

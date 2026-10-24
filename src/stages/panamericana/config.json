@@ -1,0 +1,661 @@
+{
+  "id": "panamericana",
+  "number": 8,
+  "district": "Panamericana Norte",
+  "roadName": "PANAMERICANA NORTE",
+  "eyebrow": "Etapa 8 · Panamericana Norte · Garúa",
+  "tip": "En la Panamericana la garúa tapa lo que viene. Cada papeleta o choque con la policía suma una estrella, y con muchas te persiguen y te bloquean. En los peajes pasa por una barrera abierta. Su punto ciego también está a la derecha.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1300,
+      "spd": 240,
+      "freq": 1.3,
+      "tele": true,
+      "dmgMult": 0.7
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 1800,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 2400,
+      "spd": 290,
+      "freq": 0.88,
+      "tele": false,
+      "dmgMult": 1.1
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 330,
+    "turboSpeed": 470,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.9,
+      2.8
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "patrullero",
+        "weight": 0.06,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#f4f6fb"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "roof": "#2f6b3f",
+          "panel": "#2f6b3f",
+          "siren": true,
+          "label": "POLICÍA",
+          "labelCol": "#f4f6fb"
+        }
+      },
+      {
+        "k": "persecucion",
+        "killBonus": 0,
+        "weight": 0,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 40,
+        "cols": [
+          "#f4f6fb"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#2f6b3f",
+          "panel": "#2f6b3f",
+          "siren": true,
+          "label": "POLICÍA",
+          "labelCol": "#f4f6fb"
+        }
+      },
+      {
+        "k": "interprovincial",
+        "weight": 0.12,
+        "w": 34,
+        "h": 84,
+        "vy": [
+          90,
+          120
+        ],
+        "hp": 70,
+        "cols": [
+          "#3a7bff",
+          "#f4f1e6",
+          "#d93b3b"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 8,
+        "look": {
+          "roof": "#1d1b22",
+          "band": "#ffe14d",
+          "label": "INTERPROVINCIAL",
+          "labelCol": "#ffe14d",
+          "labelSize": 4.5,
+          "labelY": 0.5
+        },
+        "move": {
+          "zigzag": {
+            "amp": 26,
+            "freq": 0.9
+          }
+        }
+      },
+      {
+        "k": "camion",
+        "weight": 0.14,
+        "w": 34,
+        "h": 70,
+        "vy": [
+          100,
+          130
+        ],
+        "hp": 60,
+        "cols": [
+          "#c9ccd3",
+          "#8a5a3a"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 8,
+        "look": {
+          "roof": "#4a4452"
+        }
+      },
+      {
+        "k": "taxi",
+        "weight": 0.34,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      },
+      {
+        "k": "auto",
+        "weight": 0.3,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          140,
+          180
+        ],
+        "hp": 36,
+        "cols": [
+          "#1d1b22",
+          "#6c7a8c",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "interprovincial",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 22,
+      "every": [
+        24,
+        32
+      ],
+      "count": [
+        2,
+        3
+      ],
+      "formation": "diagonal",
+      "gap": 110,
+      "label": "¡ADELANTANDO EN CURVA!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "crater",
+      "kind": "hueco",
+      "style": "crater",
+      "first": 8,
+      "every": [
+        11,
+        16
+      ],
+      "lanes": 1,
+      "h": 22,
+      "col": "#2a2632",
+      "col2": "#15111d",
+      "dmg": 4
+    },
+    {
+      "k": "peaje",
+      "kind": "peaje",
+      "style": "peaje",
+      "first": 14,
+      "every": [
+        18,
+        26
+      ],
+      "lanes": 4,
+      "h": 14,
+      "col": "#c9ccd3",
+      "col2": "#15111d",
+      "label": "PEAJE ABANDONADO",
+      "labelCol": "#ffe14d",
+      "dmg": 4,
+      "gatePeriod": 2.2
+    },
+    {
+      "k": "bloqueo",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 99999,
+      "every": [
+        99999,
+        99999
+      ],
+      "lanes": 2,
+      "h": 14,
+      "col": "#3a7bff",
+      "col2": "#f4f6fb",
+      "label": "BLOQUEO",
+      "labelCol": "#15111d",
+      "dmg": 4
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ],
+    "dmg": 0
+  },
+  "crossings": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ]
+  },
+  "streets": [
+    "ANCÓN",
+    "PUENTE PIEDRA",
+    "ZAPALLAL",
+    "SERPENTÍN DE PASAMAYO",
+    "HUARAL",
+    "CHANCAY"
+  ],
+  "rewards": {
+    "win": 1400,
+    "clean": 700,
+    "blindPct": 80,
+    "item": {
+      "id": "brevete",
+      "name": "Brevete vigente",
+      "desc": "la primera estrella de búsqueda de cada pelea no cuenta",
+      "effect": "wantedHit",
+      "icon": "V",
+      "col": "#ffe14d"
+    },
+    "defeatTip": "Maneja limpio para que no suban las estrellas, que con cuatro te bloquean. Cuando caigan rompellantas, cambia de carril, y en los peajes busca la barrera arriba."
+  },
+  "boss": {
+    "id": "comandante",
+    "name": "EL COMANDANTE",
+    "title": "El Comandante",
+    "w": 40,
+    "h": 78,
+    "startY": -150,
+    "baseY": 175,
+    "lane": 2,
+    "firstAction": 2,
+    "cruiseSpeed": 130,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.5,
+    "phoneOffAct": 0.3,
+    "contactDmg": 6,
+    "chargeContactDmg": 13,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · CONTROL DE RUTINA",
+        "col": "#7fd4ff",
+        "bar": "#7fd4ff",
+        "returnAct": 2.3,
+        "swapChance": 0.5,
+        "swapAct": 2.2,
+        "attack": "brake",
+        "attacks": [
+          {
+            "k": "brake",
+            "weight": 1
+          },
+          {
+            "k": "throw",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.5,
+        "speed": 330,
+        "throw": {
+          "tele": 0.8,
+          "count": 1,
+          "spread": 0,
+          "speed": 190,
+          "dmg": 3,
+          "r": 6,
+          "col": "#2a2632",
+          "text": "¡ROMPELLANTAS!",
+          "park": 0.9,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "rompellantas",
+          "stun": 0.6
+        }
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · OPERATIVO",
+        "col": "#3a7bff",
+        "bar": "#3a7bff",
+        "returnAct": 2.1,
+        "swapChance": 0.4,
+        "swapAct": 2.0,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "ram",
+            "weight": 1
+          }
+        ],
+        "tele": 0.75,
+        "dur": 0.75,
+        "speed": 360,
+        "maxY": 480,
+        "throw": {
+          "tele": 0.8,
+          "count": 2,
+          "spread": 0.7,
+          "speed": 190,
+          "dmg": 3,
+          "r": 6,
+          "col": "#2a2632",
+          "text": "¡ROMPELLANTAS!",
+          "park": 0.9,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "rompellantas",
+          "stun": 0.6
+        },
+        "summon": {
+          "type": "patrullero",
+          "every": 14,
+          "from": "arriba",
+          "count": 1,
+          "say": "¡Cierren dos carriles, que se escapa!"
+        }
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · PERSECUCIÓN TOTAL",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 1.9,
+        "swapChance": 0.3,
+        "swapAct": 1.6,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "throw",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.75,
+        "speed": 390,
+        "maxY": 490,
+        "throw": {
+          "tele": 0.8,
+          "count": 3,
+          "spread": 1.0,
+          "speed": 190,
+          "dmg": 3,
+          "r": 6,
+          "col": "#2a2632",
+          "text": "¡ROMPELLANTAS!",
+          "park": 0.9,
+          "from": "atras",
+          "aim": "abajo",
+          "look": "rompellantas",
+          "stun": 0.6
+        },
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 150,
+        "stun": 0.8,
+        "hornSound": "whistle",
+        "hornCol": "#7fd4ff",
+        "hornText": "¡SIRENA!"
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Control de rutina, oríllese!",
+        "¿Brevete, SOAT y permiso de taxi?",
+        "¡Alto ahí, que lo estoy viendo por la garúa!",
+        "¡Esta multa no se negocia... casi nunca!",
+        "¡A la derecha, a la derecha!"
+      ],
+      "2": [
+        "¡Operativo sorpresa, todos a un lado!",
+        "¡Cierren la Panamericana, que se escapa!",
+        "¡Refuerzos, que el taxi no para!",
+        "¡Con esta garúa no veo, pero igual multo!",
+        "¡El peaje está abandonado, la multa no!"
+      ],
+      "3": [
+        "¡Persecución total, sin descanso!",
+        "¡Cinco estrellas para este taxi!",
+        "¡Que no pase de Ancón!",
+        "¡Sirena, rompellantas y todo lo que tengamos!",
+        "¡Lo sigo hasta Huacho si hace falta!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Mi sirena manda más que tu claxon!",
+      "oil": "¡Patiné con la garúa!",
+      "combi": "¡Esa combi no tiene revisión técnica!",
+      "metro": "¿Qué hace el Metro en la Panamericana?",
+      "valet": ""
+    }
+  },
+  "weather": {
+    "fog": {
+      "first": 10,
+      "every": [
+        16,
+        24
+      ],
+      "dur": [
+        6,
+        9
+      ],
+      "depth": 0.6
+    }
+  },
+  "wanted": {
+    "max": 5,
+    "decay": 5,
+    "chaser": "persecucion",
+    "chaseLife": 9,
+    "blockAt": 4,
+    "blockEvery": 7,
+    "block": "bloqueo"
+  }
+}

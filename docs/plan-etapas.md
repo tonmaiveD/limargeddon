@@ -69,7 +69,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Hecho (ADR 0022) |
 | Callao | M | Contenedores que caen, tráiler | Hecho (ADR 0023) |
 | Vía Expresa | L | Saltos y rampas (motor), bus articulado | Hecho (ADR 0024) |
-| Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Pendiente |
+| Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Hecho (ADR 0025) |
 | Costa Verde (final) | L | Pista curva (pieza de motor), neblina, desprendimientos del acantilado, aves que tapan la vista, doble fila en Agua Dulce, jefe sorpresa | Pendiente |
 | Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Pendiente |
 

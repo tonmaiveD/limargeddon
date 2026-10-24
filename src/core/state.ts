@@ -35,7 +35,7 @@ export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: 
 export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
 // proyectil del jefe: avanza en línea recta y se pierde al salir de la pista
-export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor'; dead?: boolean }
+export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas'; stun?: number; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
@@ -55,6 +55,8 @@ export interface Game {
   announce: { t: string; col: string; life: number } | null;
   hint: { text: string; life: number } | null; hintI: number;
   perks: { item: ItemDef; used: boolean }[];
+  fog: { t: number; on: number; k: number };          // garúa: espera a la próxima oleada, duración que le queda e intensidad 0..1
+  stars: number; starT: number; chaseQ: number; blockT: number; // nivel de búsqueda
   p: Player; b: Boss;
   traffic: Car[]; shots: Shot[]; foes: Foe[]; allies: Ally[]; pickups: Pickup[];
   bumps: { y: number; hitP: boolean; hitB: boolean }[]; cross: { y: number; name: string }[];
@@ -79,6 +81,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   return {
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintI: 0,
     perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
+    fog: { t: cfg.weather?.fog?.first ?? Infinity, on: 0, k: 0 }, stars: 0, starT: 0, chaseQ: 0, blockT: 0,
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0, air: 0, airMax: 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
@@ -129,6 +132,14 @@ export function usePerk(G: Game, effect: PerkEffect): boolean {
   return true;
 }
 
+// Nivel de búsqueda: una falta suma una estrella (la Licencia la perdona una vez) y pide un patrullero que persiga.
+export function addStar(G: Game): void {
+  const W = G.cfg.wanted;
+  if (!W || usePerk(G, 'wantedHit')) return;
+  if (G.stars < W.max) { G.stars++; G.chaseQ++; floatText(G, G.p.x, G.p.y - 64, '★'.repeat(G.stars), C.yellow, 12); Sfx.play('whistle'); }
+  G.starT = W.decay;
+}
+
 // contact: la papeleta viene de un roce con un intocable (la perdona el Silbato antes que el Bolso).
 export function fine(G: Game, x: number, y: number, amt: number, why: string, contact = false): void {
   // Sticker "Mi papá es socio del Golf": nadie le pone papeletas
@@ -137,6 +148,7 @@ export function fine(G: Game, x: number, y: number, amt: number, why: string, co
     return;
   }
   if ((contact && usePerk(G, 'contactFine')) || usePerk(G, 'anyFine')) return;
+  addStar(G);
   G.fines += amt; floatText(G, x, y - 34, why + ' -S/' + amt, C.sky); Sfx.play('whistle');
 }
 

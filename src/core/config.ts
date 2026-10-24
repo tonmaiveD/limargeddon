@@ -35,7 +35,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number }; brake?: {
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
 // shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
 // ramHit: la primera embestida o reversa del jefe no hace daño. swingHit: el primer coletazo no hace daño.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit' | 'swingHit';
+// wantedHit: la primera estrella de búsqueda no cuenta.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit' | 'swingHit' | 'wantedHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -60,8 +61,9 @@ export interface SwarmDef {
 // Obstáculo fijo sobre la pista (avanza con el asfalto). 'bloque' es sólido y empuja; 'hueco' se cruza y castiga.
 export interface ObstacleDef {
   k: string;
-  kind: 'bloque' | 'hueco' | 'rampa';   // rampa: si se pasa acelerando, el Tico salta `jump` segundos
-  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter' | 'cables' | 'rampa';
+  // rampa: si se pasa acelerando, el Tico salta `jump` segundos. peaje: casetas con barreras que suben y bajan (gatePeriod)
+  kind: 'bloque' | 'hueco' | 'rampa' | 'peaje';
+  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter' | 'cables' | 'rampa' | 'peaje';
   diffs?: DiffKey[];                 // todas si se omite
   first: number; every: [number, number];
   lanes: number;                     // carriles que ocupa
@@ -75,6 +77,7 @@ export interface ObstacleDef {
   accelOnly?: boolean;               // hueco que solo hace daño si se cruza acelerando (cables bajos de Gamarra)
   hitText?: string;                  // texto al recibir el daño de un hueco (por defecto, ¡HUECO!)
   jump?: number;                     // segundos en el aire al saltar una rampa
+  gatePeriod?: number;               // peaje: segundos de un ciclo de barrera (mitad abajo, mitad arriba)
 }
 
 export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw' | 'swing';
@@ -88,10 +91,11 @@ export interface BossSwing { tele: number; dur: number; reach: number; dmg: numb
 // Lanzamiento: tras un aviso, el jefe lanza `count` proyectiles en abanico (`spread` en radianes) hacia el Tico (monedas de la combi).
 // park: segundos que se queda detenido después de lanzar, la ventana para castigarlo.
 // from: sale de la puerta derecha (por defecto) o de atrás. aim: apunta al Tico (por defecto) o cae recto hacia abajo.
-// look: moneda (por defecto), rollo de tela o contenedor.
+// look: moneda (por defecto), rollo de tela, contenedor o rompellantas.
 export interface BossThrow {
   tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number;
-  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo' | 'contenedor'; cols?: string[];
+  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas'; cols?: string[];
+  stun?: number; // segundos que deja aturdido al Tico (rompellantas)
 }
 
 // Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
@@ -169,5 +173,11 @@ export interface StageConfig {
   streets: string[];
   // item: objeto de victoria de la etapa; defeatTip: consejo al perder
   rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string };
+  // garúa (ADR 0025): oleadas de neblina que tapan la parte de arriba de la pantalla (depth: fracción del alto)
+  weather?: { fog?: { first: number; every: [number, number]; dur: [number, number]; depth: number } };
+  // nivel de búsqueda (ADR 0025): cada falta suma una estrella y baja una cada `decay` s sin faltas.
+  // Cada estrella trae un `chaser` (tipo de traffic.types) que persigue `chaseLife` s; desde `blockAt` estrellas,
+  // un obstáculo `block` (k de obstacles, con first muy alto para que no salga solo) cada `blockEvery` s.
+  wanted?: { max: number; decay: number; chaser: string; chaseLife: number; blockAt: number; blockEvery: number; block: string };
   boss: BossConfig;
 }
