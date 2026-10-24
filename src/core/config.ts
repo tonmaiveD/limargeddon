@@ -61,9 +61,13 @@ export interface ObstacleDef {
   label?: string; labelCol?: string;
   dmg: number;                       // daño al chocar (bloque) o al caer (hueco)
   fine?: number;                     // papeleta al chocarlo
+  drift?: { amp: number; freq: number }; // vaivén lateral (por ejemplo, una marcha que se corre de carril)
 }
 
-export type BossAttack = 'brake' | 'reverse' | 'ram';
+export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet';
+
+// Chorro: el jefe apunta al carril del Tico y suelta un chorro hacia abajo que empuja de lado (Rochabús).
+export interface BossJet { tele: number; dur: number; w: number; push: number; dmg: number }
 
 // Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
 export interface BossSummon { type: string; every: number; from: 'lado' | 'arriba'; count?: number; say?: string }
@@ -80,6 +84,7 @@ export interface BossPhase {
   hornSound?: 'bossHorn' | 'whistle'; hornCol?: string; hornText?: string;
   escorts?: { life: number; hp: number; cols: string[]; contactDmg?: number; look?: VehicleLook; w?: number; h?: number };
   summon?: BossSummon;
+  jet?: BossJet;
 }
 
 export interface BossConfig {

@@ -4,6 +4,7 @@ import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
 import type { Car, Game, Pickup } from './state';
 import type { VehicleLook } from './config';
+import { jetZone } from '../bosses/phase-boss';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
@@ -104,6 +105,24 @@ function drawObstacles(g: Gfx, G: Game): void {
       g.fillText(o.label, ob.x, o.style === 'conos' ? ob.y - 11 : ob.y + 4);
     }
   }
+}
+
+// Chorro del jefe (ataque 'jet'): aviso con línea punteada sobre el carril y luego la columna de agua.
+function drawJet(g: Gfx, G: Game): void {
+  const b = G.b;
+  if (b.state === 'teleJet') {
+    g.fillStyle = 'rgba(127,212,255,.5)';
+    for (let y = b.y + b.h / 2 + 6; y < H; y += 18) g.fillRect(b.x - 1.5, y, 3, 9);
+    g.fillStyle = Math.floor(G.t * 12) % 2 ? '#7fd4ff' : '#ffffff'; g.beginPath(); g.arc(b.x, b.y + b.h / 2, 5, 0, 7); g.fill();
+    return;
+  }
+  const z = jetZone(G);
+  if (!z) return;
+  const top = z.y - z.h / 2;
+  g.fillStyle = 'rgba(127,212,255,.35)'; g.fillRect(z.x - z.w / 2, top, z.w, z.h);
+  g.fillStyle = 'rgba(220,245,255,.6)'; g.fillRect(z.x - z.w / 6, top, z.w / 3, z.h);
+  g.fillStyle = '#ffffff';
+  for (let i = 0; i < 14; i++) { const yy = top + ((G.t * 520 + i * 47) % Math.max(1, z.h)), xx = z.x + Math.sin(i * 2.3 + G.t * 9) * z.w * 0.4; g.fillRect(xx, yy, 2, 4); }
 }
 
 function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: number }): void {
@@ -207,7 +226,7 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
       g.strokeStyle = 'rgba(120,60,20,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 7, 0, 3); g.stroke(); g.restore();
     } else { g.fillStyle = '#3b2f17'; g.beginPath(); g.ellipse(s.x, s.y, 8, 6, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(61,255,154,.5)'; g.beginPath(); g.arc(s.x - 2, s.y - 2, 2, 0, 7); g.fill(); }
   }
-  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
+  drawJet(g, G); drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
   for (const r of G.rings) { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; }
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';

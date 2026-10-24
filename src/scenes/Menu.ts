@@ -4,9 +4,9 @@ import type { DiffKey } from '../core/config';
 import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { getSettings, setSettings } from '../core/save';
+import { getSettings, setSettings, unlockedStage } from '../core/save';
 import { Sfx } from '../core/audio/sfx';
-import { DEFAULT_STAGE, STAGES, track } from '../stages';
+import { DEFAULT_STAGE, STAGES, STAGE_ORDER, TEST_MODE, stageForUnlocked, stageNumber, track } from '../stages';
 
 /* Menú: overlay DOM con dificultad y bonus sobre el asfalto que sigue corriendo. */
 export class MenuScene extends Phaser.Scene {
@@ -18,19 +18,20 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     setupCamera(this);
     this.L = createLayers(this);
+    // Las etapas se juegan en orden: el menú ofrece la más avanzada desbloqueada. Solo el modo prueba deja elegir.
     const saved = getSettings().stageId;
-    this.stageId = saved && STAGES[saved] ? saved : DEFAULT_STAGE;
+    this.stageId = TEST_MODE ? (saved && STAGES[saved] ? saved : DEFAULT_STAGE) : stageForUnlocked(unlockedStage(stageNumber));
     this.setupStageSelector();
     this.showStage();
   }
 
-  // Selector mínimo de etapa (el completo, con desbloqueos, es del Hito 5). Recuerda la última elegida.
+  // Selector de etapa, solo en modo prueba (?prueba en la dirección). Recuerda la última elegida.
   private setupStageSelector(): void {
     const box = document.getElementById('stageSel')!;
-    const ids = Object.keys(STAGES).sort((a, b) => STAGES[a].cfg.number - STAGES[b].cfg.number);
-    box.hidden = ids.length < 2;
+    box.hidden = !TEST_MODE;
     box.innerHTML = '';
-    ids.forEach((id) => {
+    if (!TEST_MODE) return;
+    STAGE_ORDER.forEach((id) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'seg'; b.setAttribute('role', 'radio'); b.dataset.stage = id;
       b.textContent = `${STAGES[id].cfg.number} · ${STAGES[id].cfg.district}`;

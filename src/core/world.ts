@@ -68,7 +68,7 @@ function spawnObstacle(G: Game, i: number): void {
   const o = G.cfg.obstacles![i], { lanes, laneWidth, left } = G.cfg.road;
   const n = Math.min(o.lanes, lanes), first = Math.floor(Math.random() * (lanes - n + 1));
   const w = Math.min(o.w ?? Infinity, n * laneWidth - 10), x = left + first * laneWidth + (n * laneWidth) / 2;
-  G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false });
+  G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false, bx: x, ph: o.drift ? Math.random() * 6 : undefined });
 }
 
 // Obstáculos: avanzan con el asfalto. Los bloques empujan al Tico y al tráfico; los huecos castigan al pasar.
@@ -77,6 +77,10 @@ function updateObstacles(G: Game, dt: number): void {
   for (const ob of G.obstacles) {
     ob.y += G.speed * dt;
     const o = defs[ob.i];
+    if (o.drift && ob.ph !== undefined) {
+      ob.ph += dt * o.drift.freq;
+      ob.x = clamp(ob.bx! + Math.sin(ob.ph) * o.drift.amp, G.cfg.road.left + ob.w / 2, G.cfg.road.right - ob.w / 2);
+    }
     if (o.kind === 'bloque') {
       if (play && overlap(p, ob)) {
         const dx = p.x - ob.x, dy = p.y - ob.y, ox = (p.w + ob.w) / 2 - Math.abs(dx), oy = (p.h + ob.h) / 2 - Math.abs(dy);

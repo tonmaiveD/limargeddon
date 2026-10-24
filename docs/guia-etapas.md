@@ -26,9 +26,10 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
   - `kind` "bloque": sólido, empuja y desvía al tráfico. Estilo "conos", "barrera" o "caja".
   - `kind` "hueco": se cruza y hace daño; con turbo se vuela. Estilo "crater" o "scooter".
   - Bloques también con estilo "peatones" (por ejemplo, turistas: papeleta sin daño).
-  - Otros campos: `lanes`, `h`, `w` (si es más angosto que los carriles), `col`, `col2`, `label`, `dmg`, `fine` y, opcional, `diffs`.
+  - Otros campos: `lanes`, `h`, `w` (si es más angosto que los carriles), `drift` (vaivén lateral: `amp`, `freq`), `col`, `col2`, `label`, `dmg`, `fine` y, opcional, `diffs`.
 - **Jefe** (`boss`): fases por porcentaje de vida.
-  - `attack` o `attacks` con peso ("brake", "reverse", "ram") y tiempos de aviso (`tele`).
+  - `attack` o `attacks` con peso ("brake", "reverse", "ram", "jet") y tiempos de aviso (`tele`).
+  - `jet`: chorro que empuja de lado (`tele`, `dur`, `w`, `push`, `dmg`), ver el Rochabús en `src/stages/centro/config.json`.
   - `summon`: trae vehículos de un tipo, desde un costado o desde arriba.
   - `escorts`: con `look`, `w` y `h` propios.
   - Claxon (`hornEvery`, `hornSound`, `hornCol`, `hornText`) y valets (solo San Isidro).

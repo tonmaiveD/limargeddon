@@ -7,8 +7,8 @@ import { beginLayers, createLayers, endLayers, renderEntities, type Layers } fro
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { getSettings, recordFight } from '../core/save';
-import { DEFAULT_STAGE, STAGES, track, type StageDef } from '../stages';
+import { getSettings, recordFight, unlockNext } from '../core/save';
+import { DEFAULT_STAGE, STAGES, stageNumber, track, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
 
@@ -85,6 +85,7 @@ export class StageScene extends Phaser.Scene {
         if (update(G, dt)) {
           const summary = summarize(G);
           recordFight({ stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best });
+          if (summary.win) unlockNext(G.cfg.number, stageNumber); // ganar desbloquea la etapa siguiente
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
           this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk }));
         }

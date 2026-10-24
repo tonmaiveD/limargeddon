@@ -1,0 +1,601 @@
+{
+  "id": "centro",
+  "number": 3,
+  "district": "Centro de Lima",
+  "roadName": "AV. ABANCAY",
+  "eyebrow": "Etapa 3 · Centro de Lima · Av. Abancay",
+  "tip": "En el Centro todo es desvío: rejas, carretillas y marchas que cierran media pista. El Rochabús apunta su chorro a tu carril: cuando brille la boquilla, cámbiate de carril. Su punto ciego también está a la derecha.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1950,
+      "spd": 235,
+      "freq": 1.3,
+      "tele": true,
+      "dmgMult": 0.8
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 2600,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 3000,
+      "spd": 290,
+      "freq": 0.88,
+      "tele": false,
+      "dmgMult": 1.1
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 300,
+    "turboSpeed": 430,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.4,
+      2.2
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "patrullero",
+        "weight": 0.16,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#f4f6fb"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "roof": "#2f6b3f",
+          "panel": "#2f6b3f",
+          "siren": true,
+          "label": "POLICÍA",
+          "labelCol": "#f4f6fb"
+        }
+      },
+      {
+        "k": "combi",
+        "weight": 0.3,
+        "w": 30,
+        "h": 60,
+        "vy": [
+          120,
+          160
+        ],
+        "hp": 44,
+        "cols": [
+          "#f4f1e6",
+          "#e8e2d0"
+        ],
+        "contactDmg": 7,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#d93b3b",
+          "band": "#2a7de1",
+          "label": "ABANCAY",
+          "labelCol": "#d93b3b",
+          "labelY": 0.5
+        }
+      },
+      {
+        "k": "delivery",
+        "weight": 0.14,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto",
+          "box": "#ffd23f"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        }
+      },
+      {
+        "k": "taxi",
+        "weight": 0.4,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "combi",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 22,
+      "every": [
+        20,
+        28
+      ],
+      "count": [
+        3,
+        4
+      ],
+      "formation": "diagonal",
+      "gap": 70,
+      "label": "¡GUERRA DE COMBIS!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "reja",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 9,
+      "every": [
+        14,
+        20
+      ],
+      "lanes": 1,
+      "h": 10,
+      "col": "#b9c0c9",
+      "col2": "#4a4452",
+      "label": "REJA",
+      "labelCol": "#15111d",
+      "dmg": 3
+    },
+    {
+      "k": "carretilla",
+      "kind": "bloque",
+      "style": "caja",
+      "first": 13,
+      "every": [
+        12,
+        18
+      ],
+      "lanes": 1,
+      "w": 30,
+      "h": 22,
+      "col": "#e0954a",
+      "col2": "#f4f1e6",
+      "label": "EMOLIENTE",
+      "labelCol": "#3b2a1e",
+      "dmg": 3
+    },
+    {
+      "k": "desvio",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 30,
+      "every": [
+        28,
+        36
+      ],
+      "lanes": 2,
+      "h": 12,
+      "col": "#ff8a1f",
+      "col2": "#15111d",
+      "label": "DESVÍO TEMPORAL · DESDE 2019",
+      "labelCol": "#fff",
+      "dmg": 4
+    },
+    {
+      "k": "marcha",
+      "kind": "bloque",
+      "style": "peatones",
+      "first": 40,
+      "every": [
+        34,
+        44
+      ],
+      "lanes": 3,
+      "h": 16,
+      "col": "#ff2e88",
+      "col2": "#ffe14d",
+      "label": "MARCHA",
+      "labelCol": "#fff",
+      "dmg": 0,
+      "fine": 0,
+      "drift": {
+        "amp": 30,
+        "freq": 0.9
+      }
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 5,
+    "every": [
+      12,
+      18
+    ],
+    "dmg": 3
+  },
+  "crossings": {
+    "first": 3,
+    "every": [
+      16,
+      20
+    ]
+  },
+  "streets": [
+    "JR. ÁNCASH",
+    "JR. HUALLAGA",
+    "JR. UCAYALI",
+    "AV. NICOLÁS DE PIÉROLA",
+    "JR. LAMPA",
+    "JR. CUZCO"
+  ],
+  "rewards": {
+    "win": 900,
+    "clean": 450,
+    "blindPct": 80,
+    "item": "Poncho impermeable · un chorro menos por etapa",
+    "defeatTip": "cuando la boquilla del Rochabús brille, cámbiate de carril. Las marchas dejan un hueco: búscalo antes de llegar."
+  },
+  "boss": {
+    "id": "rochabus",
+    "name": "EL ROCHABÚS",
+    "title": "El Rochabús",
+    "w": 52,
+    "h": 96,
+    "startY": -160,
+    "baseY": 170,
+    "lane": 2,
+    "firstAction": 2,
+    "cruiseSpeed": 120,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.45,
+    "phoneOffAct": 0.3,
+    "contactDmg": 6,
+    "chargeContactDmg": 13,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · DISUASIÓN",
+        "col": "#7fd4ff",
+        "bar": "#7fd4ff",
+        "returnAct": 2.4,
+        "swapChance": 0.55,
+        "swapAct": 2.4,
+        "attack": "jet",
+        "attacks": [
+          {
+            "k": "jet",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.5,
+        "speed": 320,
+        "jet": {
+          "tele": 0.9,
+          "dur": 1.1,
+          "w": 34,
+          "push": 260,
+          "dmg": 4
+        }
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · CONTENCIÓN",
+        "col": "#ff8a1f",
+        "bar": "#3a7bff",
+        "returnAct": 2.1,
+        "swapChance": 0.4,
+        "swapAct": 2.1,
+        "attack": "jet",
+        "attacks": [
+          {
+            "k": "jet",
+            "weight": 2
+          },
+          {
+            "k": "ram",
+            "weight": 1
+          }
+        ],
+        "tele": 0.75,
+        "dur": 0.75,
+        "speed": 360,
+        "maxY": 500,
+        "jet": {
+          "tele": 0.8,
+          "dur": 1.3,
+          "w": 40,
+          "push": 300,
+          "dmg": 5
+        },
+        "summon": {
+          "type": "patrullero",
+          "every": 12,
+          "from": "arriba",
+          "say": "¡Refuerzos a la Abancay!"
+        }
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · ESTADO DE EMERGENCIA",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 2.0,
+        "swapChance": 0.3,
+        "swapAct": 1.6,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "jet",
+            "weight": 2
+          },
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.75,
+        "speed": 400,
+        "maxY": 510,
+        "jet": {
+          "tele": 0.7,
+          "dur": 1.4,
+          "w": 46,
+          "push": 340,
+          "dmg": 6
+        },
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 150,
+        "stun": 0.9,
+        "hornSound": "bossHorn",
+        "hornCol": "#7fd4ff",
+        "hornText": "¡SIRENAZO!",
+        "escorts": {
+          "life": 12,
+          "hp": 40,
+          "cols": [
+            "#2f6b3f",
+            "#2f6b3f"
+          ],
+          "contactDmg": 8,
+          "w": 12,
+          "h": 24,
+          "look": {
+            "kind": "moto",
+            "box": "#2f6b3f"
+          }
+        }
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Circulen, que esto es zona intangible!",
+        "Agüita para todos, sin distinción.",
+        "¡Prohibido estacionar en el Centro Histórico!",
+        "Esta avenida está cerrada... por si acaso.",
+        "¡Retrocedan hasta nuevo aviso!"
+      ],
+      "2": [
+        "¡Hoy toca baldeo general!",
+        "¿Y ese taxi tiene permiso para el Centro?",
+        "¡Refuerzos a la Abancay!",
+        "El desvío es temporal desde 2019.",
+        "¡Dispérsense, que hay tráfico!"
+      ],
+      "3": [
+        "¡Estado de emergencia vehicular!",
+        "¡A este taxi le cae el chorro completo!",
+        "¡Cierren todas las calles!",
+        "¡Que nadie pase, ni yo!",
+        "¡Nos quedamos sin agua, pero sin retroceder!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Tocar bocina en el Centro es desorden público!",
+      "oil": "¡Resbalé! ¡Echen arena!",
+      "combi": "¡Esa combi no tiene ruta!",
+      "metro": "¡¿El Metro pasa por aquí?!",
+      "valet": ""
+    }
+  }
+}

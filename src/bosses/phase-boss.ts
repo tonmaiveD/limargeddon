@@ -16,7 +16,7 @@ import { makeCar } from '../core/world';
  */
 
 // Estados que un golpe fuerte (claxon, combi, metro) corta para mandarla de vuelta a su carril.
-const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park'];
+const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park', 'teleJet', 'jet'];
 
 const ph = (G: Game): BossPhase => phaseDef(G.cfg.boss.phases, G.b.phase);
 const spdK = (G: Game) => G.d.spd / 260;
@@ -49,7 +49,22 @@ function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
   const b = G.b;
   if (attack === 'brake') { b.state = 'teleBrake'; b.st = P.tele; }
   else if (attack === 'reverse') { b.state = 'teleRev'; b.st = G.d.tele ? P.tele : (P.teleOff ?? P.tele); b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); }
+  else if (attack === 'jet' && P.jet) { b.state = 'teleJet'; b.st = P.jet.tele; b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); b.jetHit = false; }
   else { b.state = 'teleRam'; b.st = P.tele; b.rx = G.p.x; Sfx.play('bossHorn'); }
+}
+
+// Zona del chorro: columna del ancho del JSON desde el frente del jefe hasta abajo.
+export function jetZone(G: Game): { x: number; y: number; w: number; h: number } | null {
+  const b = G.b, J = ph(G).jet;
+  if (b.state !== 'jet' || !J) return null;
+  const top = b.y + b.h / 2, defs = G.cfg.obstacles ?? [];
+  // el chorro nunca llega a las personas: se corta en el primer grupo de peatones que tenga delante
+  let bottom = H;
+  for (const ob of G.obstacles) {
+    const edge = ob.y - ob.h / 2;
+    if (defs[ob.i]?.style === 'peatones' && edge > top && edge < bottom && Math.abs(ob.x - b.x) < (ob.w + J.w) / 2) bottom = edge;
+  }
+  return { x: b.x, y: (top + bottom) / 2, w: J.w, h: bottom - top };
 }
 
 const STATES: StateTable<Game> = {
@@ -77,6 +92,18 @@ const STATES: StateTable<Game> = {
   ram(G, dt) {
     const b = G.b, P = ph(G); b.flash = 'horn'; b.y += P.speed * spdK(G) * dt; b.x += b.rvx * dt; b.st -= dt;
     if (b.st <= 0 || b.y > (P.maxY ?? H - 130)) b.state = 'return';
+  },
+  // chorro: se alinea con el carril del Tico (boquilla brillando) y luego dispara hacia abajo
+  teleJet(G, dt) { const b = G.b; b.flash = 'jet'; b.x += step(b.tx - b.x, 140 * dt); b.st -= dt; if (b.st <= 0) { b.state = 'jet'; b.st = ph(G).jet!.dur; Sfx.play('skid'); } },
+  jet(G, dt) {
+    const b = G.b, p = G.p, J = ph(G).jet!, z = jetZone(G)!; b.flash = 'jet'; b.st -= dt;
+    if (overlap(p, z)) {
+      const side = Math.sign(p.x - b.x || 1);
+      p.x += side * J.push * dt; p.vx = side * J.push * 0.5;
+      if (!b.jetHit && p.pw.soat <= 0) { b.jetHit = true; hurt(G, J.dmg); floatText(G, p.x, p.y - 40, '¡CHORRO!', C.sky); }
+    }
+    for (const c of G.traffic) if (!c.invulnerable && overlap(c, z)) c.x += Math.sign(c.x - b.x || 1) * J.push * 0.6 * dt;
+    if (b.st <= 0) b.state = 'return';
   },
   return(G, dt) {
     const b = G.b; b.flash = null; b.y += (b.baseY - b.y) * Math.min(1, dt * 2.2); b.x += step(b.tx - b.x, 120 * dt);
