@@ -4,7 +4,7 @@
   "district": "San Isidro",
   "roadName": "AV. CAMINO REAL",
   "eyebrow": "Etapa 2 · San Isidro · Av. Camino Real",
-  "tip": "Va hablando por celular y apenas ve sobre el timón. Atácala por la derecha: su punto ciego recibe el doble. Ojo con el serenazgo, cada roce es papeleta.",
+  "tip": "Va hablando por celular y apenas ve sobre el timón. Atácala por la derecha, que su punto ciego recibe el doble. Ojo con el serenazgo, cada roce es papeleta.",
   "difficulties": {
     "facil": { "label": "Fácil", "hp": 1350, "spd": 230, "freq": 1.33, "tele": true },
     "normal": { "label": "Normal", "hp": 1800, "spd": 260, "freq": 1, "tele": true },
@@ -75,7 +75,7 @@
   "streets": ["AV. PARDO Y ALIAGA", "AV. JORGE BASADRE", "CALLE LAS BEGONIAS", "CALLE CHOQUEHUANCA", "AV. CONQUISTADORES", "CALLE LOS LAURELES"],
   "rewards": { "win": 800, "clean": 400, "blindPct": 80,
     "item": "Bolso de Diseñador · anula una papeleta por etapa",
-    "defeatTip": "el aceite la hace derrapar y deja expuesto su lado derecho. La Combi Kamikaze quita 80." },
+    "defeatTip": "El aceite la hace derrapar y deja expuesto su lado derecho. La Combi Kamikaze quita 80." },
   "boss": {
     "id": "q8",
     "name": "LA LOCA DEL Q8",

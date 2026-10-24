@@ -4,7 +4,7 @@
   "district": "Centro de Lima",
   "roadName": "AV. ABANCAY",
   "eyebrow": "Etapa 3 · Centro de Lima · Av. Abancay",
-  "tip": "En el Centro todo es desvío: rejas, carretillas y marchas que cierran media pista. El Rochabús apunta su chorro a tu carril: cuando brille la boquilla, cámbiate de carril. Su punto ciego también está a la derecha.",
+  "tip": "En el Centro todo es desvío, con rejas, carretillas y marchas que cierran media pista. Cuando brille la boquilla del Rochabús, cámbiate de carril, que el chorro va directo al tuyo. Su punto ciego también está a la derecha.",
   "difficulties": {
     "facil": {
       "label": "Fácil",
@@ -419,7 +419,7 @@
     "clean": 450,
     "blindPct": 80,
     "item": "Poncho impermeable · un chorro menos por etapa",
-    "defeatTip": "cuando la boquilla del Rochabús brille, cámbiate de carril. Las marchas dejan un hueco: búscalo antes de llegar."
+    "defeatTip": "Cuando la boquilla del Rochabús brille, cámbiate de carril. Las marchas dejan un hueco, búscalo antes de llegar."
   },
   "boss": {
     "id": "rochabus",

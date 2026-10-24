@@ -29,7 +29,7 @@ export class ResultsScene extends Phaser.Scene {
       <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas del serenazgo</div>
       ${R.item ? `<div class="badge">${R.item}</div>` : ''}`
-      : `<div class="badge off">Consejo: ${R.defeatTip ?? `el punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
+      : `<div class="badge off">${R.defeatTip ?? `El punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
     const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement, next = $('next') as HTMLButtonElement;
     const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; next.onclick = null; this.scene.stop(); };
     again.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId, dk }); };

@@ -4,7 +4,7 @@ Para quien construya una etapa nueva. Leer esto, `CLAUDE.md` y `docs/plan-etapas
 
 ## Reglas
 - Una etapa es **datos más su jefe y su paisaje**. Si algo exige código nuevo en el motor (`src/core/`), va como pieza reutilizable y se documenta en un ADR.
-- Español latinoamericano neutro, sin voseo, sin guiones largos en los textos. La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la infraestructura, nunca a las personas por su trabajo, origen o clase. Las marcas reales van en parodia.
+- Español latinoamericano neutro, sin voseo. En los textos del juego (frases, consejos, rótulos, descripciones), sin guiones largos, dos puntos ni punto y coma. Usar comas o puntos. La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la infraestructura, nunca a las personas por su trabajo, origen o clase. Las marcas reales van en parodia.
 - Rama por etapa (`etapa-<n>-<distrito>`), commits en español, PR a `main` con la atribución de Claude Code.
 - No modificar `prototipo/` ni `tests/fixtures/`.
 

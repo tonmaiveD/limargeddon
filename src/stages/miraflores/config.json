@@ -4,7 +4,7 @@
   "district": "Miraflores",
   "roadName": "MALECÓN DE MIRAFLORES",
   "eyebrow": "Etapa 1 · Miraflores · Malecón y Av. Larco",
-  "tip": "En Miraflores hasta el claxon tiene multa. La camioneta del serenazgo también tiene punto ciego a la derecha: atácala por ahí, pero no choques a los serenos ni a los turistas, que cada roce es papeleta.",
+  "tip": "En Miraflores hasta el claxon tiene multa. La camioneta del serenazgo también tiene punto ciego a la derecha. Atácala por ahí, pero no choques a los serenos ni a los turistas, que cada roce es papeleta.",
   "difficulties": {
     "facil": {
       "label": "Fácil",
@@ -398,7 +398,7 @@
     "clean": 300,
     "blindPct": 80,
     "item": "Silbato confiscado · el serenazgo te deja pasar una vez por etapa",
-    "defeatTip": "suelta el acelerador para esquivar sus embestidas y pégale por la derecha. Los turistas y los serenos no se tocan."
+    "defeatTip": "Suelta el acelerador para esquivar sus embestidas y pégale por la derecha. Los turistas y los serenos no se tocan."
   },
   "boss": {
     "id": "serenazgo",
