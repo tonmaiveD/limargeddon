@@ -9,12 +9,23 @@ import { applyUpgrades } from '../src/garage/upgrades';
 // Reporte de duración de la pelea con bots de tres niveles (30 semillas cada uno). No es un test de CI: npm run balance.
 // Compara la config del prototipo con la del juego. Las personas tardan más que los bots: validar con el registro del dispositivo.
 
+// esquiva el cuerpo de la serpiente (Costa Verde): si un segmento le queda cerca por delante, suelta el acelerador y se corre.
+// En las demás etapas no hay cadenas y no cambia nada.
+export function evitaCuerpo(G: any, k: any) {
+  const p = G.p;
+  for (const ch of G.chains ?? []) for (const s of [...ch.segs, ...(ch.lead ? [ch.lead] : [])]) {
+    if (Math.abs(s.x - p.x) < (s.w + p.w) / 2 + 14 && s.y < p.y + 20 && p.y - s.y < 110) {
+      k.up = false; const away = p.x >= s.x ? 1 : -1; k.right = away > 0; k.left = away < 0; return;
+    }
+  }
+}
 // bot "casual": solo conos, detrás del jefe, sin aceite ni claxon
 function casual(G: any, k: any) { bot(G, k); const tx = G.b.x; k.left = tx < G.p.x - 6; k.right = tx > G.p.x + 6; k.oil = false; k.horn = false; }
 // bot "medio": como el experto pero claxon y aceite solo a veces (reacción tardía)
 function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil = false; k.horn = false; } }
 
-const BOTS = [['experto', bot], ['medio', medio], ['casual', casual]] as const;
+const conCuerpo = (fn: (G: any, k: any) => void) => (G: any, k: any) => { fn(G, k); evitaCuerpo(G, k); };
+const BOTS = [['experto', conCuerpo(bot)], ['medio', conCuerpo(medio)], ['casual', conCuerpo(casual)]] as const;
 const SEEDS = 30;
 
 function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?: FireMode) {
@@ -40,7 +51,7 @@ function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?:
 
 it('duraciones', () => {
   const rows: string[] = [];
-  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg, pa = STAGES.panamericana.cfg;
+  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg, pa = STAGES.panamericana.cfg, cv = STAGES['costa-verde'].cfg;
   const only = process.env.ETAPA; // npm run balance con ETAPA=miraflores (o san-isidro) para correr solo una
   const variants: [string, StageConfig, FireMode | undefined][] = ([
     ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
@@ -63,7 +74,10 @@ it('duraciones', () => {
     ['pa-toque', pa, 'toque'], ['pa-acelerar', pa, 'acelerar'],
     // con las mejoras típicas al llegar a la Panamericana (~S/ 7.600 gastados)
     ['pa-mej-toque', applyUpgrades(pa, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 1 }), 'toque'],
-  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've', panamericana: 'pa' } as Record<string, string>)[only] ?? only));
+    ['cv-toque', cv, 'toque'], ['cv-acelerar', cv, 'acelerar'],
+    // con las mejoras típicas al llegar a la Costa Verde (~S/ 9.000 gastados)
+    ['cv-mej-toque', applyUpgrades(cv, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 2 }), 'toque'],
+  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've', panamericana: 'pa', 'costa-verde': 'cv' } as Record<string, string>)[only] ?? only));
   for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {
       rows.push(`${label.padEnd(12)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);

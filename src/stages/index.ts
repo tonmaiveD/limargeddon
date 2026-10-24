@@ -10,6 +10,10 @@ import { drawCamion } from '../bosses/camion-render';
 import { drawTrailer } from '../bosses/trailer-render';
 import { drawArticulado } from '../bosses/articulado-render';
 import { drawComandante } from '../bosses/comandante-render';
+import { drawDobleFila } from '../bosses/doblefila-render';
+import { SnakeBoss } from '../bosses/snake-boss';
+import costaVerdeConfig from './costa-verde/config.json';
+import { drawWorld as costaVerdeWorld } from './costa-verde/scenery';
 import panamericanaConfig from './panamericana/config.json';
 import { drawWorld as panamericanaWorld } from './panamericana/scenery';
 import viaExpresaConfig from './via-expresa/config.json';
@@ -37,6 +41,7 @@ export interface StageDef {
 
 export const STAGES: Record<string, StageDef> = {
   callao: { cfg: callaoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawTrailer, drawWorld: callaoWorld },
+  'costa-verde': { cfg: costaVerdeConfig as unknown as StageConfig, ai: SnakeBoss, drawBoss: drawDobleFila, drawWorld: costaVerdeWorld },
   centro: { cfg: centroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawRochabus, drawWorld: centroWorld },
   gamarra: { cfg: gamarraConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCamion, drawWorld: gamarraWorld },
   'javier-prado': { cfg: javierPradoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCombiAsesina, drawWorld: javierPradoWorld },

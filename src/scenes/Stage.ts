@@ -3,7 +3,8 @@ import { setupCamera } from '../core/camera';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import { keys, pauseHook, setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
-import { beginLayers, createLayers, endLayers, renderEntities, type Layers } from '../core/render';
+import { beginLayers, createLayers, endLayers, renderEntities, setWarp, type Layers } from '../core/render';
+import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
@@ -101,7 +102,7 @@ export class StageScene extends Phaser.Scene {
     // sacudón: desplaza la cámara, no el contexto
     const s = G.shake > 0 ? G.shake * 4 : 0;
     setupCamera(this, s ? rnd(-4, 4) * s : 0, s ? rnd(-4, 4) * s : 0);
-    beginLayers(this.L);
+    beginLayers(this.L); setWarp(this.L, roadWarp(this.def.cfg, track.scroll));
     this.def.drawWorld(this.L.world, this.def.cfg, track.scroll, G);
     renderEntities(this.L, G, this.def.drawBoss);
     endLayers(this.L);

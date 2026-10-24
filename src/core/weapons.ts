@@ -1,6 +1,7 @@
 import { Sfx } from './audio/sfx';
 import { C, rnd } from './util';
 import { burst, dmgBoss, fine, floatText, say, type Game } from './state';
+import { scareFlock } from './hazards';
 
 /* Armas del Tico: conos, aceite, claxon y la canchita del bonus. Cooldowns y daño salen del JSON. */
 
@@ -15,7 +16,7 @@ export function fire(G: Game): void {
   if (k.oil && p.cd.oil <= 0) { p.cd.oil = Wp.oil.cd; G.shots.push({ k: 'oil', x: p.x, y: p.y - 28, vx: 0, vy: Wp.oil.vy, r: Wp.oil.r }); Sfx.play('oil'); }
   if (k.horn && p.cd.horn <= 0) {
     const h = Wp.horn; p.cd.horn = h.cd;
-    G.rings.push({ x: p.x, y: p.y, r: 10, max: h.ring, col: C.yellow, life: 0.5 }); Sfx.play('horn');
+    G.rings.push({ x: p.x, y: p.y, r: 10, max: h.ring, col: C.yellow, life: 0.5 }); Sfx.play('horn'); scareFlock(G);
     if (Math.hypot(p.x - b.x, p.y - b.y) <= h.reach && b.state !== 'enter') {
       b.phoneOff = h.phoneOff; dmgBoss(G, h.dmg, false); say(G, G.cfg.boss.quips.horn); G.ai.interrupt(G);
     }
@@ -85,6 +86,7 @@ export function updateShots(G: Game, dt: number): void {
       else if (s.k === 'picaron') { s.hit = true; dmgBoss(G, Wp.picaron.dmg, fr); burst(G, s.x, s.y, '#e0954a', 8, 120); Sfx.play('hit'); }
       else { s.dead = true; b.slip = Wp.oil.slip; dmgBoss(G, Wp.oil.dmg, fr); burst(G, s.x, s.y, '#5a4a2a', 16, 140); say(G, G.cfg.boss.quips.oil); Sfx.play('skid'); }
     }
+    if (!s.dead && G.ai.hitShot?.(G, s)) { if (s.k !== 'picaron') s.dead = true; continue; }
     if (!s.dead) for (const c of G.traffic) {
       if (Math.abs(s.x - c.x) < c.w / 2 + s.r && Math.abs(s.y - c.y) < c.h / 2) {
         if (s.k !== 'picaron') s.dead = true;

@@ -29,3 +29,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0023](0023-contenedores-y-etapa-callao.md) | Contenedores, Llanta de remolcador y Etapa 6 Callao | Aceptada |
 | [0024](0024-saltos-frenazos-coletazo-y-etapa-via-expresa.md) | Saltos, frenazos, coletazo y Etapa 7 Vía Expresa | Aceptada |
 | [0025](0025-garua-busqueda-peajes-y-etapa-panamericana.md) | Garúa, nivel de búsqueda, peajes y Etapa 8 Panamericana | Aceptada |
+| [0026](0026-pista-curva-peligros-y-jefe-serpiente-costa-verde.md) | Pista curva, peligros del malecón, jefe serpiente y Etapa 9 Costa Verde | Aceptada |

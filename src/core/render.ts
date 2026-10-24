@@ -6,6 +6,7 @@ import type { Car, Game, Pickup } from './state';
 import type { VehicleLook } from './config';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { gateClosed } from './world';
+import { drawHazards, drawSplat } from './hazards';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
@@ -344,8 +345,15 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
     } else { g.fillStyle = '#3b2f17'; g.beginPath(); g.ellipse(s.x, s.y, 8, 6, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(61,255,154,.5)'; g.beginPath(); g.arc(s.x - 2, s.y - 2, 2, 0, 7); g.fill(); }
   }
   drawFog(g, G); // la garúa tapa tráfico y obstáculos, pero no los avisos del jefe ni sus proyectiles
+  drawHazards(g, G); // la carretilla y las aves siempre se ven, aunque haya neblina
   drawJet(g, G); drawThrow(g, G);
   for (const f of G.foes) {
+    if (f.look === 'piedra') { // piedra del acantilado rodando
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(f.x + 2, f.y + 3, f.r, 0, 7); g.fill();
+      g.fillStyle = f.col; g.beginPath(); g.ellipse(f.x, f.y, f.r, f.r * 0.85, G.t * 4 + f.x, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, 2);
+      continue;
+    }
     if (f.look === 'rompellantas') { // tira de clavos que rueda hacia abajo
       const rw = f.r * 3.2, rh = f.r * 0.9;
       g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
@@ -381,7 +389,7 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
+  drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
 }
 
 // Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.
@@ -398,4 +406,6 @@ export function createLayers(scene: Phaser.Scene): Layers {
   return { world: new Gfx(scene, 0), ents: new Gfx(scene, 10), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30) };
 }
 export const beginLayers = (L: Layers) => { L.world.begin(); L.ents.begin(); L.fx.begin(); L.ui.begin(); };
+// la curva se aplica a todo menos al HUD
+export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { L.world.warp = w; L.ents.warp = w; L.fx.warp = w; };
 export const endLayers = (L: Layers) => { L.world.end(); L.ents.end(); L.fx.end(); L.ui.end(); };

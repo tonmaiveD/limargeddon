@@ -35,7 +35,7 @@ export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: 
 export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
 // proyectil del jefe: avanza en línea recta y se pierde al salir de la pista
-export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas'; stun?: number; dead?: boolean }
+export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas' | 'piedra'; stun?: number; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
@@ -45,7 +45,14 @@ export interface Float { x: number; y: number; text: string; col: string; life: 
 export interface BossAI {
   update(G: Game, dt: number): void;
   interrupt(G: Game): void;
+  // jefes con partes golpeables además del cuerpo principal (serpiente): devuelve true si el disparo pegó en una
+  hitShot?(G: Game, s: Shot): boolean;
 }
+
+// Serpiente (ADR 0026): segmentos que siguen a su guía. La cadena principal sigue a la cabeza (el jefe);
+// al romper un segmento, la cola se suelta como otra cadena que deambula hasta salir por abajo.
+export interface Seg { x: number; y: number; w: number; h: number; hp: number; max: number; col: string; flash: number }
+export interface Chain { main: boolean; segs: Seg[]; lead: Seg | null; hist: number[]; tx: number; t: number }
 
 export interface Game {
   cfg: StageConfig; dk: DiffKey; d: Difficulty; keys: Keys; ai: BossAI; fireMode: FireMode;
@@ -57,6 +64,12 @@ export interface Game {
   perks: { item: ItemDef; used: boolean }[];
   fog: { t: number; on: number; k: number };          // garúa: espera a la próxima oleada, duración que le queda e intensidad 0..1
   stars: number; starT: number; chaseQ: number; blockT: number; // nivel de búsqueda
+  // peligros de la Costa Verde: derrumbe (0 espera, 1 aviso, 2 piedras), bandada, manchas en pantalla y carretilla
+  slide: { t: number; phase: 0 | 1 | 2; st: number; lanes: number[]; spawnT: number };
+  flock: { t: number; on: boolean; x: number; y: number; vy: number; scared: boolean; hit: boolean };
+  splat: { t: number; max: number; blots: { x: number; y: number; r: number }[] };
+  cart: { t: number; on: boolean; x: number; y: number; dir: number; hit: boolean; hits: number };
+  chains: Chain[]; snakeReady: boolean;
   p: Player; b: Boss;
   traffic: Car[]; shots: Shot[]; foes: Foe[]; allies: Ally[]; pickups: Pickup[];
   bumps: { y: number; hitP: boolean; hitB: boolean }[]; cross: { y: number; name: string }[];
@@ -82,6 +95,11 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintI: 0,
     perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
     fog: { t: cfg.weather?.fog?.first ?? Infinity, on: 0, k: 0 }, stars: 0, starT: 0, chaseQ: 0, blockT: 0,
+    slide: { t: cfg.hazards?.rockslide?.first ?? Infinity, phase: 0, st: 0, lanes: [], spawnT: 0 },
+    flock: { t: cfg.hazards?.birds?.first ?? Infinity, on: false, x: 0, y: 0, vy: 0, scared: false, hit: false },
+    splat: { t: 0, max: 1, blots: [] },
+    cart: { t: cfg.hazards?.cart?.first ?? Infinity, on: false, x: 0, y: 0, dir: 1, hit: false, hits: 0 },
+    chains: [], snakeReady: false,
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0, air: 0, airMax: 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,

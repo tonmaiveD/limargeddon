@@ -4,6 +4,7 @@ import { C, overlap, pick, rnd, step, clamp } from './util';
 import { addStar, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
+import { updateHazards } from './hazards';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
 import { W } from './constants';
@@ -252,7 +253,7 @@ export function updateWorld(G: Game, dt: number): void {
     }
     return c.y < H + 80 && c.y > -140;
   });
-  if (play) { updateFog(G, dt); updateWanted(G, dt); }
+  if (play) { updateFog(G, dt); updateWanted(G, dt); updateHazards(G, dt); }
   for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.96; q.vy *= 0.96; q.life -= dt; }
   G.parts = G.parts.filter((q) => q.life > 0);
   for (const r of G.rings) { r.r += (r.max / r.life) * dt * 0.9; r.life -= dt; } G.rings = G.rings.filter((r) => r.life > 0);
@@ -297,17 +298,19 @@ export interface Summary {
   win: boolean; time: string; seconds: number; rightPct: number; powers: number; fines: number; pay: number;
   blind: boolean; clean: boolean; honest: boolean; bestCombo: number; fireMode: Game['fireMode'];
   // vida que le quedaba al jefe (0 al ganar) y cobro bruto antes de multas, para el registro
-  bossPct: number; gross: number;
+  bossPct: number; gross: number; cartHits: number;
 }
 
 export function summarize(G: Game): Summary {
   const win = !!G.result?.win, s = G.stats, R = G.cfg.rewards;
   const pct = s.total ? Math.round((s.right / s.total) * 100) : 0;
   const clean = win && !s.dmgP3, blind = win && pct >= R.blindPct, honest = G.fines === 0;
-  const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus : G.bonus, pay = Math.max(0, gross - G.fines);
+  // carretilla protegida: si nunca se tocó, paga su bono al ganar
+  const cartBonus = win && G.cfg.hazards?.cart && G.cart.hits === 0 ? G.cfg.hazards.cart.bonus : 0;
+  const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus + cartBonus : G.bonus, pay = Math.max(0, gross - G.fines);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
   return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
-    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross };
+    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits };
 }
 
 // Garúa: espera, entra una oleada que dura un rato y se despeja. La intensidad sube y baja suave para el dibujo.
