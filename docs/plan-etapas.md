@@ -1,6 +1,6 @@
 # Plan de etapas y de desarrollo
 
-**Estado:** propuesta del 23 de octubre de 2026, para revisión del dueño del producto y del proyecto advisory de claude.ai. Actualizada el mismo día: el dueño decidió no usar sesiones en la nube; todo se construye en local, una etapa a la vez. Amplía `concepto.md`, no lo reemplaza: si algo choca, manda `concepto.md` hasta que se actualice.
+**Estado:** propuesta del 23 de octubre de 2026 (el resumen del proyecto está en `docs/estado.md`), para revisión del dueño del producto y del proyecto advisory de claude.ai. Actualizada el mismo día: el dueño decidió no usar sesiones en la nube; todo se construye en local, una etapa a la vez. Amplía `concepto.md`, no lo reemplaza: si algo choca, manda `concepto.md` hasta que se actualice.
 
 ## 1. Tono
 
