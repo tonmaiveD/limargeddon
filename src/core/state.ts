@@ -1,4 +1,4 @@
-import type { DiffKey, Difficulty, FireMode, PowerKey, StageConfig } from './config';
+import type { DiffKey, Difficulty, FireMode, PowerKey, StageConfig, VehicleLook, VehicleMove } from './config';
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, rnd, reduceMotion } from './util';
@@ -27,8 +27,10 @@ export interface Car {
   k: string; x: number; y: number; w: number; h: number; vy: number; hp: number; max: number; col: string;
   spin: number; seed: number; flash?: number;
   zz?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number;
+  look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
+export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
@@ -53,6 +55,8 @@ export interface Game {
   parts: Particle[]; rings: Ring[]; floats: Float[];
   bubble: { text: string; t: number } | null; bubbleT: number;
   trafficT: number; pickT: number; bumpT: number; crossT: number; streetI: number;
+  swarmT: number[]; // un temporizador por enjambre activo en esta dificultad (Infinity si no aplica)
+  obstacles: Obstacle[]; obsT: number[];
   stats: { right: number; total: number; dmgP3: boolean; powers: number };
   result: null | { win: boolean };
 }
@@ -73,6 +77,8 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
       state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
     traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
     bubble: null, bubbleT: 2, trafficT: cfg.traffic.first, pickT: cfg.pickups.first, bumpT: cfg.bumps.first, crossT: cfg.crossings.first, streetI: 0,
+    swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
+    obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
     stats: { right: 0, total: 0, dmgP3: false, powers: 0 },
     result: null,
   };

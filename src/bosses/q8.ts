@@ -8,7 +8,7 @@ import {
 } from '../core/state';
 import { phaseDef, phaseFor, runState, type StateTable } from './phase-machine';
 
-/* La Loca del Q6: IA por fases portada de updateBoss/chooseAction del prototipo. Todos los números salen del JSON. */
+/* La Loca del Q8: IA por fases portada de updateBoss/chooseAction del prototipo. Todos los números salen del JSON. */
 
 // Estados que un golpe fuerte (claxon, combi, metro) corta para mandarla de vuelta a su carril.
 const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park'];
@@ -68,7 +68,8 @@ const STATES: StateTable<Game> = {
 function spawnValet(G: Game): void {
   const side = Math.random() < 0.5 ? 0 : 1, lane = side ? G.cfg.road.lanes - 1 : 0;
   G.traffic.push({ k: 'valet', x: side ? W + 30 : -30, tx: laneX(G.cfg, lane), y: rnd(290, 360), w: 28, h: 50, vy: 0, hp: 36, max: 36,
-    seed: Math.random() * 100, spin: 0, col: '#b9b4c4', enter: 0.7, contactDmg: 8, selfDmg: 10 });
+    seed: Math.random() * 100, spin: 0, col: '#b9b4c4', enter: 0.7, contactDmg: 8, selfDmg: 10,
+    look: { label: 'VALET', labelCol: C.pink, labelSize: 6, labelY: 0.58 } });
   say(G, G.cfg.boss.quips.valet);
 }
 
@@ -76,11 +77,11 @@ function spawnEscorts(G: Game, P: BossPhase): void {
   const b = G.b, e = P.escorts!, { left, right } = G.cfg.road;
   [-1, 1].forEach((s, i) => {
     G.traffic.push({ k: 'amiga', x: clamp(b.x + s * 70, left + 20, right - 20), y: -70, w: 32, h: 56, vy: 0, hp: e.hp, max: e.hp,
-      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: e.contactDmg ?? 10, selfDmg: 10 });
+      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: e.contactDmg ?? 10, selfDmg: 10, look: { shades: true } });
   });
 }
 
-export const Q6: BossAI = {
+export const Q8: BossAI = {
   interrupt(G) { const b = G.b; if (INTERRUPTIBLE.includes(b.state)) b.state = 'return'; },
 
   update(G, dt) {

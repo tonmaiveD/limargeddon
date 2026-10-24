@@ -31,7 +31,7 @@ describe('acelerador sin freno', () => {
   });
 });
 
-describe('el tráfico no pasa por debajo del Q6', () => {
+describe('el tráfico no pasa por debajo del Q8', () => {
   it('ningún auto termina un cuadro superpuesto al jefe', () => {
     const restore = seedRandom(11);
     try {

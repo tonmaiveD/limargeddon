@@ -3,8 +3,8 @@ import { FONT, type Gfx } from '../core/gfx';
 import type { Game } from '../core/state';
 import { C } from '../core/util';
 
-// SUV de lujo "Q6" con cuatro anillos, uno deformado (parodia), y la conductora al celular.
-export function drawQ6(g: Gfx, G: Game): void {
+// SUV de lujo "Q8" con cuatro anillos, uno deformado (parodia), y la conductora al celular.
+export function drawQ8(g: Gfx, G: Game): void {
   const b = G.b;
   drawCar(g, G.t, b, {
     body: '#eceaf2', roof: '#d9d6e2', ang: b.ang, brake: b.flash === 'brake', rev: b.flash === 'rev', hazard: b.flash === 'hazard',

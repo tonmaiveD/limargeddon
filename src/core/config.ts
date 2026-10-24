@@ -15,9 +15,50 @@ export interface PowerDef {
   dmg?: number; vy?: number; phoneOff?: number; slip?: number; trafficSpin?: number;
 }
 
+// Aspecto declarativo de un vehículo: el motor lo dibuja sin código por tipo.
+export interface VehicleLook {
+  kind?: 'auto' | 'moto';            // auto por defecto
+  roof?: string;                     // color del techo
+  panel?: string;                    // franja ancha sobre el techo (fondo del rótulo del serenazgo)
+  siren?: boolean;                   // circulina roja y azul intermitente
+  label?: string; labelCol?: string; labelSize?: number; labelY?: number; // rótulo en el techo (labelY: fracción del alto)
+  band?: string;                     // franja lateral (combis)
+  box?: string;                      // caja o mochila de reparto (motos)
+  shades?: boolean;                  // lentes oscuros de la conductora
+}
+// Movimiento propio, además de avanzar con la pista.
+export interface VehicleMove { zigzag?: { amp: number; freq: number } }
+
 export interface TrafficType {
   k: string; weight: number; w: number; h: number; vy: [number, number]; hp: number; cols: string[];
   invulnerable?: boolean; contactDmg: number; selfDmg?: number;
+  look?: VehicleLook; move?: VehicleMove;
+}
+
+// Enjambre: grupo de vehículos de un mismo tipo que llega junto, en formación, solo en ciertas dificultades.
+export interface SwarmDef {
+  type: string;                      // `k` de un tipo de traffic.types
+  diffs: DiffKey[];
+  first: number; every: [number, number];
+  count: [number, number];
+  formation: 'columna' | 'v' | 'diagonal';
+  gap: number;                       // separación entre vehículos, en px
+  label?: string;                    // aviso en pantalla al llegar
+}
+
+// Obstáculo fijo sobre la pista (avanza con el asfalto). 'bloque' es sólido y empuja; 'hueco' se cruza y castiga.
+export interface ObstacleDef {
+  k: string;
+  kind: 'bloque' | 'hueco';
+  style: 'conos' | 'barrera' | 'caja' | 'crater';
+  diffs?: DiffKey[];                 // todas si se omite
+  first: number; every: [number, number];
+  lanes: number;                     // carriles que ocupa
+  h: number;                         // alto en px
+  col: string; col2?: string;        // colores principal y de franjas
+  label?: string; labelCol?: string;
+  dmg: number;                       // daño al chocar (bloque) o al caer (hueco)
+  fine?: number;                     // papeleta al chocarlo
 }
 
 export interface BossPhase {
@@ -67,6 +108,8 @@ export interface StageConfig {
   pickups: { first: number; every: [number, number]; fall: number; rare: PowerKey[]; rareReroll: number; rerollTo: PowerKey[] };
   // yieldToBoss: el tráfico se aparta del jefe en vez de pasarle por debajo (el prototipo no lo hacía)
   traffic: { first: number; every: [number, number]; lastPhaseMult: number; yieldToBoss: boolean; killBonus: number; types: TrafficType[] };
+  swarms?: SwarmDef[];
+  obstacles?: ObstacleDef[];
   fines: { amount: number; contact: string; shot: string };
   bumps: { first: number; every: [number, number]; dmg: number };
   crossings: { first: number; every: [number, number] };

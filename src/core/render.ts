@@ -3,6 +3,7 @@ import { drawCar } from './damage-render';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
 import type { Car, Game, Pickup } from './state';
+import type { VehicleLook } from './config';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
@@ -12,25 +13,72 @@ export interface Layers { world: Gfx; ents: Gfx; fx: Gfx; ui: Gfx }
 // Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
 export const ui = { touch: false };
 
-function drawTraffic(g: Gfx, G: Game, c: Car): void {
-  if (c.k === 'scooter') {
-    g.save(); g.translate(c.x, c.y); g.rotate(Math.sin(c.zz!) * 0.25);
-    g.fillStyle = '#222'; g.fillRect(-2, -12, 4, 24); g.fillStyle = c.col; g.fillRect(-4, -4, 8, 12);
-    g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(0, -2, 4, 0, 7); g.fill(); g.fillStyle = '#111'; g.fillRect(-6, -12, 12, 2);
-    g.restore(); return;
+// Detalles declarativos sobre la carrocería (ver VehicleLook en config.ts).
+function drawLook(g: Gfx, G: Game, L: VehicleLook, w: number, h: number): void {
+  if (L.panel) { g.fillStyle = L.panel; g.fillRect(-w / 2 + 4, -h / 2 + h * 0.36, w - 8, h * 0.3); }
+  if (L.siren) {
+    const blink = Math.floor(G.t * 8) % 2;
+    g.fillStyle = blink ? '#ff3355' : '#3a7bff'; g.fillRect(-9, -h / 2 + h * 0.4, 8, 4);
+    g.fillStyle = blink ? '#3a7bff' : '#ff3355'; g.fillRect(1, -h / 2 + h * 0.4, 8, 4);
   }
-  const ex: Record<string, (g: Gfx, w: number, h: number) => void> = {
-    valet: (g) => { g.fillStyle = C.pink; g.font = FONT(6); g.textAlign = 'center'; g.fillText('VALET', 0, 4); },
-    amiga: (g, w, h) => { g.fillStyle = '#000'; g.fillRect(-w / 4 - 2, -h / 2 + h * 0.25, 7, 2); },
-    sereno: (g, w, h) => {
-      g.fillStyle = '#fff'; g.fillRect(-w / 2 + 4, -h / 2 + h * 0.36, w - 8, h * 0.3);
-      const blink = Math.floor(G.t * 8) % 2;
-      g.fillStyle = blink ? '#ff3355' : '#3a7bff'; g.fillRect(-9, -h / 2 + h * 0.4, 8, 4);
-      g.fillStyle = blink ? '#3a7bff' : '#ff3355'; g.fillRect(1, -h / 2 + h * 0.4, 8, 4);
-      g.fillStyle = '#1f4fbf'; g.font = FONT(5); g.textAlign = 'center'; g.fillText('SERENAZGO', 0, -h / 2 + h * 0.6);
-    },
-  };
-  drawCar(g, G.t, c, { body: c.col, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: ex[c.k], flash: c.flash, dmg: c.max && !c.invulnerable ? 1 - c.hp / c.max : 0, seed: c.seed });
+  if (L.band) { g.fillStyle = L.band; g.fillRect(-w / 2, -h / 2 + h * 0.55, w, 5); }
+  if (L.shades) { g.fillStyle = '#000'; g.fillRect(-w / 4 - 2, -h / 2 + h * 0.25, 7, 2); }
+  if (L.label) {
+    g.fillStyle = L.labelCol ?? '#fff'; g.font = FONT(L.labelSize ?? 5); g.textAlign = 'center';
+    g.fillText(L.label, 0, -h / 2 + h * (L.labelY ?? 0.6));
+  }
+}
+
+function drawMoto(g: Gfx, c: Car): void {
+  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.25 : 0);
+  g.fillStyle = '#222'; g.fillRect(-2, -12, 4, 24); g.fillStyle = c.col; g.fillRect(-4, -4, 8, 12);
+  if (c.look?.box) { g.fillStyle = c.look.box; g.fillRect(-6, 3, 12, 10); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-6, 11, 12, 2); }
+  g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(0, -2, 4, 0, 7); g.fill(); g.fillStyle = '#111'; g.fillRect(-6, -12, 12, 2);
+  g.restore();
+}
+
+function drawTraffic(g: Gfx, G: Game, c: Car): void {
+  if (c.look?.kind === 'moto') { drawMoto(g, c); return; }
+  const L = c.look;
+  drawCar(g, G.t, c, {
+    body: c.col, roof: L?.roof, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: L ? (g, w, h) => drawLook(g, G, L, w, h) : undefined,
+    flash: c.flash, dmg: c.max && !c.invulnerable ? 1 - c.hp / c.max : 0, seed: c.seed,
+  });
+}
+
+// Obstáculos declarados en el JSON (ver ObstacleDef). Van en la capa del asfalto, debajo de los vehículos.
+function drawObstacles(g: Gfx, G: Game): void {
+  const defs = G.cfg.obstacles ?? [];
+  for (const ob of G.obstacles) {
+    const o = defs[ob.i], x0 = ob.x - ob.w / 2, y0 = ob.y - ob.h / 2;
+    if (o.style === 'crater') {
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(ob.x, ob.y + 2, ob.w / 2, ob.h / 2, 0, 0, 7); g.fill();
+      g.fillStyle = o.col; g.beginPath(); g.ellipse(ob.x, ob.y, ob.w / 2 - 3, ob.h / 2 - 3, 0, 0, 7); g.fill();
+      g.strokeStyle = o.col2 ?? '#4a4452'; g.lineWidth = 1.2; g.beginPath();
+      for (let i = 0; i < 4; i++) { const a = i * 1.7 + ob.x; g.moveTo(ob.x + Math.cos(a) * ob.w * 0.3, ob.y + Math.sin(a) * ob.h * 0.3); g.lineTo(ob.x + Math.cos(a) * ob.w * 0.55, ob.y + Math.sin(a) * ob.h * 0.55); }
+      g.stroke();
+    } else if (o.style === 'conos') {
+      const n = Math.max(2, Math.floor(ob.w / 18)), stepX = ob.w / n;
+      g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(x0 + stepX / 2, ob.y - 1, ob.w - stepX, 2); // cinta
+      for (let i = 0; i < n; i++) {
+        const cx = x0 + stepX * (i + 0.5);
+        g.fillStyle = o.col; g.beginPath(); g.moveTo(cx, ob.y - 8); g.lineTo(cx + 6, ob.y + 6); g.lineTo(cx - 6, ob.y + 6); g.closePath(); g.fill();
+        g.fillStyle = o.col2 ?? '#fff'; g.fillRect(cx - 3, ob.y - 1, 6, 2);
+      }
+    } else if (o.style === 'barrera') {
+      g.fillStyle = o.col; g.fillRect(x0, y0, ob.w, ob.h);
+      g.fillStyle = o.col2 ?? '#111';
+      for (let x = x0; x < x0 + ob.w; x += 12) g.fillRect(x, y0, 6, ob.h);
+    } else {
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.roundRect(x0 + 3, y0 + 4, ob.w, ob.h, 4); g.fill();
+      g.fillStyle = o.col; g.roundRect(x0, y0, ob.w, ob.h, 4); g.fill();
+      g.fillStyle = o.col2 ?? 'rgba(0,0,0,.25)'; g.fillRect(x0 + 4, y0 + 4, ob.w - 8, 6);
+    }
+    if (o.label) {
+      g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(o.style === 'conos' ? 6 : 7); g.textAlign = 'center';
+      g.fillText(o.label, ob.x, o.style === 'conos' ? ob.y - 11 : ob.y + 4);
+    }
+  }
 }
 
 function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: number }): void {
@@ -122,6 +170,7 @@ function drawBubble(g: Gfx, G: Game): void {
 
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) => void): void {
   const g = L.ents, f = L.fx;
+  drawObstacles(L.world, G);
   G.pickups.forEach((u) => drawPickup(g, G, u));
   G.traffic.forEach((c) => drawTraffic(g, G, c));
   for (const s of G.shots) {

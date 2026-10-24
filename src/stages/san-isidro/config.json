@@ -54,21 +54,30 @@
     "yieldToBoss": true,
     "killBonus": 20,
     "types": [
-      { "k": "sereno", "weight": 0.18, "w": 30, "h": 52, "vy": [110, 140], "hp": 999, "cols": ["#1f4fbf"], "invulnerable": true, "contactDmg": 0 },
-      { "k": "scooter", "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 3, "selfDmg": 12 },
+      { "k": "sereno", "weight": 0.18, "w": 30, "h": 52, "vy": [110, 140], "hp": 999, "cols": ["#1f4fbf"], "invulnerable": true, "contactDmg": 0,
+        "look": { "panel": "#fff", "siren": true, "label": "SERENAZGO", "labelCol": "#1f4fbf" } },
+      { "k": "delivery", "weight": 0.18, "w": 12, "h": 24, "vy": [200, 240], "hp": 12, "cols": ["#2fd0c0"], "contactDmg": 3, "selfDmg": 12,
+        "look": { "kind": "moto", "box": "#ffd23f" }, "move": { "zigzag": { "amp": 50, "freq": 3 } } },
       { "k": "suv", "weight": 0.34, "w": 32, "h": 56, "vy": [130, 170], "hp": 36, "cols": ["#1d1b22"], "contactDmg": 6, "selfDmg": 10 },
       { "k": "sedan", "weight": 0.30, "w": 28, "h": 50, "vy": [130, 170], "hp": 36, "cols": ["#6c7a8c", "#8a2f3f", "#c9ccd3"], "contactDmg": 6, "selfDmg": 10 }
     ]
   },
+  "swarms": [
+    { "type": "delivery", "diffs": ["dificil"], "first": 20, "every": [18, 26], "count": [4, 6], "formation": "v", "gap": 34, "label": "¡ENJAMBRE DELIVERY!" }
+  ],
+  "obstacles": [
+    { "k": "reservado", "kind": "bloque", "style": "conos", "first": 14, "every": [14, 22], "lanes": 1, "h": 16,
+      "col": "#ff8a1f", "col2": "#fff", "label": "RESERVADO", "labelCol": "#ffe14d", "dmg": 2 }
+  ],
   "fines": { "amount": 50, "contact": "PAPELETA", "shot": "AGRESIÓN" },
   "bumps": { "first": 5, "every": [9, 13], "dmg": 3 },
   "crossings": { "first": 3, "every": [16, 20] },
   "streets": ["AV. PARDO Y ALIAGA", "AV. JORGE BASADRE", "CALLE LAS BEGONIAS", "CALLE CHOQUEHUANCA", "AV. CONQUISTADORES", "CALLE LOS LAURELES"],
   "rewards": { "win": 800, "clean": 400, "blindPct": 80 },
   "boss": {
-    "id": "q6",
-    "name": "LA LOCA DEL Q6",
-    "title": "La Loca del Q6",
+    "id": "q8",
+    "name": "LA LOCA DEL Q8",
+    "title": "La Loca del Q8",
     "w": 46, "h": 84, "startY": -140, "baseY": 160, "lane": 2,
     "firstAction": 1.5,
     "cruiseSpeed": 150,
@@ -101,11 +110,11 @@
     "lines": {
       "1": ["Aló, ¿amiga? Espérame...", "¿Sabes quién es mi papá?", "Ay no, se me rayó la uña", "¡Estoy hablando por teléfono!", "Reservé en Las Begonias a la 1"],
       "2": ["¡Yo estaciono donde quiero!", "Le voy a decir a mi esposo", "¿Dónde está el valet?", "Solo son cinco minutitos", "Mi papá es socio del Golf"],
-      "3": ["¡Ahora sí me molesté!", "¡Mi Q6 cuesta más que tu casa!", "¡Amigas, ayúdenme!", "¡Te voy a denunciar!", "¡Llamen al serenazgo!"]
+      "3": ["¡Ahora sí me molesté!", "¡Mi Q8 cuesta más que tu casa!", "¡Amigas, ayúdenme!", "¡Te voy a denunciar!", "¡Llamen al serenazgo!"]
     },
     "quips": {
       "horn": "¡Ay! ¿Qué te pasa?",
-      "oil": "¡Ay, mi Q6!",
+      "oil": "¡Ay, mi Q8!",
       "combi": "¡¿Una combi?! ¡Qué asco!",
       "metro": "¿Y ese tren? ¡Aquí no pasa el Metro!",
       "valet": "¿Dónde está el valet?"
