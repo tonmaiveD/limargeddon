@@ -1,4 +1,4 @@
-import type { StageConfig } from '../core/config';
+import type { ItemDef, StageConfig } from '../core/config';
 import type { Gfx } from '../core/gfx';
 import type { BossAI, Game } from '../core/state';
 import { PhaseBoss } from '../bosses/phase-boss';
@@ -40,6 +40,10 @@ export function stageForUnlocked(unlocked: number): string {
 export function nextStage(id: string): string | null {
   const i = STAGE_ORDER.indexOf(id);
   return i >= 0 && i < STAGE_ORDER.length - 1 ? STAGE_ORDER[i + 1] : null;
+}
+// Objetos de victoria que ya tiene el jugador: los de cada etapa ganada (las menores a la desbloqueada).
+export function wonItems(unlocked: number): ItemDef[] {
+  return STAGE_ORDER.map((s) => STAGES[s].cfg).filter((c) => c.number < unlocked && c.rewards.item).map((c) => c.rewards.item!);
 }
 // Modo prueba (?prueba en la dirección): muestra el selector de etapas para probar sin desbloquear.
 export const TEST_MODE = typeof location !== 'undefined' && new URLSearchParams(location.search).has('prueba');

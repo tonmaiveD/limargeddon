@@ -403,7 +403,7 @@
     "win": 600,
     "clean": 300,
     "blindPct": 80,
-    "item": "Silbato confiscado · el serenazgo te deja pasar una vez por etapa",
+    "item": { "id": "silbato", "name": "Silbato confiscado", "desc": "el primer roce con un sereno o un policía no tiene multa", "effect": "contactFine", "icon": "S", "col": "#7fd4ff" },
     "defeatTip": "Suelta el acelerador para esquivar sus embestidas y pégale por la derecha. Los turistas y los serenos no se tocan."
   },
   "boss": {

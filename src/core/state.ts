@@ -1,4 +1,4 @@
-import type { DiffKey, Difficulty, FireMode, PowerKey, StageConfig, VehicleLook, VehicleMove } from './config';
+import type { DiffKey, Difficulty, FireMode, PowerKey, StageConfig, VehicleLook, VehicleMove, ItemDef, PerkEffect } from './config';
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, rnd, reduceMotion } from './util';
@@ -50,6 +50,7 @@ export interface Game {
   t: number; mode: 'play' | 'over'; shake: number; bonus: number; fines: number; speed: number;
   announce: { t: string; col: string; life: number } | null;
   hint: { text: string; life: number } | null; hintI: number;
+  perks: { item: ItemDef; used: boolean }[];
   p: Player; b: Boss;
   traffic: Car[]; shots: Shot[]; allies: Ally[]; pickups: Pickup[];
   bumps: { y: number; hitP: boolean; hitB: boolean }[]; cross: { y: number; name: string }[];
@@ -73,6 +74,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   const cone = cfg.weapons.cone;
   return {
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintI: 0,
+    perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
@@ -115,12 +117,22 @@ export function hurt(G: Game, d: number): void {
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
   floatText(G, p.x, p.y - 30, '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
 }
-export function fine(G: Game, x: number, y: number, amt: number, why: string): void {
+// Gasta la carga de un objeto de victoria con ese efecto, si queda alguna. Devuelve true si protegió.
+export function usePerk(G: Game, effect: PerkEffect): boolean {
+  const k = G.perks.find((x) => !x.used && x.item.effect === effect);
+  if (!k) return false;
+  k.used = true; floatText(G, G.p.x, G.p.y - 52, k.item.name.toUpperCase(), k.item.col, 11); Sfx.play('block');
+  return true;
+}
+
+// contact: la papeleta viene de un roce con un intocable (la perdona el Silbato antes que el Bolso).
+export function fine(G: Game, x: number, y: number, amt: number, why: string, contact = false): void {
   // Sticker "Mi papá es socio del Golf": nadie le pone papeletas
   if (G.cfg.player.privilege) {
     if (G.privilegeT <= 0) { floatText(G, x, y - 34, '¿Usted sabe quién soy yo?', C.yellow); G.privilegeT = 2; }
     return;
   }
+  if ((contact && usePerk(G, 'contactFine')) || usePerk(G, 'anyFine')) return;
   G.fines += amt; floatText(G, x, y - 34, why + ' -S/' + amt, C.sky); Sfx.play('whistle');
 }
 

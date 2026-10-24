@@ -3,7 +3,7 @@ import { W, H } from '../core/constants';
 import { Sfx } from '../core/audio/sfx';
 import { C, clamp, overlap, rnd, step } from '../core/util';
 import {
-  announce, burst, dmgBoss, floatText, hurt, laneOf, laneX, say, shake,
+  announce, burst, dmgBoss, floatText, hurt, laneOf, laneX, say, shake, usePerk,
   type BossAI, type Game,
 } from '../core/state';
 import { phaseDef, phaseFor, runState, type StateTable } from './phase-machine';
@@ -100,7 +100,7 @@ const STATES: StateTable<Game> = {
     if (overlap(p, z)) {
       const side = Math.sign(p.x - b.x || 1);
       p.x += side * J.push * dt; p.vx = side * J.push * 0.5;
-      if (!b.jetHit && p.pw.soat <= 0) { b.jetHit = true; hurt(G, J.dmg); floatText(G, p.x, p.y - 40, '¡CHORRO!', C.sky); }
+      if (!b.jetHit && p.pw.soat <= 0) { b.jetHit = true; if (!usePerk(G, 'jetHit')) { hurt(G, J.dmg); floatText(G, p.x, p.y - 40, '¡CHORRO!', C.sky); } }
     }
     for (const c of G.traffic) if (!c.invulnerable && overlap(c, z)) c.x += Math.sign(c.x - b.x || 1) * J.push * 0.6 * dt;
     if (b.st <= 0) b.state = 'return';

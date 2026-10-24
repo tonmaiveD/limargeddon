@@ -183,10 +183,17 @@ function drawHUD(g: Gfx, G: Game): void {
   g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(-view.extra, H - 26, W + 2 * view.extra, 26);
   g.textAlign = 'left'; g.fillStyle = C.yellow; g.font = FONT(10); g.fillText('TICO', 10, H - 9);
   // en celular el deck ya muestra armas y recargas: la barra de vida se alarga y no se muestran atajos de teclado
-  const barW = ui.touch ? 210 : 110;
+  // la barra cede espacio a las fichas de objetos para no chocar con el texto de la racha
+  const barW = (ui.touch ? 210 : 110) - G.perks.length * 15;
   g.fillStyle = '#2b2238'; g.fillRect(50, H - 17, barW, 8);
   g.fillStyle = p.hp > 35 ? C.green : C.pink; g.fillRect(50, H - 17, (barW * p.hp) / p.max, 8);
-  if (G.combo.n >= 2) { g.textAlign = 'right'; g.fillStyle = C.green; g.font = FONT(10); g.fillText(`x${G.combo.n}`, W - 10, H - 9); }
+  if (G.combo.n >= 2) { g.textAlign = 'right'; g.fillStyle = C.green; g.font = FONT(10); g.fillText(`RACHA ${G.combo.n}`, W - 10, H - 9); }
+  // objetos de victoria: una ficha por objeto, que se apaga cuando ya protegió en esta pelea
+  G.perks.forEach((k, i) => {
+    const x = 50 + barW + 12 + i * 15;
+    g.globalAlpha = k.used ? 0.25 : 1; g.fillStyle = k.item.col; g.beginPath(); g.arc(x, H - 13, 6, 0, 7); g.fill();
+    g.fillStyle = C.bg; g.font = BODY(800, 8); g.textAlign = 'center'; g.fillText(k.item.icon, x, H - 10); g.globalAlpha = 1;
+  });
   if (!ui.touch) {
     const Wp = cfg.weapons, tap = G.fireMode === 'toque', maxAmmo = Wp.cone.ammo ?? 0;
     ([['cone', Wp.cone.cd, C.orange, 'Z', 'CONOS'], ['oil', Wp.oil.cd, C.green, 'X', 'ACEITE'], ['horn', Wp.horn.cd, C.yellow, 'C', 'CLAXON']] as const).forEach(([k, max, col, key, lab], i) => {

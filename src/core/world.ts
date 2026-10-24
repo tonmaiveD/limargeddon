@@ -174,7 +174,7 @@ export function updateWorld(G: Game, dt: number): void {
       if (ox < oy) { p.x += Math.sign(dx || 1) * ox; p.vx = Math.sign(dx || 1) * push; } else { p.y += Math.sign(dy || 1) * oy; p.vy = Math.sign(dy || 1) * push; }
       if (p.hitCd <= 0) {
         p.hitCd = cfg.player.trafficHitCd;
-        if (c.invulnerable) { fine(G, p.x, p.y, cfg.fines.amount, cfg.fines.contact); c.flash = 0.3; }
+        if (c.invulnerable) { fine(G, p.x, p.y, cfg.fines.amount, cfg.fines.contact, true); c.flash = 0.3; }
         else if (p.pw.turbo > 0) { c.hp = 0; Sfx.play('hit'); }
         else { hurt(G, c.contactDmg ?? 8); c.hp -= c.selfDmg ?? 10; }
         burst(G, (p.x + c.x) / 2, (p.y + c.y) / 2, C.orange, 8);

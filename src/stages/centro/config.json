@@ -419,7 +419,7 @@
     "win": 900,
     "clean": 450,
     "blindPct": 80,
-    "item": "Poncho impermeable · un chorro menos por etapa",
+    "item": { "id": "poncho", "name": "Poncho impermeable", "desc": "el primer chorro de cada pelea no te hace daño", "effect": "jetHit", "icon": "P", "col": "#3dff9a" },
     "defeatTip": "Cuando la boquilla del Rochabús brille, cámbiate de carril. Las marchas dejan un hueco, búscalo antes de llegar."
   },
   "boss": {

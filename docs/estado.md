@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #12 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #13 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -15,7 +15,9 @@
 - **Controles** (ADR 0008, 0011, 0013): acelerador sin freno (soltar es esquivar). El pulgar izquierdo gira y el derecho tiene aceite, claxon, acelerar y conos. Dos modos de disparo elegibles en el menú: "por toque" (reserva de 3 conos y combo de punto ciego) y "acelerar es atacar".
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
-- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009).
+- **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
+- **Tutorial**: ayudas breves sobre el Tico en Miraflores (ADR 0019).
+- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.
 
 ## Motor (resumen)
 - Cada etapa es datos (`src/stages/<distrito>/config.json`) más su paisaje (`scenery.ts`) y el dibujo de su jefe (`src/bosses/<jefe>-render.ts`). La IA es `PhaseBoss` para todos (ADR 0015).
@@ -41,6 +43,7 @@
 - Metas de balance (bot medio, Normal): 75 a 85 s, ganando 22 a 27 de 30. El tutorial es más corto y fácil. Difícil, cerca de la mitad de victorias. Las personas tardan unas 1.5 veces más que el bot.
 
 ## Pendiente
-- **Pruebas del dueño en el teléfono** de Miraflores, el Centro y el taller, y su registro de peleas. Con eso se decide si la vida del jefe baja solo en el modo por toque: las dos primeras peleas en San Isidro por toque duraron 2:03 y 2:06, algo largas.
+- **Pruebas en el teléfono** con el registro nuevo: 3 o 4 peleas por modo. Con eso se decide si la vida del jefe baja solo en el modo por toque. La auditoría propone ensayar el Q8 en Normal por toque con 1584 de vida (-12%). Referencias humanas hasta ahora: San Isidro por toque, 2:03 (victoria) y 2:06 (derrota). Centro por toque, 1:52 (victoria), 2:29 y 3:33 (derrotas).
+- **Auditoría de octubre de 2026, lo que queda:** tutorial completo, señal del punto ciego, daño por fuente en la pista, aviso de reversa del Q8 en Difícil, blancos táctiles de 44 px, meta de ahorro elegida y un bot con restricciones de pulgar.
 - **Etapas siguientes:** Javier Prado, Gamarra o Callao (medianas). Después Vía Expresa (saltos) y Panamericana (clima y nivel de búsqueda), la Costa Verde (final) y la Línea Amarilla del Terror (secreta), según `docs/plan-etapas.md`.
 - **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
