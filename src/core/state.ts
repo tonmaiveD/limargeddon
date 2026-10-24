@@ -33,7 +33,7 @@ export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: 
 export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
 // proyectil del jefe: avanza en línea recta y se pierde al salir de la pista
-export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo'; dead?: boolean }
+export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor'; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }

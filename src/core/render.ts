@@ -299,6 +299,16 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   }
   drawJet(g, G); drawThrow(g, G);
   for (const f of G.foes) {
+    if (f.look === 'contenedor') { // contenedor que se soltó: caja larga con nervaduras, girando apenas
+      const cw = f.r * 1.6, chh = f.r * 3;
+      g.save(); g.translate(f.x, f.y); g.rotate(Math.sin(G.t * 3 + f.x) * 0.12);
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-cw / 2 + 3, -chh / 2 + 4, cw, chh);
+      g.fillStyle = f.col; g.fillRect(-cw / 2, -chh / 2, cw, chh);
+      g.fillStyle = 'rgba(0,0,0,.22)'; for (let y = -chh / 2 + 3; y < chh / 2 - 2; y += 4) g.fillRect(-cw / 2 + 1, y, cw - 2, 1.5);
+      g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(-cw / 2, -chh / 2, cw, 2);
+      g.restore();
+      continue;
+    }
     if (f.look === 'rollo') { // rollo de tela rodando: cilindro visto desde arriba, con las vueltas de tela marcadas
       const rw = f.r * 2.4, rh = f.r * 1.4, roll = (G.t * 10 + f.x) % 4;
       g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
