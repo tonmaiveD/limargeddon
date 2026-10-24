@@ -73,7 +73,9 @@
   "bumps": { "first": 5, "every": [9, 13], "dmg": 3 },
   "crossings": { "first": 3, "every": [16, 20] },
   "streets": ["AV. PARDO Y ALIAGA", "AV. JORGE BASADRE", "CALLE LAS BEGONIAS", "CALLE CHOQUEHUANCA", "AV. CONQUISTADORES", "CALLE LOS LAURELES"],
-  "rewards": { "win": 800, "clean": 400, "blindPct": 80 },
+  "rewards": { "win": 800, "clean": 400, "blindPct": 80,
+    "item": "Bolso de Diseñador · anula una papeleta por etapa",
+    "defeatTip": "el aceite la hace derrapar y deja expuesto su lado derecho. La Combi Kamikaze quita 80." },
   "boss": {
     "id": "q8",
     "name": "LA LOCA DEL Q8",

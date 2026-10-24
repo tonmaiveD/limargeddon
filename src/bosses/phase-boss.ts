@@ -1,14 +1,19 @@
-import type { BossPhase } from '../core/config';
+import type { BossAttack, BossPhase, BossSummon } from '../core/config';
 import { W, H } from '../core/constants';
 import { Sfx } from '../core/audio/sfx';
-import { C, clamp, overlap, pick, rnd, step } from '../core/util';
+import { C, clamp, overlap, rnd, step } from '../core/util';
 import {
   announce, burst, dmgBoss, floatText, hurt, laneOf, laneX, say, shake,
   type BossAI, type Game,
 } from '../core/state';
 import { phaseDef, phaseFor, runState, type StateTable } from './phase-machine';
+import { makeCar } from '../core/world';
 
-/* La Loca del Q8: IA por fases portada de updateBoss/chooseAction del prototipo. Todos los números salen del JSON. */
+/*
+ * Jefe genérico por fases (ADR 0015), portado de updateBoss/chooseAction del prototipo y parametrizado por JSON:
+ * ataques combinables por fase (frenazo, reversa, embestida), valets, invocaciones, escoltas y claxon.
+ * La Loca del Q8 y la camioneta del serenazgo son el mismo jefe con distinto JSON y distinto dibujo.
+ */
 
 // Estados que un golpe fuerte (claxon, combi, metro) corta para mandarla de vuelta a su carril.
 const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park'];
@@ -28,8 +33,22 @@ function chooseAction(G: Game): void {
   const b = G.b, f = G.d.freq, P = ph(G);
   if (b.phoneOff > 0) { b.act = G.cfg.boss.phoneOffAct; return; }
   if (Math.random() < P.swapChance) { laneSwap(G); b.act = P.swapAct * f; return; }
-  if (P.attack === 'brake') { b.state = 'teleBrake'; b.st = P.tele; }
-  else if (P.attack === 'reverse') { b.state = 'teleRev'; b.st = G.d.tele ? P.tele : (P.teleOff ?? P.tele); b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); }
+  startAttack(G, P, pickAttack(P));
+}
+
+// Con un solo ataque no se sortea nada (mismo orden de sorteos que el prototipo).
+function pickAttack(P: BossPhase): BossAttack {
+  if (!P.attacks?.length) return P.attack;
+  const total = P.attacks.reduce((a, x) => a + x.weight, 0);
+  let r = Math.random() * total;
+  for (const a of P.attacks) { if (r < a.weight) return a.k; r -= a.weight; }
+  return P.attacks[P.attacks.length - 1].k;
+}
+
+function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
+  const b = G.b;
+  if (attack === 'brake') { b.state = 'teleBrake'; b.st = P.tele; }
+  else if (attack === 'reverse') { b.state = 'teleRev'; b.st = G.d.tele ? P.tele : (P.teleOff ?? P.tele); b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); }
   else { b.state = 'teleRam'; b.st = P.tele; b.rx = G.p.x; Sfx.play('bossHorn'); }
 }
 
@@ -76,12 +95,27 @@ function spawnValet(G: Game): void {
 function spawnEscorts(G: Game, P: BossPhase): void {
   const b = G.b, e = P.escorts!, { left, right } = G.cfg.road;
   [-1, 1].forEach((s, i) => {
-    G.traffic.push({ k: 'amiga', x: clamp(b.x + s * 70, left + 20, right - 20), y: -70, w: 32, h: 56, vy: 0, hp: e.hp, max: e.hp,
-      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: e.contactDmg ?? 10, selfDmg: 10, look: { shades: true } });
+    G.traffic.push({ k: 'amiga', x: clamp(b.x + s * 70, left + 20, right - 20), y: -70, w: e.w ?? 32, h: e.h ?? 56, vy: 0, hp: e.hp, max: e.hp,
+      seed: Math.random() * 100, spin: 0, col: e.cols[i], life: e.life, phase: Math.random() * 6, contactDmg: e.contactDmg ?? 10, selfDmg: 10, look: e.look ?? { shades: true } });
   });
 }
 
-export const Q8: BossAI = {
+// Invocación genérica: vehículos de un tipo del JSON, desde un costado (estacionándose como el valet) o desde arriba.
+function summon(G: Game, S: BossSummon): void {
+  const t = G.cfg.traffic.types.find((x) => x.k === S.type);
+  if (!t) return;
+  for (let i = 0; i < (S.count ?? 1); i++) {
+    if (S.from === 'lado') {
+      const side = Math.random() < 0.5 ? 0 : 1, lane = side ? G.cfg.road.lanes - 1 : 0;
+      const c = makeCar(t, side ? W + 30 : -30, rnd(290, 360));
+      c.tx = laneX(G.cfg, lane); c.enter = 0.7; c.vy = 0;
+      G.traffic.push(c);
+    } else G.traffic.push(makeCar(t, laneX(G.cfg, Math.floor(Math.random() * G.cfg.road.lanes)), -60 - i * 60));
+  }
+  if (S.say) say(G, S.say);
+}
+
+export const PhaseBoss: BossAI = {
   interrupt(G) { const b = G.b; if (INTERRUPTIBLE.includes(b.state)) b.state = 'return'; },
 
   update(G, dt) {
@@ -93,6 +127,7 @@ export const Q8: BossAI = {
       shake(G, 0.45); say(G, bc.lines[next][0]); Sfx.play('phase'); announce(G, P.name, P.col);
       if (P.valetEvery) { spawnValet(G); b.valetT = P.valetEvery * G.d.freq; }
       if (P.escorts) { spawnEscorts(G, P); b.hornT = P.hornFirst ?? 2; }
+      b.summonT = P.summon ? 0 : Infinity;
     }
     if (b.slip > 0) { b.slip -= dt; b.x += Math.sin(G.t * 22) * 90 * dt; b.ang = Math.sin(G.t * 11) * 0.35; }
     else if (b.bumpT > 0) b.ang = Math.sin(G.t * 40) * 0.08; else b.ang *= 0.85;
@@ -102,12 +137,13 @@ export const Q8: BossAI = {
     b.x = clamp(b.x, G.cfg.road.left + b.w / 2 + 2, G.cfg.road.right - b.w / 2 - 2);
     const P = ph(G);
     if (P.valetEvery && b.state !== 'enter') { b.valetT -= dt; if (b.valetT <= 0) { spawnValet(G); b.valetT = P.valetEvery * G.d.freq; } }
+    if (P.summon && b.state !== 'enter') { b.summonT -= dt; if (b.summonT <= 0) { summon(G, P.summon); b.summonT = P.summon.every * G.d.freq; } }
     if (P.hornEvery) {
       b.hornT -= dt;
       if (b.hornT <= 0) {
         const R = P.hornRadius ?? 150;
-        b.hornT = P.hornEvery * G.d.freq; G.rings.push({ x: b.x, y: b.y, r: 10, max: R, col: C.pink, life: 0.6 }); Sfx.play('bossHorn');
-        if (Math.hypot(p.x - b.x, p.y - b.y) < R + p.h / 2 && p.pw.soat <= 0) { p.stun = P.stun ?? 1; floatText(G, p.x, p.y - 40, '¡ATURDIDO!', C.yellow); }
+        b.hornT = P.hornEvery * G.d.freq; G.rings.push({ x: b.x, y: b.y, r: 10, max: R, col: P.hornCol ?? C.pink, life: 0.6 }); Sfx.play(P.hornSound ?? 'bossHorn');
+        if (Math.hypot(p.x - b.x, p.y - b.y) < R + p.h / 2 && p.pw.soat <= 0) { p.stun = P.stun ?? 1; floatText(G, p.x, p.y - 40, P.hornText ?? '¡ATURDIDO!', C.yellow); }
         shake(G, 0.2);
       }
     }
@@ -126,4 +162,3 @@ export const Q8: BossAI = {
   },
 };
 
-export const randomLine = (G: Game) => pick(G.cfg.boss.lines[G.b.phase]);

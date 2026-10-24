@@ -22,12 +22,13 @@
     <div id="stage">
       <button id="pauseBtn" hidden aria-label="Pausa (P)" title="Pausa (P)">II</button>
       <div class="overlay" id="menu" hidden>
-        <p class="eyebrow" id="menuEyebrow"></p>
         <h1>Limargeddon</h1>
+        <div class="setting" id="stageSel" role="radiogroup" aria-label="Etapa"></div>
+        <p class="eyebrow" id="menuEyebrow"></p>
         <p class="boss">Jefe: <b id="menuBoss"></b></p>
         <p class="tip" id="menuTip"></p>
         <div class="powers" id="menuPowers" aria-label="Bonus"></div>
-        <div class="setting" role="radiogroup" aria-labelledby="fireLabel">
+        <div class="setting" id="fireSel" role="radiogroup" aria-labelledby="fireLabel">
           <span id="fireLabel">Disparo</span>
           <button class="seg" type="button" role="radio" data-fire="toque">Por toque</button>
           <button class="seg" type="button" role="radio" data-fire="acelerar">Acelerar es atacar</button>

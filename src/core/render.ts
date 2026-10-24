@@ -37,8 +37,18 @@ function drawMoto(g: Gfx, c: Car): void {
   g.restore();
 }
 
+function drawBici(g: Gfx, c: Car): void {
+  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.15 : 0);
+  g.fillStyle = '#1b1b22'; g.fillRect(-1, -11, 2, 22);                       // ruedas y cuadro
+  g.fillStyle = c.col; g.fillRect(-3, -3, 6, 8);                             // ciclista
+  g.fillStyle = c.look?.box ?? '#ffe14d'; g.beginPath(); g.arc(0, -3, 3.4, 0, 7); g.fill(); // casco
+  g.fillStyle = '#111'; g.fillRect(-5, -9, 10, 1.5);                         // timón
+  g.restore();
+}
+
 function drawTraffic(g: Gfx, G: Game, c: Car): void {
   if (c.look?.kind === 'moto') { drawMoto(g, c); return; }
+  if (c.look?.kind === 'bici') { drawBici(g, c); return; }
   const L = c.look;
   drawCar(g, G.t, c, {
     body: c.col, roof: L?.roof, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: L ? (g, w, h) => drawLook(g, G, L, w, h) : undefined,
@@ -65,6 +75,21 @@ function drawObstacles(g: Gfx, G: Game): void {
         g.fillStyle = o.col; g.beginPath(); g.moveTo(cx, ob.y - 8); g.lineTo(cx + 6, ob.y + 6); g.lineTo(cx - 6, ob.y + 6); g.closePath(); g.fill();
         g.fillStyle = o.col2 ?? '#fff'; g.fillRect(cx - 3, ob.y - 1, 6, 2);
       }
+    } else if (o.style === 'peatones') {
+      // turistas cruzando para la foto del atardecer: muñequitos con cámara
+      const n = Math.max(2, Math.floor(ob.w / 14)), stepX = ob.w / n;
+      for (let i = 0; i < n; i++) {
+        const px = x0 + stepX * (i + 0.5) + Math.sin(G.t * 6 + i) * 1.5, cols = [o.col, o.col2 ?? '#7fd4ff', '#ffe14d'];
+        g.fillStyle = cols[i % 3]; g.fillRect(px - 3, ob.y - 3, 6, 8);
+        g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(px, ob.y - 6, 3, 0, 7); g.fill();
+        if (i % 2 === 0) { g.fillStyle = '#111'; g.fillRect(px + 2, ob.y - 4, 4, 3); } // cámara
+      }
+    } else if (o.style === 'scooter') {
+      // scooter eléctrico tirado en la pista
+      g.save(); g.translate(ob.x, ob.y); g.rotate(0.6);
+      g.fillStyle = o.col; g.fillRect(-12, -2, 24, 4); g.fillRect(9, -8, 3, 10);
+      g.fillStyle = '#111'; g.beginPath(); g.arc(-11, 3, 3, 0, 7); g.fill(); g.beginPath(); g.arc(11, 3, 3, 0, 7); g.fill();
+      g.restore();
     } else if (o.style === 'barrera') {
       g.fillStyle = o.col; g.fillRect(x0, y0, ob.w, ob.h);
       g.fillStyle = o.col2 ?? '#111';

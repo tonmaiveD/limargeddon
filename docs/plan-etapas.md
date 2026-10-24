@@ -1,6 +1,6 @@
 # Plan de etapas y de desarrollo
 
-**Estado:** propuesta del 23 de octubre de 2026, para revisión del dueño del producto y del proyecto advisory de claude.ai. Amplía `concepto.md`, no lo reemplaza: si algo choca, manda `concepto.md` hasta que se actualice.
+**Estado:** propuesta del 23 de octubre de 2026, para revisión del dueño del producto y del proyecto advisory de claude.ai. Actualizada el mismo día: el dueño decidió no usar sesiones en la nube; todo se construye en local, una etapa a la vez. Amplía `concepto.md`, no lo reemplaza: si algo choca, manda `concepto.md` hasta que se actualice.
 
 ## 1. Tono
 
@@ -58,34 +58,29 @@ Para que cada etapa sea solo datos, el motor necesita estas piezas. Cada una se 
 
 Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (portar San Isidro completo con prueba de paridad) es **L**.
 
-| Bloque | Tamaño | Qué incluye | Dónde |
+| Bloque | Tamaño | Qué incluye | Estado |
 |---|---|---|---|
-| Renombrar a La Loca del Q8 | S | Textos, JSON, nombres de archivo, ADR | Nube o local |
-| Hito 3, motor común | L | Vehículos declarativos, enjambres, obstáculos base, motos Delivery, guía para etapas nuevas | **Local** |
-| Hito 4, Miraflores | M | Etapa tutorial, paisaje, jefe de serenazgo, jefe más declarativo | Nube |
-| Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, guardado v2, selector y desbloqueo de etapas | **Local** |
-| Centro | M | Paisaje, marchas como muro móvil, Rochabús | Nube |
-| Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Nube |
-| Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Nube |
-| Callao | M | Contenedores que caen, tráiler | Nube |
-| Vía Expresa | L | Saltos y rampas (motor), bus articulado | Nube |
-| Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Nube |
-| Costa Verde (final) | L | Neblina, curvas, desprendimientos, jefe sorpresa | Local para el diseño, nube para construirla |
-| Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Local para el diseño, nube por tramos |
+| Renombrar a La Loca del Q8 | S | Textos, JSON, nombres de archivo | Hecho (ADR 0014) |
+| Hito 3, motor común | L | Vehículos declarativos, enjambres, obstáculos, guía de etapas | Hecho (ADR 0014) |
+| Hito 4, Miraflores | M | Etapa tutorial, jefe genérico por fases, selector mínimo de etapa | Hecho (ADR 0015) |
+| Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, guardado v2, selector con desbloqueo | Pendiente |
+| Centro | M | Paisaje, marchas como muro móvil, Rochabús | Pendiente |
+| Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Pendiente |
+| Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Pendiente |
+| Callao | M | Contenedores que caen, tráiler | Pendiente |
+| Vía Expresa | L | Saltos y rampas (motor), bus articulado | Pendiente |
+| Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Pendiente |
+| Costa Verde (final) | L | Neblina, curvas, desprendimientos, jefe sorpresa | Pendiente |
+| Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Pendiente |
 
-## 7. Orden y paralelismo
+## 7. Orden
 
-1. **Primero, en local:** el Hito 3 (motor común) y el renombre. Definen las piezas y la guía que usan todas las demás etapas.
-2. **Después, en la nube y en paralelo:** las etapas que solo usan piezas ya existentes, cada una en su sesión, su rama y su PR: Miraflores, Centro, Javier Prado, Gamarra y Callao.
-3. **En la nube, de a una:** las etapas que agregan piezas al motor (Vía Expresa con saltos, Panamericana con clima y búsqueda). Si dos sesiones tocaran el motor a la vez, chocarían.
-4. **En local:** el Hito 5, porque está lleno de decisiones de diseño (economía, precios de mejoras), y el diseño de la etapa final y la secreta.
-5. **Siempre:** cada PR se publica al fusionarse, y el dueño lo prueba en su teléfono.
+Todo en local, una etapa a la vez, cada una en su rama y su PR, probada por el dueño en su teléfono antes de la siguiente. Primero las etapas que solo usan piezas existentes; las que agregan piezas al motor (Vía Expresa, Panamericana) van cuando su pieza haga falta. El Hito 5 puede ir antes o después de las etapas medianas, según prefiera el dueño.
 
 ## 8. Eficiencia de tokens
 
-- **Una guía corta en el repo** (`docs/guia-etapas.md`, que se escribe en el Hito 3): pasos para crear una etapa, convenciones, cómo probar y metas de balance. Cada sesión en la nube lee esa guía y el ADR que le toca, no toda la historia del proyecto.
-- **Encargos cerrados:** cada sesión recibe una sola etapa con criterio de cierre explícito (tests, `npm run balance` dentro de la meta, build) y termina en un PR. Menos idas y vueltas, menos tokens.
-- **Modelo según la tarea:** el más capaz para piezas del motor y jefes con fases nuevas; uno más liviano para paisajes, textos, datos del JSON y el renombre.
-- **Verificar con tests y simulación, no con capturas:** cada captura de pantalla cuesta bastante. Basta con la simulación sin pantalla y los tests, más una o dos capturas por etapa.
-- **No releer lo que no cambia:** el prototipo y las etapas terminadas no se vuelven a leer completos; se consulta lo puntual.
-- **Comentarios del dueño agrupados por etapa:** probar una etapa completa y mandar todas las observaciones juntas, en vez de una por una.
+- **`docs/guia-etapas.md`** resume cómo construir una etapa: se lee eso en vez de toda la historia del proyecto.
+- **Encargos cerrados** con criterio de cierre (tests, `ETAPA=<distrito> npm run balance` dentro de la meta y build), para evitar idas y vueltas.
+- **Verificar con tests y simulación, no con capturas:** una o dos capturas por etapa bastan.
+- **No releer lo que no cambia:** el prototipo y las etapas terminadas se consultan solo en lo puntual.
+- **Comentarios del dueño agrupados por etapa.**

@@ -1,8 +1,11 @@
 import type { StageConfig } from '../core/config';
 import type { Gfx } from '../core/gfx';
 import type { BossAI, Game } from '../core/state';
-import { Q8 } from '../bosses/q8';
+import { PhaseBoss } from '../bosses/phase-boss';
 import { drawQ8 } from '../bosses/q8-render';
+import { drawSerenazgo } from '../bosses/serenazgo-render';
+import mirafloresConfig from './miraflores/config.json';
+import { drawWorld as mirafloresWorld } from './miraflores/scenery';
 import sanIsidroConfig from './san-isidro/config.json';
 import { drawWorld as sanIsidroWorld } from './san-isidro/scenery';
 
@@ -15,7 +18,8 @@ export interface StageDef {
 }
 
 export const STAGES: Record<string, StageDef> = {
-  'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: Q8, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
+  miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
+  'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
 };
 
 export const DEFAULT_STAGE = 'san-isidro';

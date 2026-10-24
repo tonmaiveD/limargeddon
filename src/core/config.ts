@@ -8,7 +8,8 @@ export const FIRE_MODES: readonly FireMode[] = ['toque', 'acelerar'];
 
 export type PowerKey = 'turbo' | 'cancha' | 'soat' | 'combi' | 'picaron' | 'metro';
 
-export interface Difficulty { label: string; hp: number; spd: number; freq: number; tele: boolean }
+// dmgMult: multiplica el daño que recibe el Tico en esa dificultad (1 si se omite)
+export interface Difficulty { label: string; hp: number; spd: number; freq: number; tele: boolean; dmgMult?: number }
 
 export interface PowerDef {
   name: string; label: string; col: string; L: string; dur: number;
@@ -17,7 +18,7 @@ export interface PowerDef {
 
 // Aspecto declarativo de un vehículo: el motor lo dibuja sin código por tipo.
 export interface VehicleLook {
-  kind?: 'auto' | 'moto';            // auto por defecto
+  kind?: 'auto' | 'moto' | 'bici';   // auto por defecto
   roof?: string;                     // color del techo
   panel?: string;                    // franja ancha sobre el techo (fondo del rótulo del serenazgo)
   siren?: boolean;                   // circulina roja y azul intermitente
@@ -50,25 +51,35 @@ export interface SwarmDef {
 export interface ObstacleDef {
   k: string;
   kind: 'bloque' | 'hueco';
-  style: 'conos' | 'barrera' | 'caja' | 'crater';
+  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter';
   diffs?: DiffKey[];                 // todas si se omite
   first: number; every: [number, number];
   lanes: number;                     // carriles que ocupa
   h: number;                         // alto en px
+  w?: number;                        // ancho en px, si es menor que los carriles que ocupa (se centra en ellos)
   col: string; col2?: string;        // colores principal y de franjas
   label?: string; labelCol?: string;
   dmg: number;                       // daño al chocar (bloque) o al caer (hueco)
   fine?: number;                     // papeleta al chocarlo
 }
 
+export type BossAttack = 'brake' | 'reverse' | 'ram';
+
+// Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
+export interface BossSummon { type: string; every: number; from: 'lado' | 'arriba'; count?: number; say?: string }
+
 export interface BossPhase {
   id: number; from: number; name: string; col: string; bar: string; returnAct: number;
   swapChance: number; swapAct: number;
-  attack: 'brake' | 'reverse' | 'ram'; tele: number; teleOff?: number; dur: number; speed: number;
+  // `attack` es el ataque único (como en el prototipo); `attacks` permite combinar varios con peso
+  attack: BossAttack; attacks?: { k: BossAttack; weight: number }[];
+  tele: number; teleOff?: number; dur: number; speed: number;
   park?: number; maxY?: number;
   valetEvery?: number;
   hornFirst?: number; hornEvery?: number; hornRadius?: number; stun?: number;
-  escorts?: { life: number; hp: number; cols: string[]; contactDmg?: number };
+  hornSound?: 'bossHorn' | 'whistle'; hornCol?: string; hornText?: string;
+  escorts?: { life: number; hp: number; cols: string[]; contactDmg?: number; look?: VehicleLook; w?: number; h?: number };
+  summon?: BossSummon;
 }
 
 export interface BossConfig {
@@ -114,6 +125,7 @@ export interface StageConfig {
   bumps: { first: number; every: [number, number]; dmg: number };
   crossings: { first: number; every: [number, number] };
   streets: string[];
-  rewards: { win: number; clean: number; blindPct: number };
+  // item: premio que se muestra al ganar; defeatTip: consejo al perder
+  rewards: { win: number; clean: number; blindPct: number; item?: string; defeatTip?: string };
   boss: BossConfig;
 }
