@@ -1,6 +1,6 @@
 import { Sfx } from './audio/sfx';
 import { C, clamp, pick, rnd } from './util';
-import { playerMaxY, type Game } from './state';
+import { playerMaxY, shake, type Game } from './state';
 import { fire, reloadCones } from './weapons';
 
 /* Manejo del Tico: aceleración suavizada, límites de pista, estela del turbo y motor. */
@@ -21,6 +21,10 @@ export function updatePlayer(G: Game, dt: number): void {
   } else {
     if (p.stun <= 0) { if (k.up) ay--; if (k.down) ay++; }
     vyTarget = ay * pc.accelY * sp;
+  }
+  if (p.air > 0) { // en el aire casi no se gira; al aterrizar, sacudida
+    ax *= 0.3; p.air -= dt;
+    if (p.air <= 0) { p.air = 0; shake(G, 0.25); Sfx.play('bump'); }
   }
   p.vx += (ax * pc.accelX * sp - p.vx) * r; p.vy += (vyTarget - p.vy) * r;
   p.x = clamp(p.x + p.vx * dt, road.left + p.w / 2 + 2, road.right - p.w / 2 - 2);

@@ -40,7 +40,7 @@ function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?:
 
 it('duraciones', () => {
   const rows: string[] = [];
-  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg;
+  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg;
   const only = process.env.ETAPA; // npm run balance con ETAPA=miraflores (o san-isidro) para correr solo una
   const variants: [string, StageConfig, FireMode | undefined][] = ([
     ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
@@ -57,7 +57,10 @@ it('duraciones', () => {
     ['ca-toque', ca, 'toque'], ['ca-acelerar', ca, 'acelerar'],
     // con las mejoras típicas al llegar al Callao (~S/ 5.000 gastados)
     ['ca-mej-toque', applyUpgrades(ca, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 1, aceite: 1 }), 'toque'],
-  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca' } as Record<string, string>)[only] ?? only));
+    ['ve-toque', ve, 'toque'], ['ve-acelerar', ve, 'acelerar'],
+    // con las mejoras típicas al llegar a la Vía Expresa (~S/ 6.300 gastados)
+    ['ve-mej-toque', applyUpgrades(ve, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 1, claxon: 1 }), 'toque'],
+  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've' } as Record<string, string>)[only] ?? only));
   for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {
       rows.push(`${label.padEnd(12)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);

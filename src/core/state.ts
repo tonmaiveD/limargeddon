@@ -14,19 +14,21 @@ export interface Player {
   stun: number; hitCd: number; flash: number;
   cd: Record<WeaponKey, number>; pw: Record<TimedPower, number>;
   ammo: number; reloadT: number; coneHeld: boolean; lives: number;
+  air: number; airMax: number; // salto de rampa: tiempo que le queda en el aire y duración total
 }
 
-export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet' | 'throw';
+export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet' | 'throw' | 'swing';
 export interface Boss {
   x: number; y: number; baseY: number; w: number; h: number; hp: number; max: number;
   tx: number; rx: number; rvx: number; state: string; st: number; act: number; phase: number;
   slip: number; phoneOff: number; hornT: number; valetT: number; summonT: number; jetHit: boolean; flash: BossFlash; hitFlash: number; ang: number; bumpT: number;
+  swing: number; // coletazo: lado (-1 o 1) por el progreso del barrido, para el dibujo
 }
 
 export interface Car {
   k: string; x: number; y: number; w: number; h: number; vy: number; hp: number; max: number; col: string;
   spin: number; seed: number; flash?: number;
-  zz?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
+  zz?: number; brakeT?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
   look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
@@ -78,9 +80,9 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintI: 0,
     perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
-      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0 },
+      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0, air: 0, airMax: 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
-      state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
+      state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0, swing: 0 },
     traffic: [], shots: [], foes: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
     bubble: null, bubbleT: 2, trafficT: cfg.traffic.first, pickT: cfg.pickups.first, bumpT: cfg.bumps.first, crossT: cfg.crossings.first, streetI: 0,
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
