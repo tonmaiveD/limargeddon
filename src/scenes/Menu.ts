@@ -18,6 +18,29 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     setupCamera(this);
     this.L = createLayers(this);
+    const saved = getSettings().stageId;
+    this.stageId = saved && STAGES[saved] ? saved : DEFAULT_STAGE;
+    this.setupStageSelector();
+    this.showStage();
+  }
+
+  // Selector mínimo de etapa (el completo, con desbloqueos, es del Hito 5). Recuerda la última elegida.
+  private setupStageSelector(): void {
+    const box = document.getElementById('stageSel')!;
+    const ids = Object.keys(STAGES).sort((a, b) => STAGES[a].cfg.number - STAGES[b].cfg.number);
+    box.hidden = ids.length < 2;
+    box.innerHTML = '';
+    ids.forEach((id) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'seg'; b.setAttribute('role', 'radio'); b.dataset.stage = id;
+      b.textContent = `${STAGES[id].cfg.number} · ${STAGES[id].cfg.district}`;
+      b.onclick = () => { this.stageId = id; setSettings({ stageId: id }); this.showStage(); };
+      box.appendChild(b);
+    });
+  }
+
+  private showStage(): void {
+    document.querySelectorAll<HTMLButtonElement>('#stageSel [data-stage]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.stage === this.stageId)));
     const { cfg } = STAGES[this.stageId];
     const $ = (id: string) => document.getElementById(id)!;
     $('menuEyebrow').textContent = cfg.eyebrow;
@@ -44,7 +67,7 @@ export class MenuScene extends Phaser.Scene {
 
   // Selector del modo de disparo (los dos son opciones permanentes, ADR 0013); la elección se guarda en el dispositivo.
   private setupFireSelector(enabled: boolean): void {
-    const box = document.querySelector<HTMLElement>('.setting')!, tip = document.getElementById('fireTip')!;
+    const box = document.getElementById('fireSel')!, tip = document.getElementById('fireTip')!;
     box.hidden = !enabled; tip.hidden = !enabled;
     if (!enabled) return;
     const TIPS: Record<FireMode, string> = {

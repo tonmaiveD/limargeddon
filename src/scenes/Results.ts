@@ -26,8 +26,8 @@ export class ResultsScene extends Phaser.Scene {
       <div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>
       <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas del serenazgo</div>
-      <div class="badge">Bolso de Diseñador · anula una papeleta por etapa</div>`
-      : `<div class="badge off">Consejo: el aceite la hace derrapar y deja expuesto su lado derecho. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.</div>`;
+      ${R.item ? `<div class="badge">${R.item}</div>` : ''}`
+      : `<div class="badge off">Consejo: ${R.defeatTip ?? `el punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
     const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement;
     const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; this.scene.stop(); };
     again.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId, dk }); };

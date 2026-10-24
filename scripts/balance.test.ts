@@ -39,11 +39,15 @@ function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?:
 
 it('duraciones', () => {
   const rows: string[] = [];
-  const game = STAGES['san-isidro'].cfg;
-  const variants: [string, StageConfig, FireMode | undefined][] = [['prototipo', PROTOTYPE_CFG, undefined], ['toque', game, 'toque'], ['acelerar', game, 'acelerar']];
+  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg;
+  const only = process.env.ETAPA; // npm run balance con ETAPA=miraflores (o san-isidro) para correr solo una
+  const variants: [string, StageConfig, FireMode | undefined][] = ([
+    ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
+    ['mf-toque', mf, 'toque'], ['mf-acelerar', mf, 'acelerar'],
+  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || (only === 'miraflores' ? l.startsWith('mf') : l.startsWith('si')));
   for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {
-      rows.push(`${label.padEnd(10)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);
+      rows.push(`${label.padEnd(12)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);
     }
   }
   console.log('\n' + rows.join('\n'));

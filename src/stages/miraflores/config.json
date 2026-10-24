@@ -1,0 +1,545 @@
+{
+  "id": "miraflores",
+  "number": 1,
+  "district": "Miraflores",
+  "roadName": "MALECÓN DE MIRAFLORES",
+  "eyebrow": "Etapa 1 · Miraflores · Malecón y Av. Larco",
+  "tip": "En Miraflores hasta el claxon tiene multa. La camioneta del serenazgo también tiene punto ciego a la derecha: atácala por ahí, pero no choques a los serenos ni a los turistas, que cada roce es papeleta.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1000,
+      "spd": 220,
+      "freq": 1.4,
+      "tele": true,
+      "dmgMult": 0.8
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 1350,
+      "spd": 245,
+      "freq": 1.1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 1800,
+      "spd": 275,
+      "freq": 0.85,
+      "tele": true,
+      "dmgMult": 1.7
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 300,
+    "turboSpeed": 430,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.3,
+      2.0
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "sereno",
+        "weight": 0.2,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#1f4fbf"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "panel": "#fff",
+          "siren": true,
+          "label": "SERENAZGO",
+          "labelCol": "#1f4fbf"
+        }
+      },
+      {
+        "k": "ciclista",
+        "weight": 0.2,
+        "w": 12,
+        "h": 22,
+        "vy": [
+          150,
+          190
+        ],
+        "hp": 10,
+        "cols": [
+          "#ff2e88",
+          "#3dff9a",
+          "#7fd4ff"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 10,
+        "look": {
+          "kind": "bici",
+          "box": "#ffe14d"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 18,
+            "freq": 2
+          }
+        }
+      },
+      {
+        "k": "delivery",
+        "weight": 0.18,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto",
+          "box": "#ffd23f"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        }
+      },
+      {
+        "k": "sedan",
+        "weight": 0.42,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#c9ccd3",
+          "#6c7a8c",
+          "#e8e2d0",
+          "#8a2f3f"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "delivery",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 20,
+      "every": [
+        18,
+        26
+      ],
+      "count": [
+        4,
+        6
+      ],
+      "formation": "v",
+      "gap": 34,
+      "label": "¡ENJAMBRE DELIVERY!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "turistas",
+      "kind": "bloque",
+      "style": "peatones",
+      "first": 10,
+      "every": [
+        16,
+        24
+      ],
+      "lanes": 1,
+      "h": 14,
+      "col": "#ff8a1f",
+      "col2": "#7fd4ff",
+      "label": "FOTO",
+      "labelCol": "#fff",
+      "dmg": 0,
+      "fine": 50
+    },
+    {
+      "k": "fin-ciclovia",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 18,
+      "every": [
+        20,
+        28
+      ],
+      "lanes": 1,
+      "h": 10,
+      "col": "#3dff9a",
+      "col2": "#15111d",
+      "label": "FIN DE CICLOVÍA",
+      "labelCol": "#15111d",
+      "dmg": 3
+    },
+    {
+      "k": "scooter",
+      "kind": "hueco",
+      "style": "scooter",
+      "first": 7,
+      "every": [
+        12,
+        18
+      ],
+      "lanes": 1,
+      "w": 26,
+      "h": 14,
+      "col": "#9aa3ad",
+      "dmg": 2
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 5,
+    "every": [
+      10,
+      15
+    ],
+    "dmg": 3
+  },
+  "crossings": {
+    "first": 3,
+    "every": [
+      16,
+      20
+    ]
+  },
+  "streets": [
+    "AV. JOSÉ LARCO",
+    "CALLE SCHELL",
+    "AV. BENAVIDES",
+    "CALLE BERLÍN",
+    "AV. DIAGONAL",
+    "MALECÓN CISNEROS"
+  ],
+  "rewards": {
+    "win": 600,
+    "clean": 300,
+    "blindPct": 80,
+    "item": "Silbato confiscado · el serenazgo te deja pasar una vez por etapa",
+    "defeatTip": "suelta el acelerador para esquivar sus embestidas y pégale por la derecha. Los turistas y los serenos no se tocan."
+  },
+  "boss": {
+    "id": "serenazgo",
+    "name": "LA CAMIONETA DEL SERENAZGO",
+    "title": "La Camioneta del Serenazgo",
+    "w": 44,
+    "h": 80,
+    "startY": -140,
+    "baseY": 160,
+    "lane": 1,
+    "firstAction": 2,
+    "cruiseSpeed": 140,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.35,
+    "phoneOffAct": 0.3,
+    "contactDmg": 7,
+    "chargeContactDmg": 15,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · ZONA RESIDENCIAL",
+        "col": "#7fd4ff",
+        "bar": "#7fd4ff",
+        "returnAct": 2.6,
+        "swapChance": 0.7,
+        "swapAct": 2.6,
+        "attack": "brake",
+        "tele": 0.8,
+        "dur": 0.5,
+        "speed": 340
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · OPERATIVO",
+        "col": "#ff8a1f",
+        "bar": "#3a7bff",
+        "returnAct": 2.2,
+        "swapChance": 0.35,
+        "swapAct": 2.3,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "brake",
+            "weight": 1
+          },
+          {
+            "k": "ram",
+            "weight": 1
+          }
+        ],
+        "tele": 0.6,
+        "dur": 0.7,
+        "speed": 380,
+        "maxY": 510,
+        "summon": {
+          "type": "sereno",
+          "every": 11,
+          "from": "lado",
+          "say": "¡Refuerzos! Hay un taxi informal en el malecón."
+        }
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · TOLERANCIA CERO",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 2.2,
+        "swapChance": 0.2,
+        "swapAct": 1.6,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.6,
+        "dur": 0.7,
+        "speed": 420,
+        "maxY": 510,
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 140,
+        "stun": 0.8,
+        "hornSound": "whistle",
+        "hornCol": "#7fd4ff",
+        "hornText": "¡PITAZO!",
+        "escorts": {
+          "life": 12,
+          "hp": 40,
+          "cols": [
+            "#1f4fbf",
+            "#1f4fbf"
+          ],
+          "contactDmg": 9,
+          "w": 12,
+          "h": 24,
+          "look": {
+            "kind": "moto",
+            "box": "#1f4fbf"
+          }
+        }
+      }
+    ],
+    "lines": {
+      "1": [
+        "Esto es zona residencial, señor.",
+        "¿Tiene permiso para ese claxon?",
+        "Documentos, por favor.",
+        "Aquí no se toca bocina.",
+        "Circule, circule."
+      ],
+      "2": [
+        "¡Operativo! Orille el vehículo.",
+        "¿Ese taxi está formalizado?",
+        "Le voy a levantar un acta.",
+        "Esto se reporta a la municipalidad.",
+        "¡Refuerzos al malecón!"
+      ],
+      "3": [
+        "¡Tolerancia cero, oiga!",
+        "¡Le cayó la papeleta del año!",
+        "¡Alto ahí, taxista!",
+        "¡Llamen a la grúa!",
+        "¡Esta cuadra es de los vecinos!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Prohibido tocar bocina!",
+      "oil": "¡Derrame en la vía pública!",
+      "combi": "¡¿Una combi en Miraflores?!",
+      "metro": "¡Aquí no llega el Metro, oiga!",
+      "valet": ""
+    }
+  }
+}

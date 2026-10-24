@@ -18,3 +18,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0012](0012-vista-de-ancho-variable.md) | Vista de ancho variable: más ciudad a los costados | Aceptada |
 | [0013](0013-dos-modos-de-disparo-permanentes.md) | Dos modos de disparo permanentes | Aceptada |
 | [0014](0014-motor-comun-vehiculos-enjambres-obstaculos.md) | Motor común: vehículos declarativos, enjambres y obstáculos | Aceptada |
+| [0015](0015-jefe-generico-y-etapa-miraflores.md) | Jefe genérico por fases, selector de etapa y Etapa 1 Miraflores | Aceptada |

@@ -67,7 +67,7 @@ function pushAside(G: Game, c: Car, b: { x: number; y: number; w: number; h: num
 function spawnObstacle(G: Game, i: number): void {
   const o = G.cfg.obstacles![i], { lanes, laneWidth, left } = G.cfg.road;
   const n = Math.min(o.lanes, lanes), first = Math.floor(Math.random() * (lanes - n + 1));
-  const w = n * laneWidth - 10, x = left + first * laneWidth + (n * laneWidth) / 2;
+  const w = Math.min(o.w ?? Infinity, n * laneWidth - 10), x = left + first * laneWidth + (n * laneWidth) / 2;
   G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false });
 }
 
@@ -133,8 +133,9 @@ export function updateWorld(G: Game, dt: number): void {
   updateObstacles(G, dt);
   // tráfico
   for (const c of G.traffic) {
-    if (c.k === 'valet') { if (c.enter! > 0) { c.enter! -= dt; c.x += (c.tx! - c.x) * Math.min(1, dt * 5); } else c.y += (70 + extra) * dt; }
-    else if (c.k === 'amiga') {
+    // entra desde un costado (valet, invocaciones) o sigue al Tico (escoltas): se decide por sus datos, no por su nombre
+    if (c.enter !== undefined) { if (c.enter > 0) { c.enter! -= dt; c.x += (c.tx! - c.x) * Math.min(1, dt * 5); } else c.y += (70 + extra) * dt; }
+    else if (c.life !== undefined) {
       c.life! -= dt; c.phase! += dt;
       if (c.life! > 0) { c.y += ((240 + Math.sin(c.phase!) * 40) - c.y) * Math.min(1, dt * 1.5); c.x += step(p.x - c.x, 45 * dt); }
       else c.y -= 240 * dt;
@@ -143,7 +144,7 @@ export function updateWorld(G: Game, dt: number): void {
       const zig = c.move?.zigzag; if (zig) { c.zz! += dt * zig.freq; c.x += Math.sin(c.zz!) * zig.amp * dt; }
     }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
-    const inValet = c.k === 'valet' && c.enter! > 0;
+    const inValet = c.enter !== undefined && c.enter > 0;
     // los bloques (obras, conos, barreras) también desvían al tráfico; si un auto queda apretado entre un bloque
     // y el jefe, se resuelve en pocas pasadas y el jefe va al final (lo más visible es que no le pase por debajo)
     if (!inValet) for (let pass = 0; pass < 3; pass++) {

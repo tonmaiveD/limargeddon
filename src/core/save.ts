@@ -11,7 +11,7 @@ const VERSION = 1;
 const MAX_FIGHTS = 300;
 
 export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number }
-export interface Settings { fireMode?: FireMode }
+export interface Settings { fireMode?: FireMode; stageId?: string }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings }
 
