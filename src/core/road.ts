@@ -10,9 +10,16 @@ import { C } from './util';
 // 2c y 2c+1 son la columna extra número c hacia la izquierda y hacia la derecha (ADR 0012).
 export type SideFn = (g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number) => void;
 
+// Curva de la pista (road.curve): dos ondas suaves pegadas al asfalto, así las curvas bajan con el scroll.
+export function roadWarp(cfg: StageConfig, scroll: number): ((y: number) => number) | null {
+  const c = cfg.road.curve;
+  if (!c) return null;
+  return (y) => c.amp * Math.sin(((scroll - y) / c.len) * Math.PI * 2) + c.amp * 0.4 * Math.sin(((scroll - y) / (c.len * 0.43)) * Math.PI * 2 + 1.3);
+}
+
 export function drawSides(g: Gfx, cfg: StageConfig, scroll: number, drawSide: SideFn, bg = '#1a1522'): void {
   const L = cfg.road.left, R = cfg.road.right, ex = view.extra, colW = L - 8, cols = Math.ceil(ex / (colW + 4));
-  g.fillStyle = bg; g.fillRect(-ex, 0, W + 2 * ex, H);
+  g.fillStyle = bg; g.fillRect(-ex - 80, 0, W + 2 * ex + 160, H); // margen para la pista curva
   const seg = 110, base = Math.floor(scroll / seg), off = scroll % seg;
   for (let k = -1; k < H / seg + 2; k++) {
     const y = off + k * seg - seg, idx = base - k;

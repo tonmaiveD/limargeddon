@@ -64,7 +64,7 @@ describe('objetos de victoria', () => {
   it('cada objeto declara un efecto conocido y textos sin puntuación delatora', () => {
     for (const { cfg } of Object.values(STAGES)) {
       const it = cfg.rewards.item!;
-      expect(['contactFine', 'anyFine', 'jetHit', 'shotHit', 'obstacleHit', 'ramHit', 'swingHit', 'wantedHit']).toContain(it.effect);
+      expect(['contactFine', 'anyFine', 'jetHit', 'shotHit', 'obstacleHit', 'ramHit', 'swingHit', 'wantedHit', 'birdHit']).toContain(it.effect);
       expect(`${it.name} ${it.desc}`).not.toMatch(/[:;—]/);
     }
   });

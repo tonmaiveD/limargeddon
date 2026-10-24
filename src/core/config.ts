@@ -35,8 +35,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number }; brake?: {
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
 // shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
 // ramHit: la primera embestida o reversa del jefe no hace daño. swingHit: el primer coletazo no hace daño.
-// wantedHit: la primera estrella de búsqueda no cuenta.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit' | 'swingHit' | 'wantedHit';
+// wantedHit: la primera estrella de búsqueda no cuenta. birdHit: la primera bandada no mancha.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit' | 'swingHit' | 'wantedHit' | 'birdHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -94,7 +94,7 @@ export interface BossSwing { tele: number; dur: number; reach: number; dmg: numb
 // look: moneda (por defecto), rollo de tela, contenedor o rompellantas.
 export interface BossThrow {
   tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number;
-  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas'; cols?: string[];
+  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas' | 'piedra'; cols?: string[];
   stun?: number; // segundos que deja aturdido al Tico (rompellantas)
 }
 
@@ -125,6 +125,8 @@ export interface BossConfig {
   phases: BossPhase[];
   lines: Record<string, string[]>;
   quips: Record<'horn' | 'oil' | 'combi' | 'metro' | 'valet', string>;
+  // cuerpo de serpiente (ADR 0026): autos que cuelgan detrás de la cabeza y siguen su recorrido con retraso
+  body?: { count: number; spacing: number; hp: number; w: number; h: number; contactDmg: number; cols: string[]; bodyDmgShare: number; lean?: number }; // lean: corrimiento lateral por segmento (negativo, a la izquierda)
 }
 
 export interface StageConfig {
@@ -134,7 +136,8 @@ export interface StageConfig {
   difficulties: Record<DiffKey, Difficulty>;
   // exclusive: carril pintado como exclusivo (sátira visual, sin regla para el Tico)
   road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number;
-    exclusive?: { lane: number; label: string; col: string } };
+    exclusive?: { lane: number; label: string; col: string };
+    curve?: { amp: number; len: number } }; // pista curva: amplitud en px y largo de la onda en px de scroll
   player: {
     lane: number; y: number; w: number; h: number; hp: number;
     accelX: number; accelY: number; response: number; minY: number; bottomMargin: number; turboMult: number;
@@ -171,13 +174,22 @@ export interface StageConfig {
   bumps: { first: number; every: [number, number]; dmg: number };
   crossings: { first: number; every: [number, number] };
   streets: string[];
-  // item: objeto de victoria de la etapa; defeatTip: consejo al perder
-  rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string };
+  // item: objeto de victoria de la etapa; defeatTip: consejo al perder; winLine: remate al ganar (la etapa final)
+  rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string; winLine?: string };
   // garúa (ADR 0025): oleadas de neblina que tapan la parte de arriba de la pantalla (depth: fracción del alto)
   weather?: { fog?: { first: number; every: [number, number]; dur: [number, number]; depth: number } };
   // nivel de búsqueda (ADR 0025): cada falta suma una estrella y baja una cada `decay` s sin faltas.
   // Cada estrella trae un `chaser` (tipo de traffic.types) que persigue `chaseLife` s; desde `blockAt` estrellas,
   // un obstáculo `block` (k de obstacles, con first muy alto para que no salga solo) cada `blockEvery` s.
   wanted?: { max: number; decay: number; chaser: string; chaseLife: number; blockAt: number; blockEvery: number; block: string };
+  // peligros de la Costa Verde (ADR 0026)
+  hazards?: {
+    // derrumbe: aviso de `warn` s y luego piedras que caen `dur` s en 1 o 2 carriles del lado del acantilado
+    rockslide?: { first: number; every: [number, number]; warn: number; dur: number; lanes: [number, number]; side: 'izquierda' | 'derecha'; dmg: number; rate: number; speed: number };
+    // bandada: baja hacia el carril del Tico en `dur` s; si lo alcanza, mancha la pantalla `splat` s. El claxon la espanta.
+    birds?: { first: number; every: [number, number]; dur: number; w: number; splat: number };
+    // carretilla protegida: cruza la pista; tocarla daña y es papeleta; si nunca se toca, paga `bonus` al ganar
+    cart?: { first: number; every: [number, number]; speed: number; dmg: number; fine: number; bonus: number; label: string };
+  };
   boss: BossConfig;
 }

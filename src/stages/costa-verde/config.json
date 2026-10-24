@@ -1,0 +1,684 @@
+{
+  "id": "costa-verde",
+  "number": 9,
+  "district": "Costa Verde",
+  "roadName": "CIRCUITO DE PLAYAS",
+  "eyebrow": "Etapa 9 · Costa Verde · De noche",
+  "tip": "De noche hay curvas, neblina y derrumbes. Pégale a la cabeza de la doble fila por la derecha o rómpela en pedazos. A la carretilla Don Frío no la toques, y espanta a las gaviotas con el claxon.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1500,
+      "spd": 240,
+      "freq": 1.3,
+      "tele": true,
+      "dmgMult": 0.75
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 2000,
+      "spd": 260,
+      "freq": 1,
+      "tele": true
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 2600,
+      "spd": 290,
+      "freq": 0.88,
+      "tele": false,
+      "dmgMult": 1.1
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 320,
+    "turboSpeed": 460,
+    "idleScroll": 90,
+    "curve": {
+      "amp": 30,
+      "len": 900
+    }
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "combi": {
+      "name": "COMBI KAMIKAZE",
+      "label": "Combi Kamikaze",
+      "col": "#ff2e88",
+      "L": "K",
+      "dur": 0,
+      "dmg": 80,
+      "vy": -560
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    },
+    "metro": {
+      "name": "BOCINA DEL METRO",
+      "label": "Bocina del Metro",
+      "col": "#7fd4ff",
+      "L": "M",
+      "dur": 0,
+      "dmg": 30,
+      "phoneOff": 2.5,
+      "slip": 1.5,
+      "trafficSpin": 2.2
+    }
+  },
+  "pickups": {
+    "first": 6,
+    "every": [
+      9,
+      13
+    ],
+    "fall": 110,
+    "rare": [
+      "combi",
+      "metro"
+    ],
+    "rareReroll": 0.35,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.9,
+      2.8
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "sereno",
+        "weight": 0.08,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 999,
+        "cols": [
+          "#1f4fbf"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "panel": "#fff",
+          "siren": true,
+          "label": "SERENAZGO",
+          "labelCol": "#1f4fbf"
+        }
+      },
+      {
+        "k": "persecucion",
+        "killBonus": 0,
+        "weight": 0,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 40,
+        "cols": [
+          "#1f4fbf"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 10,
+        "look": {
+          "panel": "#fff",
+          "siren": true,
+          "label": "SERENAZGO",
+          "labelCol": "#1f4fbf"
+        }
+      },
+      {
+        "k": "combi",
+        "weight": 0.2,
+        "w": 30,
+        "h": 60,
+        "vy": [
+          120,
+          160
+        ],
+        "hp": 44,
+        "cols": [
+          "#f2c230",
+          "#f4f1e6"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#d93b3b",
+          "band": "#f2c230",
+          "label": "CHORRILLOS",
+          "labelCol": "#d93b3b",
+          "labelY": 0.5,
+          "labelSize": 5
+        }
+      },
+      {
+        "k": "mototaxi",
+        "killBonus": 0,
+        "weight": 0.12,
+        "w": 22,
+        "h": 34,
+        "vy": [
+          150,
+          190
+        ],
+        "hp": 20,
+        "cols": [
+          "#d93b3b",
+          "#2a7de1",
+          "#1f9e5a",
+          "#f2c230"
+        ],
+        "contactDmg": 4,
+        "selfDmg": 10,
+        "look": {
+          "kind": "mototaxi",
+          "roof": "rgba(0,0,0,.3)",
+          "label": "MOTOTAXI",
+          "labelCol": "#ffe14d",
+          "labelSize": 4
+        },
+        "move": {
+          "zigzag": {
+            "amp": 14,
+            "freq": 1.6
+          }
+        }
+      },
+      {
+        "k": "app",
+        "weight": 0.2,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          140,
+          180
+        ],
+        "hp": 36,
+        "cols": [
+          "#1d1b22",
+          "#e0e0e0",
+          "#6c7a8c"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "label": "APP",
+          "labelCol": "#3dff9a",
+          "labelSize": 6,
+          "labelY": 0.58
+        },
+        "move": {
+          "brake": {
+            "chance": 0.25,
+            "dur": 0.8
+          }
+        }
+      },
+      {
+        "k": "delivery",
+        "killBonus": 0,
+        "weight": 0.1,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto",
+          "box": "#ffd23f"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        }
+      },
+      {
+        "k": "taxi",
+        "weight": 0.3,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "combi",
+      "diffs": [
+        "dificil"
+      ],
+      "first": 24,
+      "every": [
+        24,
+        32
+      ],
+      "count": [
+        2,
+        3
+      ],
+      "formation": "diagonal",
+      "gap": 70,
+      "label": "¡TODOS A LA PLAYA!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "crater",
+      "kind": "hueco",
+      "style": "crater",
+      "first": 9,
+      "every": [
+        12,
+        17
+      ],
+      "lanes": 1,
+      "h": 22,
+      "col": "#2a2632",
+      "col2": "#15111d",
+      "dmg": 4
+    },
+    {
+      "k": "bloqueo",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 99999,
+      "every": [
+        99999,
+        99999
+      ],
+      "lanes": 2,
+      "h": 14,
+      "col": "#1f4fbf",
+      "col2": "#f4f6fb",
+      "label": "BLOQUEO",
+      "labelCol": "#15111d",
+      "dmg": 4
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ],
+    "dmg": 0
+  },
+  "crossings": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ]
+  },
+  "streets": [
+    "BAJADA ARMENDÁRIZ",
+    "BAJADA BALTA",
+    "PLAYA AGUA DULCE",
+    "PLAYA LOS PESCADORES",
+    "MORRO SOLAR",
+    "PLAYA LA HERRADURA"
+  ],
+  "rewards": {
+    "win": 1600,
+    "clean": 800,
+    "blindPct": 80,
+    "item": {
+      "id": "corneta",
+      "name": "Corneta de heladero",
+      "desc": "la primera bandada de cada pelea no te mancha",
+      "effect": "birdHit",
+      "icon": "H",
+      "col": "#ffd400"
+    },
+    "defeatTip": "Pégale a la cabeza por la derecha o rompe la fila para partirla. Cuando pase la carretilla Don Frío, la fila se detiene, aprovecha. Toca el claxon cuando veas la sombra de las gaviotas.",
+    "winLine": "La carretilla Don Frío cruza primero la meta. En Lima, el único que nunca choca es el heladero."
+  },
+  "boss": {
+    "id": "doble-fila",
+    "name": "LA DOBLE FILA DE AGUA DULCE",
+    "title": "La Doble Fila",
+    "w": 34,
+    "h": 60,
+    "startY": -150,
+    "baseY": 150,
+    "lane": 1,
+    "firstAction": 2,
+    "cruiseSpeed": 150,
+    "weakSideMult": 2,
+    "slipMult": 1.5,
+    "laneSwapAimChance": 0.5,
+    "phoneOffAct": 0.3,
+    "contactDmg": 6,
+    "chargeContactDmg": 12,
+    "body": {
+      "count": 5,
+      "spacing": 46,
+      "hp": 70,
+      "w": 28,
+      "h": 44,
+      "contactDmg": 4,
+      "cols": [
+        "#8a2f3f",
+        "#1d1b22",
+        "#6c7a8c",
+        "#e0e0e0",
+        "#2f6b3f",
+        "#3a7bff"
+      ],
+      "bodyDmgShare": 1,
+      "lean": -18
+    },
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "FASE 1 · ESTACIONADOS",
+        "col": "#ffe14d",
+        "bar": "#ffe14d",
+        "returnAct": 2.0,
+        "swapChance": 0.7,
+        "swapAct": 1.7,
+        "attack": "brake",
+        "tele": 0.7,
+        "dur": 0.5,
+        "speed": 300
+      },
+      {
+        "id": 2,
+        "from": 0.66,
+        "name": "FASE 2 · FILA INDIA",
+        "col": "#3a7bff",
+        "bar": "#3a7bff",
+        "returnAct": 1.9,
+        "swapChance": 0.6,
+        "swapAct": 1.5,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 1
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.75,
+        "dur": 0.7,
+        "speed": 340,
+        "maxY": 420
+      },
+      {
+        "id": 3,
+        "from": 0.33,
+        "name": "FASE 3 · AGUA DULCE",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 1.8,
+        "swapChance": 0.55,
+        "swapAct": 1.3,
+        "attack": "ram",
+        "attacks": [
+          {
+            "k": "ram",
+            "weight": 2
+          },
+          {
+            "k": "brake",
+            "weight": 1
+          }
+        ],
+        "tele": 0.7,
+        "dur": 0.75,
+        "speed": 370,
+        "maxY": 430,
+        "hornFirst": 2,
+        "hornEvery": 6,
+        "hornRadius": 150,
+        "stun": 0.8,
+        "hornSound": "bossHorn",
+        "hornCol": "#ffe14d",
+        "hornText": "¡BOCINAZO!"
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Solo un ratito, voy a la playa y vuelvo!",
+        "¡Doble fila, pero con balizas, todo legal!",
+        "¡Aquí me estaciono porque hay sitio!",
+        "¡Cuidado con mi carro, que es nuevo!",
+        "¡La pista también es estacionamiento!"
+      ],
+      "2": [
+        "¡Arranquen todos, que llegó el serenazgo!",
+        "¡Fila india hasta Chorrillos!",
+        "¡Si nos separan, nos juntamos de nuevo!",
+        "¡Balizas prendidas, problema resuelto!",
+        "¡Somos una sola fila, como familia!"
+      ],
+      "3": [
+        "¡Agua Dulce es nuestra!",
+        "¡Nadie pasa, que estamos estacionados!",
+        "¡Tercera fila, cuarta fila, la que sea!",
+        "¡El que se mueve pierde el sitio!",
+        "¡Hasta el último carro de la fila!"
+      ]
+    },
+    "quips": {
+      "horn": "¡Mi claxon también es para estacionar!",
+      "oil": "¡Se resbala toda la fila!",
+      "combi": "¡Esa combi se metió en la fila!",
+      "metro": "¡El Metro no llega a la playa!",
+      "valet": "¡Pase, pase, que el heladero va primero!"
+    }
+  },
+  "weather": {
+    "fog": {
+      "first": 16,
+      "every": [
+        22,
+        30
+      ],
+      "dur": [
+        5,
+        8
+      ],
+      "depth": 0.45
+    }
+  },
+  "wanted": {
+    "max": 5,
+    "decay": 5,
+    "chaser": "persecucion",
+    "chaseLife": 8,
+    "blockAt": 4,
+    "blockEvery": 8,
+    "block": "bloqueo"
+  },
+  "hazards": {
+    "rockslide": {
+      "first": 12,
+      "every": [
+        18,
+        26
+      ],
+      "warn": 1.6,
+      "dur": 3.5,
+      "lanes": [
+        1,
+        2
+      ],
+      "side": "izquierda",
+      "dmg": 4,
+      "rate": 2.5,
+      "speed": 250
+    },
+    "birds": {
+      "first": 9,
+      "every": [
+        14,
+        20
+      ],
+      "dur": 2.2,
+      "w": 70,
+      "splat": 4
+    },
+    "cart": {
+      "first": 20,
+      "every": [
+        24,
+        32
+      ],
+      "speed": 55,
+      "dmg": 8,
+      "fine": 100,
+      "bonus": 800,
+      "label": "¡HELADOS DON FRÍO!"
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
-import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
+import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../core/render';
+import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
 import { getSettings, setSettings, unlockedStage } from '../core/save';
@@ -95,6 +96,6 @@ export class MenuScene extends Phaser.Scene {
     const dt = Math.min(0.05, delta / 1000), def = STAGES[this.stageId];
     track.scroll += def.cfg.road.idleScroll * dt;
     setupCamera(this); // la vista puede cambiar de ancho al rotar o redimensionar
-    beginLayers(this.L); def.drawWorld(this.L.world, def.cfg, track.scroll, null); endLayers(this.L);
+    beginLayers(this.L); setWarp(this.L, roadWarp(def.cfg, track.scroll)); def.drawWorld(this.L.world, def.cfg, track.scroll, null); endLayers(this.L);
   }
 }

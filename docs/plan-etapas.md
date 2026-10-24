@@ -26,7 +26,7 @@ La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la
 | 6 | Gamarra y La Victoria | Triciclos con fardos, carretillas saliendo de galerías, rumas de cajas, cables bajos que castigan acelerar | Mototaxis y triciclos | Camión de mercadería (rollos de tela rodando) |
 | 7 | Av. Colonial y Callao | Contenedores mal amarrados, grúas, camiones de obra cerrando carriles, cráteres con agua, desvíos de saneamiento | Mototaxis (carcochas) y combis asesinas | Tráiler portacontenedores |
 | 8 | Panamericana Norte | Garúa que reduce la visibilidad, casetas de peaje abandonadas con barreras que bajan solas, buses interprovinciales adelantando en curva | Patrulleros según nivel de búsqueda (1 a 5 estrellas) | Escuadrón policial (rompellantas, bloqueos) |
-| F | Costa Verde de noche | Neblina, pista con curvas (no recta) junto al mar, deslizamientos ocasionales del acantilado, aves que ensucian el parabrisas y tapan la vista, autos en doble fila a la altura de Agua Dulce, enemigos de todas las etapas | Mezcla de todos | Sorpresa (por definir) |
+| F | Costa Verde de noche | Neblina, pista con curvas (no recta) junto al mar, deslizamientos ocasionales del acantilado, aves que ensucian el parabrisas y tapan la vista, autos en doble fila a la altura de Agua Dulce, enemigos de todas las etapas | Mezcla de todos | La Doble Fila de Agua Dulce, serpiente de autos (ver sección 5b) |
 | S | **Línea Amarilla del Terror** (secreta) | Ver sección 5 | Todos los enjambres mezclados | Final de precisión: el avión carguero |
 
 ## 4. Motor común que hace falta
@@ -44,6 +44,25 @@ Para que cada etapa sea solo datos, el motor necesita estas piezas. Cada una se 
 | **Saltos y rampas** | Desniveles que lanzan al Tico | Vía Expresa |
 | **Nivel de búsqueda** | Estrellas de 1 a 5 que escalan la persecución policial | Panamericana |
 | **Escenas de cierre** | Secuencias cortas al final de una etapa (el avión) | Línea Amarilla |
+
+## 5b. Jefe final: la Doble Fila de Agua Dulce y la carretilla Don Frío
+
+Decidido por el dueño el 24 de octubre de 2026.
+
+- **Jefe:** una fila de autos estacionados en doble fila que despierta y se mueve como una serpiente segmentada. La cabeza elige el carril y cada auto sigue el rastro del anterior, ondulando con las curvas.
+  - El punto débil es la cabeza, por la derecha.
+  - Cada segmento se puede romper. Al romper uno, la serpiente **se parte en dos** serpientes más chicas, como en *Centipede*.
+  - Ataques: cruzarse en diagonal cerrando carriles, latigazo de la cola y, al final, enroscarse dejando un solo hueco.
+- **La carretilla Don Frío** (parodia de una marca de helados; usa los colores clásicos de las carretillas de helado limeñas, amarillo con detalles rojos y azules, y la corneta sintetizada) es la **protegida** de la pelea:
+  - Cruza la pista de forma imprudente, sobre todo en la fase final.
+  - No se toca: tocarla quita vida y suma estrellas de búsqueda.
+  - La serpiente se detiene para cederle el paso, una pausa que se puede aprovechar.
+  - Si llega intacta al final, da un bonus grande.
+  - Tono: el chiste es que en Lima el único que nunca choca es el heladero. Nunca se burla del heladero.
+- **Cierre:** al vencer a la serpiente, la carretilla cruza la meta primero.
+- **Pista curva:** la pista entera se desplaza a izquierda y derecha en curvas suaves, con el acantilado de un lado y el mar del otro. Todo la sigue. No hay fuerza que empuje hacia afuera.
+- **Deslizamientos:** primero cae polvo y piedritas del lado del acantilado como aviso, y después rueda una lluvia de piedras que cierra uno o dos carriles un rato.
+- **Aves:** pasa una bandada con su sombra. Si te agarra debajo, caen manchas en la pantalla que tapan parte de la vista y se borran solas en unos segundos. Tocar el claxon a tiempo espanta a la bandada.
 
 ## 5. Nivel secreto: "Línea Amarilla del Terror"
 
@@ -70,7 +89,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Callao | M | Contenedores que caen, tráiler | Hecho (ADR 0023) |
 | Vía Expresa | L | Saltos y rampas (motor), bus articulado | Hecho (ADR 0024) |
 | Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Hecho (ADR 0025) |
-| Costa Verde (final) | L | Pista curva (pieza de motor), neblina, desprendimientos del acantilado, aves que tapan la vista, doble fila en Agua Dulce, jefe sorpresa | Pendiente |
+| Costa Verde (final) | L | Pista curva (pieza de motor), neblina, desprendimientos del acantilado, aves que tapan la vista, doble fila en Agua Dulce, jefe serpiente | Hecho (ADR 0026) |
 | Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Pendiente |
 
 ## 7. Orden

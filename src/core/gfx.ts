@@ -47,6 +47,8 @@ export class Gfx {
   globalAlpha = 1;
   font: FontSpec = FONT(10);
   textAlign: 'left' | 'center' | 'right' = 'left';
+  // pista curva (ADR 0026): corrimiento horizontal según la altura en pantalla; null en las etapas rectas
+  warp: ((y: number) => number) | null = null;
 
   private m = [1, 0, 0, 1, 0, 0]; // a b c d e f
   private stack: { m: number[]; fillStyle: string; strokeStyle: string; lineWidth: number; globalAlpha: number; font: FontSpec; textAlign: Gfx['textAlign'] }[] = [];
@@ -83,7 +85,10 @@ export class Gfx {
     const m = this.m, cs = Math.cos(r), sn = Math.sin(r), a = m[0], b = m[1], c = m[2], d = m[3];
     m[0] = a * cs + c * sn; m[1] = b * cs + d * sn; m[2] = c * cs - a * sn; m[3] = d * cs - b * sn;
   }
-  private tx(x: number, y: number): Pt { const m = this.m; return { x: m[0] * x + m[2] * y + m[4], y: m[1] * x + m[3] * y + m[5] }; }
+  private tx(x: number, y: number): Pt {
+    const m = this.m, py = m[1] * x + m[3] * y + m[5];
+    return { x: m[0] * x + m[2] * y + m[4] + (this.warp ? this.warp(py) : 0), y: py };
+  }
   private get axisAligned(): boolean { const m = this.m; return m[1] === 0 && m[2] === 0 && m[0] === 1 && m[3] === 1; }
 
   /* ---------- relleno directo ---------- */
@@ -94,8 +99,13 @@ export class Gfx {
   }
   fillRect(x: number, y: number, w: number, h: number): void {
     if (!this.setFill()) return;
-    if (this.axisAligned) { this.g.fillRect(x + this.m[4], y + this.m[5], w, h); return; }
-    this.g.fillPoints([this.tx(x, y), this.tx(x + w, y), this.tx(x + w, y + h), this.tx(x, y + h)], true);
+    if (this.axisAligned && !this.warp) { this.g.fillRect(x + this.m[4], y + this.m[5], w, h); return; }
+    // con curva, los rectángulos altos se cortan en franjas para que sigan la pista
+    const n = this.warp ? Math.max(1, Math.ceil(Math.abs(h) / 16)) : 1, sh = h / n;
+    for (let i = 0; i < n; i++) {
+      const y0 = y + i * sh, y1 = y0 + sh;
+      this.g.fillPoints([this.tx(x, y0), this.tx(x + w, y0), this.tx(x + w, y1), this.tx(x, y1)], true);
+    }
   }
 
   /* ---------- trazados ---------- */
