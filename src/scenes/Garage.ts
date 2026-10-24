@@ -9,7 +9,7 @@ import { beginLayers, createLayers, endLayers, type Layers } from '../core/rende
 import { buyUpgrade, getGarage, unlockedStage, type Garage } from '../core/save';
 import { C } from '../core/util';
 import { CATEGORIES, UPGRADES, applyUpgrades, isLocked, nextGoal, nextLevel, recommended } from '../garage/upgrades';
-import { STAGES, stageNumber } from '../stages';
+import { STAGES, stageNumber, wonItems } from '../stages';
 
 export interface GarageData { stageId: string; dk: DiffKey }
 
@@ -58,6 +58,8 @@ export class GarageScene extends Phaser.Scene {
     const unlocked = unlockedStage(stageNumber);
     const goal = nextGoal(levels, wallet, unlocked);
     $('gGoal').textContent = goal ? `Te faltan ${money(goal.missing)} para ${goal.name}.` : 'Te alcanza para cualquier mejora. ¡Elige bien!';
+    const items = wonItems(unlocked), it = $('gItems');
+    it.hidden = !items.length; it.textContent = `Tus objetos · ${items.map((x) => x.name).join(', ')}`;
     const cats = $('gCats'); cats.innerHTML = '';
     for (const c of CATEGORIES) {
       const b = document.createElement('button');

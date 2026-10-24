@@ -30,6 +30,11 @@ export interface VehicleLook {
 // Movimiento propio, además de avanzar con la pista.
 export interface VehicleMove { zigzag?: { amp: number; freq: number } }
 
+// Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
+// contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit';
+export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
+
 export interface TrafficType {
   k: string; weight: number; w: number; h: number; vy: [number, number]; hp: number; cols: string[];
   invulnerable?: boolean; contactDmg: number; selfDmg?: number;
@@ -114,6 +119,8 @@ export interface StageConfig {
     armor?: number; regen?: number; lives?: number; look?: { bumper?: boolean; plates?: boolean };
     // mejoras de lujo: sin papeletas y con paso libre ante uniformados; combi aliada cada allyEvery s con allyDmg de daño
     privilege?: boolean; allyEvery?: number; allyDmg?: number;
+    // objetos de victoria que el jugador ya tiene (los pone la escena al empezar)
+    items?: ItemDef[];
   };
   weapons: {
     cone: {
@@ -138,7 +145,7 @@ export interface StageConfig {
   bumps: { first: number; every: [number, number]; dmg: number };
   crossings: { first: number; every: [number, number] };
   streets: string[];
-  // item: premio que se muestra al ganar; defeatTip: consejo al perder
-  rewards: { win: number; clean: number; blindPct: number; item?: string; defeatTip?: string };
+  // item: objeto de victoria de la etapa; defeatTip: consejo al perder
+  rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string };
   boss: BossConfig;
 }

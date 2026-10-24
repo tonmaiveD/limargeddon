@@ -37,7 +37,8 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
   - Frases (`lines`) y réplicas (`quips`).
 - **Ayudas** (`hints`): frases cortas sobre el Tico en los primeros segundos, `{ "at": 1.5, "text": "..." }`. Pensadas para el tutorial, máximo unas ocho palabras.
 - **Dificultades:** vida del jefe, velocidad, frecuencia de ataques y `dmgMult`, el multiplicador del daño que recibe el Tico.
-- **Recompensas:** pago, bono sin daño, `item` (premio que se muestra al ganar) y `defeatTip` (consejo al perder).
+- **Recompensas:** pago, bono sin daño, `item` y `defeatTip` (consejo al perder).
+  - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine" o "jetHit" (ADR 0020). La `desc` va en minúscula, porque se muestra después de "nombre ·".
 - **Armas, bonus, papeletas, rompemuelles, cruces, calles y recompensas.**
 
 ## Paisaje

@@ -13,7 +13,7 @@ Una auditoría externa (comportamiento, UX/UI y diseño de juego) contrastó el 
 - **Registro de peleas:** guarda el commit del build, si fue en modo prueba, las mejoras compradas, la vida que le quedó al jefe, el cobro bruto, las multas, lo cobrado y si fue repetida. La mediana trunca el tiempo igual que la pantalla y promedia las dos del medio cuando hay un número par.
 - **Textos:** "Más conos" explica su efecto en cada modo. El consejo de Miraflores ya no dice que el claxon tiene multa. El logro "Vecino ejemplar" dice "cero papeletas", sin nombrar al serenazgo. `docs/concepto.md` pasa al Q8 y a la vida vigente.
 - **Sin cambios por ahora:** la vida del jefe en el modo por toque y la economía. Primero se juntan peleas con el registro nuevo.
-- Los efectos de Silbato, Bolso y Poncho van en una decisión aparte.
+- Los efectos de Silbato, Bolso y Poncho van en la ADR 0020.
 
 ## Consecuencias
 - Ningún cambio toca la simulación del prototipo: la prueba de paridad sigue igual.

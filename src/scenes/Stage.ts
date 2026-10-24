@@ -7,9 +7,9 @@ import { beginLayers, createLayers, endLayers, renderEntities, type Layers } fro
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { getGarage, getSettings, settleFight } from '../core/save';
+import { getGarage, getSettings, settleFight, unlockedStage } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, type StageDef } from '../stages';
+import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
 
@@ -37,7 +37,9 @@ export class StageScene extends Phaser.Scene {
     this.def = STAGES[this.data0.stageId];
     const mode: FireMode | undefined = this.def.cfg.weapons.cone.mode ? getSettings().fireMode : undefined;
     // las mejoras del taller se aplican sobre una copia de la config de la etapa (ADR 0018)
-    this.G = createGame(applyUpgrades(this.def.cfg, getGarage().levels), this.data0.dk, keys, this.def.ai, mode);
+    const cfg = applyUpgrades(this.def.cfg, getGarage().levels);
+    cfg.player.items = wonItems(unlockedStage(stageNumber));
+    this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
     setDeckMode(this.G.fireMode);
     this.paused = false;
     Sfx.init(); Sfx.music(true);
