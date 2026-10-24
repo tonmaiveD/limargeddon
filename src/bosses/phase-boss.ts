@@ -54,6 +54,12 @@ function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
   else { b.state = 'teleRam'; b.st = P.tele; b.rx = G.p.x; Sfx.play('bossHorn'); }
 }
 
+// Punto de salida de los proyectiles: la puerta derecha (cobrador) o la parte de atrás (carga del camión).
+export function throwOrigin(G: Game): { x: number; y: number } {
+  const b = G.b, T = ph(G).throw;
+  return T?.from === 'atras' ? { x: b.x, y: b.y + b.h / 2 + 4 } : { x: b.x + b.w / 2, y: b.y + b.h / 4 };
+}
+
 // Zona del chorro: columna del ancho del JSON desde el frente del jefe hasta abajo.
 export function jetZone(G: Game): { x: number; y: number; w: number; h: number } | null {
   const b = G.b, J = ph(G).jet;
@@ -110,10 +116,10 @@ const STATES: StateTable<Game> = {
   teleThrow(G, dt) {
     const b = G.b, T = ph(G).throw!; b.flash = 'throw'; b.st -= dt;
     if (b.st > 0) return;
-    const x0 = b.x + b.w / 2, y0 = b.y + b.h / 4, aim = Math.atan2(G.p.y - y0, G.p.x - x0);
+    const { x: x0, y: y0 } = throwOrigin(G), aim = T.aim === 'abajo' ? Math.PI / 2 : Math.atan2(G.p.y - y0, G.p.x - x0);
     for (let i = 0; i < T.count; i++) {
-      const a = aim + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0);
-      G.foes.push({ x: x0, y: y0, vx: Math.cos(a) * T.speed, vy: Math.sin(a) * T.speed, r: T.r, dmg: T.dmg, col: T.col ?? C.yellow });
+      const a = aim + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0), col = T.cols ? T.cols[i % T.cols.length] : T.col ?? C.yellow;
+      G.foes.push({ x: x0, y: y0, vx: Math.cos(a) * T.speed, vy: Math.sin(a) * T.speed, r: T.r, dmg: T.dmg, col, look: T.look });
     }
     if (T.text) floatText(G, x0, y0 - 20, T.text, T.col ?? C.yellow);
     Sfx.play('kernel');

@@ -88,13 +88,16 @@ function updateObstacles(G: Game, dt: number): void {
         if (!ob.hit && p.hitCd <= 0) {
           ob.hit = true; p.hitCd = G.cfg.player.trafficHitCd;
           if (p.pw.turbo > 0) { floatText(G, ob.x, ob.y - 10, '¡FUERA!', C.orange); burst(G, ob.x, ob.y, o.col, 12); ob.y = 9999; }
-          else { if (o.dmg) hurt(G, o.dmg); if (o.fine) fine(G, p.x, p.y, o.fine, 'PAPELETA'); burst(G, p.x, p.y - p.h / 2, o.col, 8); }
+          else { if (o.dmg && !usePerk(G, 'obstacleHit')) hurt(G, o.dmg); if (o.fine) fine(G, p.x, p.y, o.fine, 'PAPELETA'); burst(G, p.x, p.y - p.h / 2, o.col, 8); }
         }
       }
-    } else if (play && !ob.hit && overlap(p, ob)) {
+    } else if (play && !ob.hit && overlap(p, ob) && (!o.accelOnly || G.keys.up)) {
       ob.hit = true;
       if (p.pw.turbo > 0) { floatText(G, p.x, p.y - 46, '¡VUELA!', C.orange); burst(G, p.x, p.y, C.orange, 8); }
-      else { hurt(G, o.dmg); floatText(G, p.x, p.y - 46, '¡HUECO!', C.yellow); shake(G, 0.35); Sfx.play('bump'); }
+      else {
+        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg);
+        floatText(G, p.x, p.y - 46, o.hitText ?? '¡HUECO!', C.yellow); shake(G, 0.35); Sfx.play('bump');
+      }
     }
   }
   G.obstacles = G.obstacles.filter((ob) => ob.y < 640 + 60);

@@ -25,3 +25,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0019](0019-correcciones-de-la-auditoria.md) | Correcciones de la auditoría de octubre de 2026 | Aceptada |
 | [0020](0020-objetos-de-victoria-con-efecto.md) | Objetos de victoria con efecto | Aceptada |
 | [0021](0021-proyectiles-del-jefe-y-etapa-javier-prado.md) | Proyectiles del jefe y Etapa 4 Javier Prado | Aceptada |
+| [0022](0022-cables-mototaxis-y-etapa-gamarra.md) | Cables, mototaxis y Etapa 5 Gamarra | Aceptada |
