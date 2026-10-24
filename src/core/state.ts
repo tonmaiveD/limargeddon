@@ -13,7 +13,7 @@ export interface Player {
   x: number; y: number; w: number; h: number; vx: number; vy: number; hp: number; max: number;
   stun: number; hitCd: number; flash: number;
   cd: Record<WeaponKey, number>; pw: Record<TimedPower, number>;
-  ammo: number; reloadT: number; coneHeld: boolean;
+  ammo: number; reloadT: number; coneHeld: boolean; lives: number;
 }
 
 export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet';
@@ -72,7 +72,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   return {
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null,
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
-      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false },
+      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
       state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
     traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
@@ -108,6 +108,7 @@ export function hurt(G: Game, d: number): void {
   const p = G.p;
   if (p.pw.soat > 0) { floatText(G, p.x, p.y - 30, 'SOAT', C.green); Sfx.play('block'); return; }
   if (G.d.dmgMult) d = Math.max(1, Math.round(d * G.d.dmgMult));
+  if (G.cfg.player.armor) d = Math.max(1, Math.round(d * (1 - G.cfg.player.armor)));
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
   floatText(G, p.x, p.y - 30, '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
 }

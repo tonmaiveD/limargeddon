@@ -21,3 +21,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0015](0015-jefe-generico-y-etapa-miraflores.md) | Jefe genérico por fases, selector de etapa y Etapa 1 Miraflores | Aceptada (selector reemplazado por la 0017) |
 | [0016](0016-chorro-marchas-y-etapa-centro.md) | Ataque de chorro, obstáculos con vaivén y Etapa 3 Centro | Aceptada |
 | [0017](0017-etapas-en-orden-con-desbloqueo.md) | Etapas en orden, con desbloqueo | Aceptada |
+| [0018](0018-taller-entre-etapas.md) | Taller entre etapas: billetera, mejoras y parada rápida | Aceptada |

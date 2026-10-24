@@ -50,6 +50,7 @@ npm run balance     # duración y victorias con bots, por modo de disparo
 npm run build
 ```
 - Agregar la etapa a `scripts/balance.test.ts`. Con `ETAPA=<distrito> npm run balance` se corre solo esa etapa.
+- Revisar también la fila con mejoras típicas (ver `ce-mej-toque` en el script): las mejoras deben ayudar sin trivializar la etapa.
 - **Metas de balance, bot medio:** Normal entre 75 y 85 s, ganando 22 a 27 de 30 peleas. Fácil, más corta y casi siempre ganada. Difícil, unos 10 s más larga y con menos de la mitad ganadas. Las personas tardan unas 1.5 veces más que el bot.
 - Verificar con tests y simulación. Basta con una o dos capturas en viewport móvil (393×852) para revisar cómo se ve.
 

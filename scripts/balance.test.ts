@@ -4,6 +4,7 @@ import { PROTOTYPE_CFG, startPort, stepPort } from '../tests/harness/port';
 import { seedRandom } from '../tests/harness/rng';
 import { bot } from '../tests/harness/bot';
 import { STAGES } from '../src/stages';
+import { applyUpgrades } from '../src/garage/upgrades';
 
 // Reporte de duración de la pelea con bots de tres niveles (30 semillas cada uno). No es un test de CI: npm run balance.
 // Compara la config del prototipo con la del juego. Las personas tardan más que los bots: validar con el registro del dispositivo.
@@ -45,6 +46,8 @@ it('duraciones', () => {
     ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
     ['mf-toque', mf, 'toque'], ['mf-acelerar', mf, 'acelerar'],
     ['ce-toque', ce, 'toque'], ['ce-acelerar', ce, 'acelerar'],
+    // con las mejoras típicas al llegar al Centro (~S/ 1.300 gastados)
+    ['ce-mej-toque', applyUpgrades(ce, { conos: 1, llantas: 1, parachoques: 1, motor: 1 }), 'toque'],
   ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si' } as Record<string, string>)[only] ?? only));
   for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {

@@ -218,6 +218,11 @@ export function updateWorld(G: Game, dt: number): void {
 export function update(G: Game, dt: number): boolean {
   G.t += dt;
   updatePlayer(G, dt); G.ai.update(G, dt); updateWorld(G, dt);
+  // SOAT de verdad (taller): una vida extra por etapa
+  if (G.p.hp <= 0 && G.p.lives > 0) {
+    G.p.lives--; G.p.hp = 40; G.p.pw.soat = 2.5; G.p.hitCd = 1;
+    floatText(G, G.p.x, G.p.y - 50, '¡EL SOAT TE SALVÓ!', C.green, 12); burst(G, G.p.x, G.p.y, C.green, 24, 200); Sfx.play('block');
+  }
   if (G.b.hp <= 0 || G.p.hp <= 0) {
     const win = G.b.hp <= 0;
     G.mode = 'over'; G.result = { win };

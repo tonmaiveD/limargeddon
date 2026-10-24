@@ -11,10 +11,11 @@ const VERSION = 1;
 const MAX_FIGHTS = 300;
 
 export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number }
-export interface Settings { fireMode?: FireMode; stageId?: string }
+export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
-interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number } }
+// garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)
+interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number> } }
 
 function load(): SaveV1 {
   try {
@@ -71,4 +72,42 @@ export function unlockNext(stageNumber: number, numberOf: (stageId: string) => n
   data.progress = { unlocked: Math.max(current, stageNumber + 1) };
   store(data);
   return data.progress.unlocked;
+}
+
+/* Taller: billetera y mejoras. */
+export interface Garage { wallet: number; levels: Record<string, number> }
+export function getGarage(): Garage {
+  const g = load().garage;
+  return { wallet: g?.wallet ?? 0, levels: { ...(g?.levels ?? {}) } };
+}
+
+// Suma lo cobrado en una pelea. Repetir una etapa ya ganada paga la mitad, para que no convenga quedarse juntando plata.
+export const REPLAY_PAY = 0.5;
+export function addEarnings(amount: number): number {
+  const data = load(), g = data.garage ?? { wallet: 0, levels: {} };
+  g.wallet = Math.max(0, Math.round(g.wallet + amount)); data.garage = g; store(data);
+  return g.wallet;
+}
+
+// Compra el siguiente nivel de una mejora si alcanza la plata. Devuelve el nuevo estado o null si no se pudo.
+export function buyUpgrade(id: string, price: number, maxLevel: number): Garage | null {
+  const data = load(), g = data.garage ?? { wallet: 0, levels: {} };
+  const lvl = g.levels[id] ?? 0;
+  if (lvl >= maxLevel || g.wallet < price) return null;
+  g.wallet -= price; g.levels = { ...g.levels, [id]: lvl + 1 }; data.garage = g; store(data);
+  return { wallet: g.wallet, levels: { ...g.levels } };
+}
+
+/*
+ * Cierre de una pelea: decide si fue una etapa repetida (antes de registrarla, porque la victoria misma cuenta para
+ * el desbloqueo), registra la pelea, cobra (50% si se repite) y, si ganó, desbloquea la siguiente.
+ */
+export function settleFight(f: Omit<FightRecord, 'at'>, stageNumber: number, pay: number, numberOf: (id: string) => number | undefined):
+  { earned: number; replay: boolean; wallet: number } {
+  const replay = stageNumber < unlockedStage(numberOf);
+  recordFight(f);
+  const earned = Math.round(pay * (replay ? REPLAY_PAY : 1));
+  const wallet = addEarnings(earned);
+  if (f.win) unlockNext(stageNumber, numberOf);
+  return { earned, replay, wallet };
 }

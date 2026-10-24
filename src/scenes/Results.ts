@@ -3,25 +3,27 @@ import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import type { Summary } from '../core/world';
 import { STAGES, nextStage } from '../stages';
-
-const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
 import { exportFights, fightStats } from '../core/save';
 
-interface ResultsData { summary: Summary; stageId: string; dk: DiffKey }
+const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
+const money = (n: number) => 'S/ ' + n.toLocaleString('es-PE');
+
+interface ResultsData { summary: Summary; stageId: string; dk: DiffKey; earned: number; replay: boolean; wallet: number }
 
 /* Resultados: overlay DOM sobre la etapa, que sigue animando humo y partículas detrás. */
 export class ResultsScene extends Phaser.Scene {
   constructor() { super('Results'); }
 
   create(data: ResultsData): void {
-    const { summary: s, stageId, dk } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
+    const { summary: s, stageId, dk, earned, replay, wallet } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
     const $ = (id: string) => document.getElementById(id)!;
     const bossName = cfg.boss.title;
     $('endEyebrow').textContent = s.win ? `Etapa ${cfg.number} completa` : `Etapa ${cfg.number} · fallida`;
     $('endTitle').textContent = s.win ? `${bossName} cayó` : `Te chocó ${bossName.replace(/^La /, "la ")}`;
     $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd><dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
       ${s.fireMode !== 'mantener' ? `<dt>Mejor combo</dt><dd style="color:var(--green)">x${s.bestCombo}</dd>` : ''}<dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>
-      <dt>Pago neto</dt><dd style="color:var(--yellow)">S/ ${s.pay}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
+      <dt>Cobrado${replay ? ' (etapa repetida: 50%)' : ''}</dt><dd style="color:var(--yellow)">${money(earned)}</dd>
+      <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
     $('endBadges').innerHTML = s.win ? `
       <div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>
       <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
@@ -31,10 +33,12 @@ export class ResultsScene extends Phaser.Scene {
     const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement, next = $('next') as HTMLButtonElement;
     const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; next.onclick = null; this.scene.stop(); };
     again.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId, dk }); };
-    // al ganar se ofrece la etapa siguiente (ya quedó desbloqueada); si era la última disponible, se avisa
-    const nxt = s.win ? nextStage(stageId) : null;
-    next.hidden = !nxt; again.className = nxt ? 'pick alt' : 'pick';
-    if (nxt) next.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId: nxt, dk }); };
+    // al ganar, el botón principal lleva al taller y de ahí a la etapa siguiente (ya desbloqueada);
+    // al perder, la revancha es lo principal y el taller queda como opción
+    const nxt = s.win ? nextStage(stageId) : null, target = nxt ?? stageId;
+    next.hidden = false; next.textContent = s.win ? 'Al taller' : 'Taller';
+    next.className = s.win ? 'pick' : 'pick alt'; again.className = s.win ? 'pick alt' : 'pick';
+    next.onclick = () => { close(); this.scene.stop('Stage'); this.scene.start('Garage', { stageId: target, dk }); };
     if (s.win && !nxt) $('endBadges').insertAdjacentHTML('beforeend', '<div class="badge">¡Completaste todas las etapas disponibles! Pronto llegan más distritos.</div>');
     toMenu.onclick = () => { close(); Sfx.engine(0); this.scene.stop('Stage'); this.scene.start('Menu'); };
     const copy = $('copyLog') as HTMLButtonElement;
@@ -43,7 +47,7 @@ export class ResultsScene extends Phaser.Scene {
       try { await navigator.clipboard.writeText(JSON.stringify(exportFights())); copy.textContent = 'Registro copiado'; }
       catch { copy.textContent = 'No se pudo copiar'; }
     };
-    end.hidden = false; (nxt ? next : again).focus();
+    end.hidden = false; (s.win ? next : again).focus();
   }
 }
 

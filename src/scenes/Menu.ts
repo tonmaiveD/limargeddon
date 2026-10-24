@@ -54,12 +54,15 @@ export class MenuScene extends Phaser.Scene {
       const b = document.createElement('button');
       b.className = 'pick' + (dk === 'normal' ? '' : ' alt'); b.dataset.diff = dk; b.id = 'd-' + dk; b.textContent = cfg.difficulties[dk].label;
       b.addEventListener('click', () => {
-        Sfx.init(); $('menu').hidden = true;
+        Sfx.init(); $('menu').hidden = true; setSettings({ dk });
         this.scene.start('Stage', { stageId: this.stageId, dk });
       });
       diffs.appendChild(b);
     });
     this.setupFireSelector(cfg.weapons.cone.mode !== undefined);
+    ($('toGarage') as HTMLButtonElement).onclick = () => {
+      $('menu').hidden = true; this.scene.start('Garage', { stageId: this.stageId, dk: getSettings().dk ?? 'normal' });
+    };
     $('menu').hidden = false;
     Sfx.engine(0);
     setDeckCooldowns({ cone: 0, oil: 0, horn: 0 });

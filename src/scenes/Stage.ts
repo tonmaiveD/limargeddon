@@ -7,7 +7,8 @@ import { beginLayers, createLayers, endLayers, renderEntities, type Layers } fro
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { getSettings, recordFight, unlockNext } from '../core/save';
+import { getGarage, getSettings, settleFight } from '../core/save';
+import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, stageNumber, track, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
@@ -35,7 +36,8 @@ export class StageScene extends Phaser.Scene {
     this.L = createLayers(this);
     this.def = STAGES[this.data0.stageId];
     const mode: FireMode | undefined = this.def.cfg.weapons.cone.mode ? getSettings().fireMode : undefined;
-    this.G = createGame(this.def.cfg, this.data0.dk, keys, this.def.ai, mode);
+    // las mejoras del taller se aplican sobre una copia de la config de la etapa (ADR 0018)
+    this.G = createGame(applyUpgrades(this.def.cfg, getGarage().levels), this.data0.dk, keys, this.def.ai, mode);
     setDeckMode(this.G.fireMode);
     this.paused = false;
     Sfx.init(); Sfx.music(true);
@@ -84,10 +86,11 @@ export class StageScene extends Phaser.Scene {
       if (G.mode === 'play') {
         if (update(G, dt)) {
           const summary = summarize(G);
-          recordFight({ stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best });
-          if (summary.win) unlockNext(G.cfg.number, stageNumber); // ganar desbloquea la etapa siguiente
+          const { earned, replay, wallet } = settleFight(
+            { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best },
+            G.cfg.number, summary.pay, stageNumber);
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
-          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk }));
+          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk, earned, replay, wallet }));
         }
       } else { G.t += dt; updateWorld(G, dt); }
     }

@@ -1,0 +1,402 @@
+{
+  "categories": [
+    {
+      "id": "performance",
+      "name": "Performance"
+    },
+    {
+      "id": "armas",
+      "name": "Armas"
+    },
+    {
+      "id": "defensas",
+      "name": "Defensas"
+    },
+    {
+      "id": "especiales",
+      "name": "Especiales"
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "motor",
+      "cat": "performance",
+      "name": "Motor repotenciado",
+      "levels": [
+        {
+          "price": 300,
+          "desc": "+8% de aceleración y +5% al girar",
+          "ops": [
+            {
+              "path": "player.accelY",
+              "op": "mul",
+              "value": 1.08
+            },
+            {
+              "path": "player.accelX",
+              "op": "mul",
+              "value": 1.05
+            }
+          ]
+        },
+        {
+          "price": 650,
+          "desc": "+8% de aceleración y +5% al girar",
+          "ops": [
+            {
+              "path": "player.accelY",
+              "op": "mul",
+              "value": 1.08
+            },
+            {
+              "path": "player.accelX",
+              "op": "mul",
+              "value": 1.05
+            }
+          ]
+        },
+        {
+          "price": 1100,
+          "desc": "+8% de aceleración y +5% al girar",
+          "ops": [
+            {
+              "path": "player.accelY",
+              "op": "mul",
+              "value": 1.08
+            },
+            {
+              "path": "player.accelX",
+              "op": "mul",
+              "value": 1.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llantas",
+      "cat": "performance",
+      "name": "Llantas de verdad",
+      "levels": [
+        {
+          "price": 250,
+          "desc": "Giros más firmes y rápidos",
+          "ops": [
+            {
+              "path": "player.response",
+              "op": "add",
+              "value": 1.5
+            },
+            {
+              "path": "player.accelX",
+              "op": "mul",
+              "value": 1.06
+            }
+          ]
+        },
+        {
+          "price": 550,
+          "desc": "Giros más firmes y rápidos",
+          "ops": [
+            {
+              "path": "player.response",
+              "op": "add",
+              "value": 1.5
+            },
+            {
+              "path": "player.accelX",
+              "op": "mul",
+              "value": 1.06
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turbo",
+      "cat": "performance",
+      "name": "Turbo Chicha",
+      "levels": [
+        {
+          "price": 400,
+          "desc": "El bono de turbo dura 1.5 s más",
+          "ops": [
+            {
+              "path": "powers.turbo.dur",
+              "op": "add",
+              "value": 1.5
+            }
+          ]
+        },
+        {
+          "price": 800,
+          "desc": "El bono de turbo dura 1.5 s más",
+          "ops": [
+            {
+              "path": "powers.turbo.dur",
+              "op": "add",
+              "value": 1.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conos",
+      "cat": "armas",
+      "name": "Más conos",
+      "levels": [
+        {
+          "price": 350,
+          "desc": "+1 cono en la reserva y cadencia 8% mayor",
+          "ops": [
+            {
+              "path": "weapons.cone.ammo",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "path": "weapons.cone.cd",
+              "op": "mul",
+              "value": 0.92
+            }
+          ]
+        },
+        {
+          "price": 750,
+          "desc": "+1 cono, recarga 15% más rápida y cadencia 8% mayor",
+          "ops": [
+            {
+              "path": "weapons.cone.ammo",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "path": "weapons.cone.reload",
+              "op": "mul",
+              "value": 0.85
+            },
+            {
+              "path": "weapons.cone.cd",
+              "op": "mul",
+              "value": 0.92
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aceite",
+      "cat": "armas",
+      "name": "Aceite reciclado",
+      "levels": [
+        {
+          "price": 300,
+          "desc": "El aceite vuelve 0.8 s antes y el derrape dura más",
+          "ops": [
+            {
+              "path": "weapons.oil.cd",
+              "op": "add",
+              "value": -0.8
+            },
+            {
+              "path": "weapons.oil.slip",
+              "op": "add",
+              "value": 0.4
+            }
+          ]
+        },
+        {
+          "price": 650,
+          "desc": "El aceite vuelve 0.8 s antes y el derrape dura más",
+          "ops": [
+            {
+              "path": "weapons.oil.cd",
+              "op": "add",
+              "value": -0.8
+            },
+            {
+              "path": "weapons.oil.slip",
+              "op": "add",
+              "value": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "claxon",
+      "cat": "armas",
+      "name": "Claxon de combi",
+      "levels": [
+        {
+          "price": 300,
+          "desc": "El claxon vuelve 1 s antes y llega más lejos",
+          "ops": [
+            {
+              "path": "weapons.horn.cd",
+              "op": "add",
+              "value": -1
+            },
+            {
+              "path": "weapons.horn.reach",
+              "op": "add",
+              "value": 20
+            }
+          ]
+        },
+        {
+          "price": 650,
+          "desc": "El claxon vuelve 1 s antes y llega más lejos",
+          "ops": [
+            {
+              "path": "weapons.horn.cd",
+              "op": "add",
+              "value": -1
+            },
+            {
+              "path": "weapons.horn.reach",
+              "op": "add",
+              "value": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "parachoques",
+      "cat": "defensas",
+      "name": "Parachoques de fierro",
+      "levels": [
+        {
+          "price": 400,
+          "desc": "Las embestidas pegan +6 y recibes 5% menos daño",
+          "ops": [
+            {
+              "path": "weapons.ram.dmg",
+              "op": "add",
+              "value": 6
+            },
+            {
+              "path": "player.armor",
+              "op": "add",
+              "value": 0.05
+            },
+            {
+              "path": "player.look.bumper",
+              "op": "set",
+              "value": true
+            }
+          ]
+        },
+        {
+          "price": 850,
+          "desc": "Las embestidas pegan +6 y recibes 5% menos daño",
+          "ops": [
+            {
+              "path": "weapons.ram.dmg",
+              "op": "add",
+              "value": 6
+            },
+            {
+              "path": "player.armor",
+              "op": "add",
+              "value": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blindaje",
+      "cat": "defensas",
+      "name": "Blindaje lateral",
+      "levels": [
+        {
+          "price": 450,
+          "desc": "+15 de vida y 8% menos daño",
+          "ops": [
+            {
+              "path": "player.hp",
+              "op": "add",
+              "value": 15
+            },
+            {
+              "path": "player.armor",
+              "op": "add",
+              "value": 0.08
+            },
+            {
+              "path": "player.look.plates",
+              "op": "set",
+              "value": true
+            }
+          ]
+        },
+        {
+          "price": 950,
+          "desc": "+15 de vida y 7% menos daño",
+          "ops": [
+            {
+              "path": "player.hp",
+              "op": "add",
+              "value": 15
+            },
+            {
+              "path": "player.armor",
+              "op": "add",
+              "value": 0.07
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reparacion",
+      "cat": "defensas",
+      "name": "Reparación al paso",
+      "levels": [
+        {
+          "price": 500,
+          "desc": "Recupera 0.5 de vida por segundo",
+          "ops": [
+            {
+              "path": "player.regen",
+              "op": "add",
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "price": 1000,
+          "desc": "Recupera 0.5 de vida más por segundo",
+          "ops": [
+            {
+              "path": "player.regen",
+              "op": "add",
+              "value": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "soat",
+      "cat": "especiales",
+      "name": "SOAT de verdad",
+      "levels": [
+        {
+          "price": 1500,
+          "desc": "Una vez por etapa, el SOAT te salva de quedar fuera",
+          "ops": [
+            {
+              "path": "player.lives",
+              "op": "add",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

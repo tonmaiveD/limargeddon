@@ -106,6 +106,8 @@ export interface StageConfig {
     // 'libre': cuatro direcciones con freno (prototipo v3). 'acelerador': se sube manteniendo el acelerador y al soltar vuelve a la línea de crucero.
     throttle: 'libre' | 'acelerador'; cruiseReturn: number;
     bossPush: number; bossHitCd: number; trafficPush: number; trafficHitCd: number;
+    // mejoras del taller (ADR 0018): armadura (fracción de daño evitado), vida por segundo, vidas extra y piezas visibles
+    armor?: number; regen?: number; lives?: number; look?: { bumper?: boolean; plates?: boolean };
   };
   weapons: {
     cone: {

@@ -139,7 +139,10 @@ function drawPlayer(g: Gfx, G: Game): void {
   const p = G.p;
   if (p.hitCd > 0 && Math.floor(G.t * 20) % 2) g.globalAlpha = 0.6;
   drawCar(g, G.t, p, {
-    body: '#f2c230', roof: '#e0ae1a', flash: p.flash, brake: G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, dmg: 1 - p.hp / p.max, seed: 7, extra: (g, _w, h) => {
+    body: '#f2c230', roof: '#e0ae1a', flash: p.flash, brake: G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, dmg: 1 - p.hp / p.max, seed: 7, extra: (g, w, h) => {
+      const look = G.cfg.player.look;
+      if (look?.bumper) { g.fillStyle = '#4a4452'; g.fillRect(-w / 2 - 1, -h / 2 - 3, w + 2, 4); g.fillStyle = '#8c869a'; g.fillRect(-w / 2 + 2, -h / 2 - 2, w - 4, 1); } // parachoques de fierro
+      if (look?.plates) { g.fillStyle = '#6c7a8c'; g.fillRect(-w / 2 - 2, -h / 4, 2, h / 2); g.fillRect(w / 2, -h / 4, 2, h / 2); }            // blindaje lateral
       g.fillStyle = '#111'; g.fillRect(-8, -h / 2 + h * 0.42, 16, 6);
       g.fillStyle = C.yellow; g.font = FONT(5); g.textAlign = 'center'; g.fillText('TAXI', 0, -h / 2 + h * 0.42 + 5);
     },

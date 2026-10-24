@@ -35,8 +35,18 @@
         </div>
         <p class="tip small" id="fireTip"></p>
         <div class="row" id="menuDiffs"></div>
-        <button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido: sí</button>
+        <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido: sí</button></div>
         <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
+      </div>
+      <div class="overlay garage" id="garage" hidden>
+        <div class="wallet"><span>Billetera</span><b id="gWallet">S/ 0</b></div>
+        <p class="tip small" id="gGoal"></p>
+        <div class="setting" id="gCats" role="tablist" aria-label="Categorías del taller"></div>
+        <div class="upgrades" id="gList"></div>
+        <div class="row sticky">
+          <button class="pick" id="gGo" type="button">Seguir</button>
+          <button class="pick alt" id="gMenu" type="button">Menú</button>
+        </div>
       </div>
       <div class="overlay" id="pause" hidden>
         <h2>Pausa</h2>
