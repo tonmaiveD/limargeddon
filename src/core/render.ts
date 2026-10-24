@@ -84,7 +84,7 @@ function drawTraffic(g: Gfx, G: Game, c: Car): void {
   const L = c.look;
   drawCar(g, G.t, c, {
     body: c.col, roof: L?.roof, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: L ? (g, w, h) => drawLook(g, G, L, w, h) : undefined,
-    flash: c.flash, dmg: c.max && !c.invulnerable ? 1 - c.hp / c.max : 0, seed: c.seed,
+    flash: c.flash, dmg: c.max && !c.invulnerable ? 1 - c.hp / c.max : 0, seed: c.seed, brake: (c.brakeT ?? 0) > 0,
   });
 }
 
@@ -93,6 +93,15 @@ function drawObstacles(g: Gfx, G: Game): void {
   const defs = G.cfg.obstacles ?? [];
   for (const ob of G.obstacles) {
     const o = defs[ob.i], x0 = ob.x - ob.w / 2, y0 = ob.y - ob.h / 2;
+    if (o.style === 'rampa') {
+      // rampa de tierra con franjas: el lado oscuro es la subida
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x0 + 2, y0 + 3, ob.w, ob.h);
+      g.fillStyle = o.col; g.fillRect(x0, y0, ob.w, ob.h);
+      g.fillStyle = o.col2 ?? '#15111d'; for (let i = 0; i < 4; i++) g.fillRect(x0, y0 + ob.h - (i + 1) * (ob.h / 5), ob.w, 2);
+      g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x0, y0, ob.w, 2);
+      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(6); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y + 3); }
+      continue;
+    }
     if (o.style === 'cables') {
       // cables colgando de poste a poste: pasar por debajo acelerando te engancha
       g.fillStyle = '#15111d'; g.fillRect(x0 - 3, ob.y - 8, 4, 16); g.fillRect(x0 + ob.w - 1, ob.y - 8, 4, 16);
@@ -198,8 +207,12 @@ function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: num
 
 function drawPlayer(g: Gfx, G: Game): void {
   const p = G.p;
+  // en el aire: sombra en el piso y el Tico más grande, como si se acercara a la cámara
+  const lift = p.air > 0 && p.airMax > 0 ? Math.sin(Math.PI * (1 - p.air / p.airMax)) : 0;
+  if (lift > 0) { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(p.x + 6 * lift, p.y + 8 * lift, p.w / 2 + 2, p.h / 2, 0, 0, 7); g.fill(); }
+  const body = lift > 0 ? { x: p.x, y: p.y - 10 * lift, w: p.w * (1 + 0.3 * lift), h: p.h * (1 + 0.3 * lift) } : p;
   if (p.hitCd > 0 && Math.floor(G.t * 20) % 2) g.globalAlpha = 0.6;
-  drawCar(g, G.t, p, {
+  drawCar(g, G.t, body, {
     body: '#f2c230', roof: '#e0ae1a', flash: p.flash, brake: G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, dmg: 1 - p.hp / p.max, seed: 7, extra: (g, w, h) => {
       const look = G.cfg.player.look;
       if (look?.bumper) { g.fillStyle = '#4a4452'; g.fillRect(-w / 2 - 1, -h / 2 - 3, w + 2, 4); g.fillStyle = '#8c869a'; g.fillRect(-w / 2 + 2, -h / 2 - 2, w - 4, 1); } // parachoques de fierro

@@ -39,6 +39,14 @@ export function drawRoad(g: Gfx, cfg: StageConfig, scroll: number, G: Game | nul
   g.fillStyle = 'rgba(247,241,255,.55)';
   const doff = scroll % 50;
   for (let j = 1; j < cfg.road.lanes; j++) { const x = L + LW * j - 1.5; for (let y = -50 + doff; y < H; y += 50) g.fillRect(x, y, 3, 26); }
+  const ex = cfg.road.exclusive;
+  if (ex) { // carril exclusivo pintado (que nadie respeta)
+    const x = L + LW * ex.lane;
+    g.fillStyle = ex.col; g.globalAlpha = 0.18; g.fillRect(x + 3, 0, LW - 6, H); g.globalAlpha = 1;
+    g.fillStyle = 'rgba(247,241,255,.35)'; g.font = FONT(8); g.textAlign = 'center';
+    const eoff = scroll % 220;
+    for (let y = eoff - 220; y < H + 20; y += 220) g.fillText(ex.label, x + LW / 2, y);
+  }
   if (G) {
     for (const c of G.cross) { // paso de cebra y calle transversal
       g.fillStyle = 'rgba(247,241,255,.6)'; for (let x = L + 8; x < R - 8; x += 16) g.fillRect(x, c.y, 9, 22);

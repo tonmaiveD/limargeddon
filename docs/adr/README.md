@@ -27,3 +27,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0021](0021-proyectiles-del-jefe-y-etapa-javier-prado.md) | Proyectiles del jefe y Etapa 4 Javier Prado | Aceptada |
 | [0022](0022-cables-mototaxis-y-etapa-gamarra.md) | Cables, mototaxis y Etapa 5 Gamarra | Aceptada |
 | [0023](0023-contenedores-y-etapa-callao.md) | Contenedores, Llanta de remolcador y Etapa 6 Callao | Aceptada |
+| [0024](0024-saltos-frenazos-coletazo-y-etapa-via-expresa.md) | Saltos, frenazos, coletazo y Etapa 7 Vía Expresa | Aceptada |

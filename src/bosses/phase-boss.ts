@@ -16,7 +16,7 @@ import { makeCar } from '../core/world';
  */
 
 // Estados que un golpe fuerte (claxon, combi, metro) corta para mandarla de vuelta a su carril.
-const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park', 'teleJet', 'jet', 'teleThrow'];
+const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park', 'teleJet', 'jet', 'teleThrow', 'teleSwing', 'swing'];
 
 const ph = (G: Game): BossPhase => phaseDef(G.cfg.boss.phases, G.b.phase);
 const spdK = (G: Game) => G.d.spd / 260;
@@ -50,6 +50,7 @@ function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
   if (attack === 'brake') { b.state = 'teleBrake'; b.st = P.tele; }
   else if (attack === 'reverse') { b.state = 'teleRev'; b.st = G.d.tele ? P.tele : (P.teleOff ?? P.tele); b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); }
   else if (attack === 'jet' && P.jet) { b.state = 'teleJet'; b.st = P.jet.tele; b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); b.jetHit = false; }
+  else if (attack === 'swing' && P.swing) { b.state = 'teleSwing'; b.st = G.d.tele ? P.swing.tele : P.swing.tele * 0.7; b.swing = Math.sign(G.p.x - b.x) || 1; }
   else if (attack === 'throw' && P.throw) { b.state = 'teleThrow'; b.st = G.d.tele ? P.throw.tele : P.throw.tele * 0.7; }
   else { b.state = 'teleRam'; b.st = P.tele; b.rx = G.p.x; Sfx.play('bossHorn'); }
 }
@@ -58,6 +59,16 @@ function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
 export function throwOrigin(G: Game): { x: number; y: number } {
   const b = G.b, T = ph(G).throw;
   return T?.from === 'atras' ? { x: b.x, y: b.y + b.h / 2 + 4 } : { x: b.x + b.w / 2, y: b.y + b.h / 4 };
+}
+
+// Zona del coletazo: la mitad trasera del jefe corrida hacia el lado del barrido (null si no está barriendo).
+export function swingZone(G: Game): { x: number; y: number; w: number; h: number } | null {
+  const b = G.b, S = ph(G).swing;
+  if (b.state !== 'swing' || !S) return null;
+  const k = Math.sin(Math.PI * (1 - b.st / S.dur)), side = Math.sign(b.swing) || 1;
+  // la punta de la cola barre un poco más abajo que la mitad trasera
+  const h = b.h / 2 + 34;
+  return { x: b.x + side * (b.w / 2 + S.reach / 2) * k, y: b.y + h / 2, w: b.w * 0.6 + S.reach * k, h };
 }
 
 // Zona del chorro: columna del ancho del JSON desde el frente del jefe hasta abajo.
@@ -111,6 +122,18 @@ const STATES: StateTable<Game> = {
     }
     for (const c of G.traffic) if (!c.invulnerable && overlap(c, z)) c.x += Math.sign(c.x - b.x || 1) * J.push * 0.6 * dt;
     if (b.st <= 0) b.state = 'return';
+  },
+  // coletazo: la mitad trasera tiembla (aviso) y luego barre hacia el lado donde estaba el Tico
+  teleSwing(G, dt) { const b = G.b; b.flash = 'swing'; b.st -= dt; if (b.st <= 0) { b.state = 'swing'; b.st = ph(G).swing!.dur; b.jetHit = false; Sfx.play('skid'); } },
+  swing(G, dt) {
+    const b = G.b, p = G.p, S = ph(G).swing!; b.flash = 'swing'; b.st -= dt;
+    b.swing = (Math.sign(b.swing) || 1) * Math.sin(Math.PI * Math.max(0, 1 - b.st / S.dur));
+    const z = swingZone(G);
+    if (z && p.air <= 0 && !b.jetHit && overlap(p, z)) {
+      b.jetHit = true; const side = Math.sign(p.x - b.x) || 1; p.vx = side * S.push;
+      if (p.pw.soat <= 0 && !usePerk(G, 'swingHit')) { hurt(G, S.dmg); floatText(G, p.x, p.y - 40, '¡COLETAZO!', C.orange); }
+    }
+    if (b.st <= 0) { b.swing = 0; b.state = 'return'; }
   },
   // lanzamiento: el brazo asoma (aviso) y suelta el abanico de proyectiles apuntado al Tico
   teleThrow(G, dt) {
@@ -195,7 +218,7 @@ export const PhaseBoss: BossAI = {
       }
     }
     // choque cuerpo a cuerpo: el lado derecho es su punto ciego
-    if (overlap(p, b)) {
+    if (p.air <= 0 && overlap(p, b)) {
       const dx = p.x - b.x, dy = p.y - b.y, ox = (p.w + b.w) / 2 - Math.abs(dx), oy = (p.h + b.h) / 2 - Math.abs(dy);
       if (ox < oy) { p.x += Math.sign(dx || 1) * ox; p.vx = Math.sign(dx || 1) * pc.bossPush; }
       else { p.y += Math.sign(dy || 1) * oy; p.vy = Math.sign(dy || 1) * pc.bossPush; }

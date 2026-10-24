@@ -81,6 +81,16 @@ function updateObstacles(G: Game, dt: number): void {
       ob.ph += dt * o.drift.freq;
       ob.x = clamp(ob.bx! + Math.sin(ob.ph) * o.drift.amp, G.cfg.road.left + ob.w / 2, G.cfg.road.right - ob.w / 2);
     }
+    if (o.kind === 'rampa') {
+      // rampa: acelerando (o con turbo) el Tico sale volando; sin acelerar, solo un saltito
+      if (play && !ob.hit && p.air <= 0 && overlap(p, ob)) {
+        ob.hit = true;
+        if (G.keys.up || p.pw.turbo > 0) { p.air = p.airMax = o.jump ?? 0.9; floatText(G, p.x, p.y - 46, o.hitText ?? '¡A VOLAR!', C.orange); Sfx.play('pickup'); }
+        else shake(G, 0.08);
+      }
+      continue;
+    }
+    if (p.air > 0) continue; // en el aire pasa por encima de bloques y huecos
     if (o.kind === 'bloque') {
       if (play && overlap(p, ob)) {
         const dx = p.x - ob.x, dy = p.y - ob.y, ox = (p.w + ob.w) / 2 - Math.abs(dx), oy = (p.h + ob.h) / 2 - Math.abs(dy);
@@ -137,7 +147,7 @@ export function updateWorld(G: Game, dt: number): void {
   for (const m of G.bumps) {
     m.y += G.speed * dt;
     if (!m.hitB && b.state !== 'enter' && Math.abs(m.y - b.y) < b.h / 2) { m.hitB = true; b.bumpT = 0.35; }
-    if (!m.hitP && Math.abs(m.y - p.y) < p.h / 2 && play) {
+    if (!m.hitP && Math.abs(m.y - p.y) < p.h / 2 && play && p.air <= 0) {
       m.hitP = true; Sfx.play('bump');
       if (k.up && p.pw.turbo <= 0) { hurt(G, cfg.bumps.dmg); floatText(G, p.x, p.y - 46, '¡ROMPEMUELLES!', C.yellow); shake(G, 0.3); }
       else if (p.pw.turbo > 0) { floatText(G, p.x, p.y - 46, '¡VUELA!', C.orange); burst(G, p.x, p.y, C.orange, 8); }
@@ -158,6 +168,12 @@ export function updateWorld(G: Game, dt: number): void {
     } else {
       c.y += (c.vy + extra) * dt;
       const zig = c.move?.zigzag; if (zig) { c.zz! += dt * zig.freq; c.x += Math.sin(c.zz!) * zig.amp * dt; }
+      // frenazo en seco: se detiene en la pista (baja en pantalla a la velocidad de la vía) con luces de freno
+      const br = c.move?.brake;
+      if (br) {
+        if ((c.brakeT ?? 0) > 0) { c.brakeT! -= dt; c.y += (cfg.road.speed - c.vy) * dt; }
+        else if (c.y > 40 && c.y < p.y - 140 && Math.random() < br.chance * dt) c.brakeT = br.dur;
+      }
     }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
     // con el sticker, serenazgo y policía se corren de carril cuando el Tico viene detrás
@@ -172,7 +188,7 @@ export function updateWorld(G: Game, dt: number): void {
     // si sigue atrapado entre un bloque y el jefe, se queda esperando detrás del bloque
     if (!inValet) for (const ob of G.obstacles) if (cfg.obstacles![ob.i].kind === 'bloque' && overlap(c, ob)) c.y = ob.y - (c.h + ob.h) / 2;
     c.x = clamp(c.x, inValet ? -40 : cfg.road.left + c.w / 2, inValet ? W + 40 : cfg.road.right - c.w / 2);
-    if (play && overlap(p, c)) {
+    if (play && p.air <= 0 && overlap(p, c)) {
       const dx = p.x - c.x, dy = p.y - c.y, ox = (p.w + c.w) / 2 - Math.abs(dx), oy = (p.h + c.h) / 2 - Math.abs(dy), push = cfg.player.trafficPush;
       if (ox < oy) { p.x += Math.sign(dx || 1) * ox; p.vx = Math.sign(dx || 1) * push; } else { p.y += Math.sign(dy || 1) * oy; p.vy = Math.sign(dy || 1) * push; }
       if (p.hitCd <= 0) {

@@ -8,6 +8,9 @@ import { drawRochabus } from '../bosses/rochabus-render';
 import { drawCombiAsesina } from '../bosses/combi-render';
 import { drawCamion } from '../bosses/camion-render';
 import { drawTrailer } from '../bosses/trailer-render';
+import { drawArticulado } from '../bosses/articulado-render';
+import viaExpresaConfig from './via-expresa/config.json';
+import { drawWorld as viaExpresaWorld } from './via-expresa/scenery';
 import callaoConfig from './callao/config.json';
 import { drawWorld as callaoWorld } from './callao/scenery';
 import centroConfig from './centro/config.json';
@@ -34,6 +37,7 @@ export const STAGES: Record<string, StageDef> = {
   centro: { cfg: centroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawRochabus, drawWorld: centroWorld },
   gamarra: { cfg: gamarraConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCamion, drawWorld: gamarraWorld },
   'javier-prado': { cfg: javierPradoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCombiAsesina, drawWorld: javierPradoWorld },
+  'via-expresa': { cfg: viaExpresaConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawArticulado, drawWorld: viaExpresaWorld },
   miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
   'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
 };

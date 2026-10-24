@@ -28,13 +28,14 @@ export interface VehicleLook {
   shades?: boolean;                  // lentes oscuros de la conductora
 }
 // Movimiento propio, además de avanzar con la pista.
-export interface VehicleMove { zigzag?: { amp: number; freq: number } }
+// brake: frenazos en seco al azar (chance por segundo, duración en s), como los autos de aplicación
+export interface VehicleMove { zigzag?: { amp: number; freq: number }; brake?: { chance: number; dur: number } }
 
 // Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
 // shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
-// ramHit: la primera embestida o reversa del jefe no hace daño.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit';
+// ramHit: la primera embestida o reversa del jefe no hace daño. swingHit: el primer coletazo no hace daño.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit' | 'ramHit' | 'swingHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -59,8 +60,8 @@ export interface SwarmDef {
 // Obstáculo fijo sobre la pista (avanza con el asfalto). 'bloque' es sólido y empuja; 'hueco' se cruza y castiga.
 export interface ObstacleDef {
   k: string;
-  kind: 'bloque' | 'hueco';
-  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter' | 'cables';
+  kind: 'bloque' | 'hueco' | 'rampa';   // rampa: si se pasa acelerando, el Tico salta `jump` segundos
+  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter' | 'cables' | 'rampa';
   diffs?: DiffKey[];                 // todas si se omite
   first: number; every: [number, number];
   lanes: number;                     // carriles que ocupa
@@ -73,12 +74,16 @@ export interface ObstacleDef {
   drift?: { amp: number; freq: number }; // vaivén lateral (por ejemplo, una marcha que se corre de carril)
   accelOnly?: boolean;               // hueco que solo hace daño si se cruza acelerando (cables bajos de Gamarra)
   hitText?: string;                  // texto al recibir el daño de un hueco (por defecto, ¡HUECO!)
+  jump?: number;                     // segundos en el aire al saltar una rampa
 }
 
-export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw';
+export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw' | 'swing';
 
 // Chorro: el jefe apunta al carril del Tico y suelta un chorro hacia abajo que empuja de lado (Rochabús).
 export interface BossJet { tele: number; dur: number; w: number; push: number; dmg: number }
+
+// Coletazo: tras un aviso, la mitad trasera del jefe (bus articulado) barre de lado hacia el Tico, `reach` px más allá de su costado.
+export interface BossSwing { tele: number; dur: number; reach: number; dmg: number; push: number }
 
 // Lanzamiento: tras un aviso, el jefe lanza `count` proyectiles en abanico (`spread` en radianes) hacia el Tico (monedas de la combi).
 // park: segundos que se queda detenido después de lanzar, la ventana para castigarlo.
@@ -106,6 +111,7 @@ export interface BossPhase {
   summon?: BossSummon;
   jet?: BossJet;
   throw?: BossThrow;
+  swing?: BossSwing;
 }
 
 export interface BossConfig {
@@ -122,7 +128,9 @@ export interface StageConfig {
   // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
   hints?: { at: number; text: string }[];
   difficulties: Record<DiffKey, Difficulty>;
-  road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number };
+  // exclusive: carril pintado como exclusivo (sátira visual, sin regla para el Tico)
+  road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number;
+    exclusive?: { lane: number; label: string; col: string } };
   player: {
     lane: number; y: number; w: number; h: number; hp: number;
     accelX: number; accelY: number; response: number; minY: number; bottomMargin: number; turboMult: number;

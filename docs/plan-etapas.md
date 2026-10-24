@@ -26,7 +26,7 @@ La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la
 | 6 | Gamarra y La Victoria | Triciclos con fardos, carretillas saliendo de galerías, rumas de cajas, cables bajos que castigan acelerar | Mototaxis y triciclos | Camión de mercadería (rollos de tela rodando) |
 | 7 | Av. Colonial y Callao | Contenedores mal amarrados, grúas, camiones de obra cerrando carriles, cráteres con agua, desvíos de saneamiento | Mototaxis (carcochas) y combis asesinas | Tráiler portacontenedores |
 | 8 | Panamericana Norte | Garúa que reduce la visibilidad, casetas de peaje abandonadas con barreras que bajan solas, buses interprovinciales adelantando en curva | Patrulleros según nivel de búsqueda (1 a 5 estrellas) | Escuadrón policial (rompellantas, bloqueos) |
-| F | Costa Verde de noche | Neblina, curvas junto al mar, deslizamientos de piedras, enemigos de todas las etapas | Mezcla de todos | Sorpresa (por definir) |
+| F | Costa Verde de noche | Neblina, pista con curvas (no recta) junto al mar, deslizamientos ocasionales del acantilado, aves que ensucian el parabrisas y tapan la vista, autos en doble fila a la altura de Agua Dulce, enemigos de todas las etapas | Mezcla de todos | Sorpresa (por definir) |
 | S | **Línea Amarilla del Terror** (secreta) | Ver sección 5 | Todos los enjambres mezclados | Final de precisión: el avión carguero |
 
 ## 4. Motor común que hace falta
@@ -68,9 +68,9 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Hecho (ADR 0021) |
 | Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Hecho (ADR 0022) |
 | Callao | M | Contenedores que caen, tráiler | Hecho (ADR 0023) |
-| Vía Expresa | L | Saltos y rampas (motor), bus articulado | Pendiente |
+| Vía Expresa | L | Saltos y rampas (motor), bus articulado | Hecho (ADR 0024) |
 | Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Pendiente |
-| Costa Verde (final) | L | Neblina, curvas, desprendimientos, jefe sorpresa | Pendiente |
+| Costa Verde (final) | L | Pista curva (pieza de motor), neblina, desprendimientos del acantilado, aves que tapan la vista, doble fila en Agua Dulce, jefe sorpresa | Pendiente |
 | Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Pendiente |
 
 ## 7. Orden
