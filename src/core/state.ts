@@ -13,7 +13,7 @@ export interface Player {
   x: number; y: number; w: number; h: number; vx: number; vy: number; hp: number; max: number;
   stun: number; hitCd: number; flash: number;
   cd: Record<WeaponKey, number>; pw: Record<TimedPower, number>;
-  ammo: number; reloadT: number; coneHeld: boolean;
+  ammo: number; reloadT: number; coneHeld: boolean; lives: number;
 }
 
 export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet';
@@ -31,7 +31,7 @@ export interface Car {
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
 export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
-export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean }
+export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
@@ -57,6 +57,7 @@ export interface Game {
   trafficT: number; pickT: number; bumpT: number; crossT: number; streetI: number;
   swarmT: number[]; // un temporizador por enjambre activo en esta dificultad (Infinity si no aplica)
   obstacles: Obstacle[]; obsT: number[];
+  allyT: number; privilegeT: number; // Socio de la Combi y aviso del sticker (mejoras de lujo)
   stats: { right: number; total: number; dmgP3: boolean; powers: number };
   result: null | { win: boolean };
 }
@@ -72,12 +73,13 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   return {
     cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null,
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
-      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false },
+      cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
       state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
     traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
     bubble: null, bubbleT: 2, trafficT: cfg.traffic.first, pickT: cfg.pickups.first, bumpT: cfg.bumps.first, crossT: cfg.crossings.first, streetI: 0,
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
+    allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,
     obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
     stats: { right: 0, total: 0, dmgP3: false, powers: 0 },
     result: null,
@@ -108,10 +110,16 @@ export function hurt(G: Game, d: number): void {
   const p = G.p;
   if (p.pw.soat > 0) { floatText(G, p.x, p.y - 30, 'SOAT', C.green); Sfx.play('block'); return; }
   if (G.d.dmgMult) d = Math.max(1, Math.round(d * G.d.dmgMult));
+  if (G.cfg.player.armor) d = Math.max(1, Math.round(d * (1 - G.cfg.player.armor)));
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
   floatText(G, p.x, p.y - 30, '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
 }
 export function fine(G: Game, x: number, y: number, amt: number, why: string): void {
+  // Sticker "Mi papá es socio del Golf": nadie le pone papeletas
+  if (G.cfg.player.privilege) {
+    if (G.privilegeT <= 0) { floatText(G, x, y - 34, '¿Usted sabe quién soy yo?', C.yellow); G.privilegeT = 2; }
+    return;
+  }
   G.fines += amt; floatText(G, x, y - 34, why + ' -S/' + amt, C.sky); Sfx.play('whistle');
 }
 

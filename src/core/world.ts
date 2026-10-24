@@ -119,6 +119,15 @@ export function updateWorld(G: Game, dt: number): void {
       G.obsT[i] = t - dt;
       if (G.obsT[i] <= 0) { spawnObstacle(G, i); G.obsT[i] = rnd(...G.cfg.obstacles![i].every); }
     });
+    // Socio de la Combi: una combi aliada llega sola cada cierto tiempo a embestir al jefe
+    if (isFinite(G.allyT) && b.state !== 'enter') {
+      G.allyT -= dt;
+      if (G.allyT <= 0) {
+        G.allyT = cfg.player.allyEvery!;
+        G.allies.push({ k: 'combi', x: p.x, y: H + 50, w: 34, h: 70, vy: cfg.powers.combi.vy ?? -560, said: false, dmg: cfg.player.allyDmg });
+        Sfx.play('combi');
+      }
+    }
     G.crossT -= dt; if (G.crossT <= 0) { G.cross.push({ y: -40, name: cfg.streets[G.streetI++ % cfg.streets.length] }); G.crossT = rnd(...cfg.crossings.every); }
   }
   // rompemuelles y cruces
@@ -148,6 +157,8 @@ export function updateWorld(G: Game, dt: number): void {
       const zig = c.move?.zigzag; if (zig) { c.zz! += dt * zig.freq; c.x += Math.sin(c.zz!) * zig.amp * dt; }
     }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
+    // con el sticker, serenazgo y policía se corren de carril cuando el Tico viene detrás
+    if (cfg.player.privilege && c.invulnerable && c.y < p.y && p.y - c.y < 160 && Math.abs(c.x - p.x) < (c.w + p.w) / 2 + 8) c.x += Math.sign(c.x - p.x || 1) * 130 * dt;
     const inValet = c.enter !== undefined && c.enter > 0;
     // los bloques (obras, conos, barreras) también desvían al tráfico; si un auto queda apretado entre un bloque
     // y el jefe, se resuelve en pocas pasadas y el jefe va al final (lo más visible es que no le pase por debajo)
@@ -178,7 +189,7 @@ export function updateWorld(G: Game, dt: number): void {
     if (!a.said && a.y < H - 60) { a.said = true; floatText(G, a.x, a.y - 50, '¡AL FONDO HAY SITIO!', C.pink); }
     for (const c of G.traffic) if (!c.invulnerable && overlap(a, c)) c.hp = 0;
     if (!a.dead && b.state !== 'enter' && overlap(a, b)) {
-      a.dead = true; dmgBoss(G, cfg.powers.combi.dmg ?? 80, false); b.slip = Math.max(b.slip, 1); G.ai.interrupt(G); shake(G, 0.7); Sfx.play('boom');
+      a.dead = true; dmgBoss(G, a.dmg ?? cfg.powers.combi.dmg ?? 80, false); b.slip = Math.max(b.slip, 1); G.ai.interrupt(G); shake(G, 0.7); Sfx.play('boom');
       burst(G, b.x, b.y + 30, C.pink, 30, 240); burst(G, b.x, b.y + 30, C.yellow, 20, 200); say(G, cfg.boss.quips.combi);
     }
   }
@@ -211,13 +222,18 @@ export function updateWorld(G: Game, dt: number): void {
   };
   emit(p, 1 - p.hp / p.max); if (b.state !== 'enter') emit(b, 1 - b.hp / b.max);
   for (const c of G.traffic) if (c.max && !c.invulnerable) emit(c, 1 - c.hp / c.max);
-  G.shake = Math.max(0, G.shake - dt);
+  G.shake = Math.max(0, G.shake - dt); G.privilegeT -= dt;
 }
 
 // Un paso de simulación. Devuelve true el cuadro en que termina la pelea.
 export function update(G: Game, dt: number): boolean {
   G.t += dt;
   updatePlayer(G, dt); G.ai.update(G, dt); updateWorld(G, dt);
+  // SOAT de verdad (taller): una vida extra por etapa
+  if (G.p.hp <= 0 && G.p.lives > 0) {
+    G.p.lives--; G.p.hp = 40; G.p.pw.soat = 2.5; G.p.hitCd = 1;
+    floatText(G, G.p.x, G.p.y - 50, '¡EL SOAT TE SALVÓ!', C.green, 12); burst(G, G.p.x, G.p.y, C.green, 24, 200); Sfx.play('block');
+  }
   if (G.b.hp <= 0 || G.p.hp <= 0) {
     const win = G.b.hp <= 0;
     G.mode = 'over'; G.result = { win };

@@ -9,6 +9,7 @@ Arcade de acción vehicular browser based, vista cenital con scroll vertical. Un
 ## Idioma y estilo
 - Español latinoamericano neutro en código comentado, docs, commits y textos del juego. Nada de voseo ni rioplatense.
 - Sin guiones largos en textos; usar comas.
+- En los textos del juego no usar puntuación que delate escritura con IA, es decir, ni guiones largos, ni dos puntos, ni punto y coma. Usar comas o puntos.
 - Diálogos del juego: sátira al privilegio y a la mala conducción, nunca a rasgos raciales o de clase de terceros.
 - Marcas reales siempre como parodia ficticia (ej. el SUV del jefe de San Isidro es un "Q6" con cuatro anillos, uno deformado).
 

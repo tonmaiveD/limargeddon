@@ -54,12 +54,15 @@ export class MenuScene extends Phaser.Scene {
       const b = document.createElement('button');
       b.className = 'pick' + (dk === 'normal' ? '' : ' alt'); b.dataset.diff = dk; b.id = 'd-' + dk; b.textContent = cfg.difficulties[dk].label;
       b.addEventListener('click', () => {
-        Sfx.init(); $('menu').hidden = true;
+        Sfx.init(); $('menu').hidden = true; setSettings({ dk });
         this.scene.start('Stage', { stageId: this.stageId, dk });
       });
       diffs.appendChild(b);
     });
     this.setupFireSelector(cfg.weapons.cone.mode !== undefined);
+    ($('toGarage') as HTMLButtonElement).onclick = () => {
+      $('menu').hidden = true; this.scene.start('Garage', { stageId: this.stageId, dk: getSettings().dk ?? 'normal' });
+    };
     $('menu').hidden = false;
     Sfx.engine(0);
     setDeckCooldowns({ cone: 0, oil: 0, horn: 0 });
@@ -72,7 +75,7 @@ export class MenuScene extends Phaser.Scene {
     box.hidden = !enabled; tip.hidden = !enabled;
     if (!enabled) return;
     const TIPS: Record<FireMode, string> = {
-      toque: 'Cada toque lanza un cono; tienes 3 y se recargan de a uno. Seguidos por la derecha suben el combo.',
+      toque: 'Cada toque lanza un cono. Tienes 3 y se recargan de a uno, y si pegas seguido por la derecha sube el combo.',
       acelerar: 'Mientras aceleras, el Tico lanza conos solo. Atacar te obliga a acercarte.',
       mantener: '',
     };

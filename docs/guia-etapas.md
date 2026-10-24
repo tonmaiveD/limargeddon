@@ -4,7 +4,7 @@ Para quien construya una etapa nueva. Leer esto, `CLAUDE.md` y `docs/plan-etapas
 
 ## Reglas
 - Una etapa es **datos más su jefe y su paisaje**. Si algo exige código nuevo en el motor (`src/core/`), va como pieza reutilizable y se documenta en un ADR.
-- Español latinoamericano neutro, sin voseo, sin guiones largos en los textos. La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la infraestructura, nunca a las personas por su trabajo, origen o clase. Las marcas reales van en parodia.
+- Español latinoamericano neutro, sin voseo. En los textos del juego (frases, consejos, rótulos, descripciones), sin guiones largos, dos puntos ni punto y coma. Usar comas o puntos. La sátira apunta a la mala conducción, al privilegio, a las autoridades y a la infraestructura, nunca a las personas por su trabajo, origen o clase. Las marcas reales van en parodia.
 - Rama por etapa (`etapa-<n>-<distrito>`), commits en español, PR a `main` con la atribución de Claude Code.
 - No modificar `prototipo/` ni `tests/fixtures/`.
 
@@ -50,6 +50,7 @@ npm run balance     # duración y victorias con bots, por modo de disparo
 npm run build
 ```
 - Agregar la etapa a `scripts/balance.test.ts`. Con `ETAPA=<distrito> npm run balance` se corre solo esa etapa.
+- Revisar también la fila con mejoras típicas (ver `ce-mej-toque` en el script): las mejoras deben ayudar sin trivializar la etapa.
 - **Metas de balance, bot medio:** Normal entre 75 y 85 s, ganando 22 a 27 de 30 peleas. Fácil, más corta y casi siempre ganada. Difícil, unos 10 s más larga y con menos de la mitad ganadas. Las personas tardan unas 1.5 veces más que el bot.
 - Verificar con tests y simulación. Basta con una o dos capturas en viewport móvil (393×852) para revisar cómo se ve.
 

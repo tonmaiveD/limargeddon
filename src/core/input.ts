@@ -14,7 +14,7 @@ const MIN_HOLD = 60;
 
 function setSnd(): void {
   document.querySelectorAll<HTMLButtonElement>('.snd-toggle').forEach((b) => {
-    b.setAttribute('aria-pressed', String(Sfx.on)); b.textContent = Sfx.on ? '♪ Sonido: sí' : '♪ Sonido: no';
+    b.setAttribute('aria-pressed', String(Sfx.on)); b.textContent = Sfx.on ? '♪ Sonido activado' : '♪ Sonido apagado';
   });
 }
 
