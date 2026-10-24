@@ -8,26 +8,27 @@
   "difficulties": {
     "facil": {
       "label": "Fácil",
-      "hp": 1500,
+      "hp": 1700,
       "spd": 240,
       "freq": 1.3,
       "tele": true,
-      "dmgMult": 0.8
+      "dmgMult": 0.96
     },
     "normal": {
       "label": "Normal",
-      "hp": 2000,
+      "hp": 2300,
       "spd": 260,
       "freq": 1,
-      "tele": true
+      "tele": true,
+      "dmgMult": 1.75
     },
     "dificil": {
       "label": "Difícil",
-      "hp": 2400,
+      "hp": 2750,
       "spd": 290,
       "freq": 0.88,
       "tele": false,
-      "dmgMult": 1.1
+      "dmgMult": 2.27
     }
   },
   "road": {

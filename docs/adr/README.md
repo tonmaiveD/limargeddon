@@ -30,3 +30,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0024](0024-saltos-frenazos-coletazo-y-etapa-via-expresa.md) | Saltos, frenazos, coletazo y Etapa 7 Vía Expresa | Aceptada |
 | [0025](0025-garua-busqueda-peajes-y-etapa-panamericana.md) | Garúa, nivel de búsqueda, peajes y Etapa 8 Panamericana | Aceptada |
 | [0026](0026-pista-curva-peligros-y-jefe-serpiente-costa-verde.md) | Pista curva, peligros del malecón, jefe serpiente y Etapa 9 Costa Verde | Aceptada |
+| [0027](0027-pasada-de-dificultad-con-campana.md) | Pasada de dificultad con simulador de campaña | Aceptada |
