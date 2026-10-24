@@ -4,7 +4,7 @@
   "district": "Vía Expresa",
   "roadName": "VÍA EXPRESA",
   "eyebrow": "Etapa 7 · Vía Expresa · El Zanjón",
-  "tip": "En la Vía Expresa todo va más rápido. Pasa las rampas acelerando y vuela sobre el tráfico y los huecos. Los autos de aplicación frenan en seco. Cuando tiemble la cola del bus, aléjate de su costado. Su punto ciego también está a la derecha.",
+  "tip": "En la Vía Expresa todo va más rápido. Pasa las rampas acelerando y vuela sobre el tráfico y los huecos, aunque el claxon del bus igual te aturde. Los autos de aplicación frenan en seco. Cuando tiemble la cola del bus, aléjate de su costado.",
   "difficulties": {
     "facil": {
       "label": "Fácil",
@@ -66,7 +66,7 @@
   },
   "weapons": {
     "cone": {
-      "cd": 0.55,
+      "cd": 0.68,
       "vy": -560,
       "r": 6,
       "dmg": 12,
@@ -433,7 +433,7 @@
       "icon": "T",
       "col": "#d93b3b"
     },
-    "defeatTip": "Cuando tiemble la cola del bus, sal de su costado o quédate justo detrás. Las rampas se pasan acelerando y en el aire nada te toca."
+    "defeatTip": "Cuando tiemble la cola del bus, sal de su costado o quédate justo detrás. Saltando evitas choques y coletazos, pero el claxon te aturde."
   },
   "boss": {
     "id": "articulado",
@@ -597,5 +597,11 @@
       "metro": "¡Colega, no me toques la bocina!",
       "valet": ""
     }
-  }
+  },
+  "hints": [
+    {
+      "at": 2,
+      "text": "Acelera sobre la rampa para saltar"
+    }
+  ]
 }

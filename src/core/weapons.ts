@@ -86,7 +86,8 @@ export function updateShots(G: Game, dt: number): void {
       else if (s.k === 'picaron') { s.hit = true; dmgBoss(G, Wp.picaron.dmg, fr); burst(G, s.x, s.y, '#e0954a', 8, 120); Sfx.play('hit'); }
       else { s.dead = true; b.slip = Wp.oil.slip; dmgBoss(G, Wp.oil.dmg, fr); burst(G, s.x, s.y, '#5a4a2a', 16, 140); say(G, G.cfg.boss.quips.oil); Sfx.play('skid'); }
     }
-    if (!s.dead && G.ai.hitShot?.(G, s)) { if (s.k !== 'picaron') s.dead = true; continue; }
+    // impacto válido en una parte del jefe (cuerpo de la serpiente): no corta la racha, pero tampoco la sube
+    if (!s.dead && G.ai.hitShot?.(G, s)) { if (s.k !== 'picaron') s.dead = true; s.hitBoss = true; continue; }
     if (!s.dead) for (const c of G.traffic) {
       if (Math.abs(s.x - c.x) < c.w / 2 + s.r && Math.abs(s.y - c.y) < c.h / 2) {
         if (s.k !== 'picaron') s.dead = true;

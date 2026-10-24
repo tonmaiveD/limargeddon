@@ -6,7 +6,7 @@ import { bot } from '../tests/harness/bot';
 import { STAGES, STAGE_ORDER, wonItems } from '../src/stages';
 import { UPGRADES, applyUpgrades, nextLevel, recommended, type Levels } from '../src/garage/upgrades';
 import { summarize } from '../src/core/world';
-import { evitaCuerpo } from './balance.test';
+import { evitaCuerpo } from '../tests/harness/evita';
 
 /*
  * Simulador de campaña (npm run campana): el bot medio juega las etapas en orden con lo que va comprando en el taller.

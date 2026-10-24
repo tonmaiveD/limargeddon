@@ -20,7 +20,7 @@
       "spd": 260,
       "freq": 1,
       "tele": true,
-      "dmgMult": 1.3
+      "dmgMult": 1.15
     },
     "dificil": {
       "label": "Difícil",
@@ -28,7 +28,7 @@
       "spd": 290,
       "freq": 0.88,
       "tele": false,
-      "dmgMult": 1.69
+      "dmgMult": 1.49
     }
   },
   "road": {
@@ -645,5 +645,11 @@
       "metro": "¡El Metro no entra a Gamarra!",
       "valet": ""
     }
-  }
+  },
+  "hints": [
+    {
+      "at": 7,
+      "text": "Pasa los cables sin acelerar"
+    }
+  ]
 }
