@@ -22,6 +22,8 @@ function rammed(G: Game): number {
   const hp = G.p.hp; stepPort(G, DT); return hp - G.p.hp;
 }
 
+const ram = Math.max(1, Math.round(ca.boss.chargeContactDmg * (ca.difficulties.normal.dmgMult ?? 1)));
+
 describe('Etapa 6 Callao', () => {
   it('va después de Gamarra', () => expect(ca.number).toBe(6));
 
@@ -34,11 +36,11 @@ describe('Etapa 6 Callao', () => {
   }));
 
   it('la Llanta de remolcador aguanta la primera embestida, no la segunda', () => withSeed(2, () => {
-    expect(rammed(game())).toBe(ca.boss.chargeContactDmg);
+    expect(rammed(game())).toBe(ram);
     const G = game('normal', [ca.rewards.item!]);
     expect(rammed(G)).toBe(0);
     for (let i = 0; i < 60; i++) stepPort(G, DT);
-    expect(rammed(G)).toBe(ca.boss.chargeContactDmg);
+    expect(rammed(G)).toBe(ram);
   }));
 
   it('textos sin dos puntos, punto y coma ni guiones largos', () => {

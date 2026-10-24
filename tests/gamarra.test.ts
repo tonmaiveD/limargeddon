@@ -29,7 +29,9 @@ describe('Etapa 5 Gamarra', () => {
 
   it('los cables solo hacen daño si se pasan acelerando', () => withSeed(1, () => {
     expect(underCables(game(), false)).toBe(0);
-    expect(underCables(game(), true)).toBe(ga.obstacles!.find((o) => o.k === 'cables')!.dmg);
+    // el daño pasa por el multiplicador de la dificultad, como cualquier golpe
+    const dmg = ga.obstacles!.find((o) => o.k === 'cables')!.dmg;
+    expect(underCables(game(), true)).toBe(Math.max(1, Math.round(dmg * (ga.difficulties.normal.dmgMult ?? 1))));
   }));
 
   it('los rollos caen desde atrás del camión, hacia abajo y en abanico', () => withSeed(2, () => {

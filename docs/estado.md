@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #20 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #21 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -46,11 +46,26 @@
   - Prueba en el navegador en viewport móvil (393×852 o 430×780).
   - ADR si se agregó una pieza al motor.
   - Textos del juego sin guiones largos, dos puntos ni punto y coma.
-- Metas de balance (bot medio, Normal): 75 a 85 s, ganando 22 a 27 de 30. El tutorial es más corto y fácil. Difícil, cerca de la mitad de victorias. Las personas tardan unas 1.5 veces más que el bot.
+- Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-- **Pruebas en el teléfono** con el registro nuevo: 3 o 4 peleas por modo. Con eso se decide si la vida del jefe baja solo en el modo por toque. La auditoría propone ensayar el Q8 en Normal por toque con 1584 de vida (-12%). Referencias humanas hasta ahora: San Isidro por toque, 2:03 (victoria) y 2:06 (derrota). Centro por toque, 1:52 (victoria), 2:29 y 3:33 (derrotas).
-- **Pasada de dificultad final** con el juego completo. Ya se sabe que con las mejoras típicas, Difícil se vuelve fácil desde la Etapa 4.
-- **Auditoría de octubre de 2026, lo que queda:** tutorial completo, señal del punto ciego, daño por fuente en la pista, aviso de reversa del Q8 en Difícil, blancos táctiles de 44 px, meta de ahorro elegida y un bot con restricciones de pulgar.
-- **Etapas siguientes:** la Línea Amarilla del Terror (secreta), según `docs/plan-etapas.md`.
-- **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
+Ordenado como se acordó: primero datos reales y balance, después la etapa secreta, y en paralelo el pulido.
+
+1. **Partidas reales:** que el tester juegue 3 o 4 peleas por modo con la versión actual y comparta "Copiar registro". Con eso se confirma la pasada de dificultad (ADR 0027) y se decide si la vida del jefe baja solo en el modo por toque.
+2. **Línea Amarilla del Terror** (secreta): se desbloquea al ganar la Costa Verde. Tiene peajes, túnel, pista del aeropuerto y la escena del avión. Hay que decidir mecánicas con el dueño antes de construir.
+3. **Pista de la secreta:** cuando exista, reemplazar "¡Completaste todas las etapas disponibles!" y mostrar en el menú el candado con la línea amarilla.
+4. **Música sintetizada por distrito** (cumbia chicha, criolla, salsa), como pide el concepto. Hoy solo hay efectos.
+5. **Animación del cierre:** la carretilla Don Frío cruzando la meta (hoy es texto).
+6. **Semáforos en ola** de la Javier Prado como mecánica (hoy son paisaje).
+7. **Auditoría de octubre, lo que queda:**
+   - Tutorial completo.
+   - Señal del punto ciego.
+   - Daño por fuente en la pista.
+   - Aviso de reversa del Q8 en Difícil.
+   - Blancos táctiles de 44 px.
+   - Meta de ahorro elegida.
+   - Bot con restricciones de pulgar.
+   - Las propuestas aplazadas (gracia de aceleración, pagos por fase, repetición mejor pagada) solo si los datos lo piden.
+8. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
+9. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
+10. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
