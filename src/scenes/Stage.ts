@@ -9,7 +9,7 @@ import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
 import { getGarage, getSettings, settleFight } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { DEFAULT_STAGE, STAGES, stageNumber, track, type StageDef } from '../stages';
+import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
 
@@ -87,7 +87,8 @@ export class StageScene extends Phaser.Scene {
         if (update(G, dt)) {
           const summary = summarize(G);
           const { earned, replay, wallet } = settleFight(
-            { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best },
+            { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
+              build: __BUILD__, test: TEST_MODE || undefined, upgrades: getGarage().levels, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines },
             G.cfg.number, summary.pay, stageNumber);
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
           this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk, earned, replay, wallet }));

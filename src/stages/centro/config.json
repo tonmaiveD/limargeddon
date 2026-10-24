@@ -245,6 +245,7 @@
       },
       {
         "k": "delivery",
+        "killBonus": 0,
         "weight": 0.14,
         "w": 12,
         "h": 24,

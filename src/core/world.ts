@@ -24,7 +24,7 @@ export function makeCar(t: TrafficType, x: number, y: number): Car {
   const zz = t.move?.zigzag ? Math.random() * 6 : undefined;
   return {
     k: t.k, x, y, w: t.w, h: t.h, vy, hp: t.hp, max: t.hp, col,
-    spin: 0, seed: Math.random() * 100, invulnerable: t.invulnerable, contactDmg: t.contactDmg, selfDmg: t.selfDmg, zz,
+    spin: 0, seed: Math.random() * 100, invulnerable: t.invulnerable, contactDmg: t.contactDmg, selfDmg: t.selfDmg, killBonus: t.killBonus, zz,
     look: t.look, move: t.move,
   };
 }
@@ -202,8 +202,10 @@ export function updateWorld(G: Game, dt: number): void {
   G.pickups = G.pickups.filter((u) => !u.dead && u.y < H + 30);
   G.traffic = G.traffic.filter((c) => {
     if (c.hp <= 0) {
-      burst(G, c.x, c.y, C.orange, 22, 200); burst(G, c.x, c.y, '#777', 10, 90); G.bonus += cfg.traffic.killBonus;
-      floatText(G, c.x, c.y, '+S/' + cfg.traffic.killBonus, C.green); shake(G, 0.15); Sfx.play('boom'); return false;
+      const pay = c.killBonus ?? cfg.traffic.killBonus;
+      burst(G, c.x, c.y, C.orange, 22, 200); burst(G, c.x, c.y, '#777', 10, 90); G.bonus += pay;
+      if (pay) floatText(G, c.x, c.y, '+S/' + pay, C.green);
+      shake(G, 0.15); Sfx.play('boom'); return false;
     }
     return c.y < H + 80 && c.y > -140;
   });
@@ -228,6 +230,9 @@ export function updateWorld(G: Game, dt: number): void {
 // Un paso de simulación. Devuelve true el cuadro en que termina la pelea.
 export function update(G: Game, dt: number): boolean {
   G.t += dt;
+  const hints = G.cfg.hints;
+  if (hints && G.hintI < hints.length && G.t >= hints[G.hintI].at) G.hint = { text: hints[G.hintI++].text, life: 3.2 };
+  if (G.hint && (G.hint.life -= dt) <= 0) G.hint = null;
   updatePlayer(G, dt); G.ai.update(G, dt); updateWorld(G, dt);
   // SOAT de verdad (taller): una vida extra por etapa
   if (G.p.hp <= 0 && G.p.lives > 0) {
@@ -247,6 +252,8 @@ export function update(G: Game, dt: number): boolean {
 export interface Summary {
   win: boolean; time: string; seconds: number; rightPct: number; powers: number; fines: number; pay: number;
   blind: boolean; clean: boolean; honest: boolean; bestCombo: number; fireMode: Game['fireMode'];
+  // vida que le quedaba al jefe (0 al ganar) y cobro bruto antes de multas, para el registro
+  bossPct: number; gross: number;
 }
 
 export function summarize(G: Game): Summary {
@@ -255,5 +262,6 @@ export function summarize(G: Game): Summary {
   const clean = win && !s.dmgP3, blind = win && pct >= R.blindPct, honest = G.fines === 0;
   const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus : G.bonus, pay = Math.max(0, gross - G.fines);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
-  return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode };
+  return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
+    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross };
 }

@@ -19,15 +19,15 @@ export class ResultsScene extends Phaser.Scene {
     const $ = (id: string) => document.getElementById(id)!;
     const bossName = cfg.boss.title;
     $('endEyebrow').textContent = s.win ? `Etapa ${cfg.number} completa` : `Etapa ${cfg.number} · fallida`;
-    $('endTitle').textContent = s.win ? `${bossName} cayó` : `Te chocó ${bossName.replace(/^La /, "la ")}`;
-    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd><dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
-      ${s.fireMode !== 'mantener' ? `<dt>Mejor combo</dt><dd style="color:var(--green)">x${s.bestCombo}</dd>` : ''}<dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>
+    $('endTitle').textContent = s.win ? `${bossName} cayó` : `Te ganó ${bossName.replace(/^(La|El) /, (m) => m.toLowerCase())}`;
+    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`}<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
+      ${s.fireMode !== 'mantener' ? `<dt>Mejor racha</dt><dd style="color:var(--green)">${s.bestCombo}</dd>` : ''}<dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>
       <dt>Cobrado${replay ? ' (etapa repetida: 50%)' : ''}</dt><dd style="color:var(--yellow)">${money(earned)}</dd>
       <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
     $('endBadges').innerHTML = s.win ? `
       <div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>
       <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
-      <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas del serenazgo</div>
+      <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas</div>
       ${R.item ? `<div class="badge">${R.item}</div>` : ''}`
       : `<div class="badge off">${R.defeatTip ?? `El punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
     const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement, next = $('next') as HTMLButtonElement;

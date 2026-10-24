@@ -234,7 +234,17 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawBubble(L.ui, G); drawHUD(L.ui, G);
+  drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
+}
+
+// Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.
+function drawHint(g: Gfx, G: Game): void {
+  const h = G.hint; if (!h) return;
+  g.font = BODY(800, 12);
+  const tw = g.measureText(h.text).width + 20, x = clamp(G.p.x - tw / 2, 6, W - tw - 6), y = G.p.y - G.p.h / 2 - 48;
+  g.globalAlpha = clamp(h.life * 2, 0, 1);
+  g.fillStyle = 'rgba(14,10,22,.85)'; g.roundRect(x, y, tw, 24, 12); g.fill();
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.fillText(h.text, x + tw / 2, y + 16); g.globalAlpha = 1;
 }
 
 export function createLayers(scene: Phaser.Scene): Layers {

@@ -75,7 +75,7 @@ export class MenuScene extends Phaser.Scene {
     box.hidden = !enabled; tip.hidden = !enabled;
     if (!enabled) return;
     const TIPS: Record<FireMode, string> = {
-      toque: 'Cada toque lanza un cono. Tienes 3 y se recargan de a uno, y si pegas seguido por la derecha sube el combo.',
+      toque: 'Cada toque lanza un cono. Tienes 3 y se recargan de a uno, y si pegas seguido por la derecha armas una racha que suma daño, hasta +30%.',
       acelerar: 'Mientras aceleras, el Tico lanza conos solo. Atacar te obliga a acercarte.',
       mantener: '',
     };

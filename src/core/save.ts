@@ -10,7 +10,12 @@ const KEY = 'limargeddon.save';
 const VERSION = 1;
 const MAX_FIGHTS = 300;
 
-export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number }
+export interface FightRecord {
+  stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number;
+  // contexto para comparar peleas (opcionales: los registros viejos no los tienen)
+  build?: string; test?: boolean; upgrades?: Record<string, number>; bossPct?: number;
+  gross?: number; fines?: number; earned?: number; replay?: boolean;
+}
 export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
@@ -32,7 +37,8 @@ function store(data: SaveV1): void {
 
 export function recordFight(f: Omit<FightRecord, 'at'>): void {
   const data = load();
-  data.fights.push({ ...f, t: Math.round(f.t * 10) / 10, at: new Date().toISOString() });
+  // se trunca igual que el tiempo de la pantalla de resultados, así la mediana no aparece un segundo arriba
+  data.fights.push({ ...f, t: Math.floor(f.t * 10) / 10, at: new Date().toISOString() });
   if (data.fights.length > MAX_FIGHTS) data.fights.splice(0, data.fights.length - MAX_FIGHTS);
   store(data);
 }
@@ -43,7 +49,9 @@ export interface FightStats { played: number; wins: number; median: number | nul
 export function fightStats(stage: string, dk: DiffKey, fireMode?: FireMode): FightStats {
   const all = load().fights.filter((f) => f.stage === stage && f.dk === dk && (!fireMode || f.fireMode === fireMode));
   const ts = all.filter((f) => f.win).map((f) => f.t).sort((a, b) => a - b);
-  return { played: all.length, wins: ts.length, median: ts.length ? ts[ts.length >> 1] : null };
+  const mid = ts.length >> 1;
+  const median = !ts.length ? null : ts.length % 2 ? ts[mid] : (ts[mid - 1] + ts[mid]) / 2;
+  return { played: all.length, wins: ts.length, median };
 }
 
 // Todo el registro, para copiarlo y compartirlo al calibrar.
@@ -105,8 +113,8 @@ export function buyUpgrade(id: string, price: number, maxLevel: number): Garage 
 export function settleFight(f: Omit<FightRecord, 'at'>, stageNumber: number, pay: number, numberOf: (id: string) => number | undefined):
   { earned: number; replay: boolean; wallet: number } {
   const replay = stageNumber < unlockedStage(numberOf);
-  recordFight(f);
   const earned = Math.round(pay * (replay ? REPLAY_PAY : 1));
+  recordFight({ ...f, earned, replay });
   const wallet = addEarnings(earned);
   if (f.win) unlockNext(stageNumber, numberOf);
   return { earned, replay, wallet };

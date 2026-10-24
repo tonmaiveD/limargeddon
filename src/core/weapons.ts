@@ -58,13 +58,14 @@ function coneHit(G: Game, fromRight: boolean, x: number, y: number): void {
   const mult = 1 + combo.step * Math.min(n - 1, combo.maxSteps);
   dmgBoss(G, base * mult, true, n >= 2 ? 14 : undefined);
   if (n >= 2) {
-    floatText(G, x, y - 46, `¡x${n} PUNTO CIEGO!`, C.green, n >= 5 ? 13 : 11);
+    // la racha cuenta impactos; el daño extra tiene techo (maxSteps), por eso se muestran por separado
+    floatText(G, x, y - 46, `RACHA ${n} · DAÑO +${Math.round((mult - 1) * 100)}%`, C.green, n >= 5 ? 13 : 11);
     G.hitstop = Math.max(G.hitstop, combo.hitstop);
     Sfx.play('combo', Math.min(n, 8));
   }
 }
 function breakCombo(G: Game): void {
-  if (G.combo.n >= 3) floatText(G, G.p.x, G.p.y - 46, 'COMBO CORTADO', C.muted);
+  if (G.combo.n >= 3) floatText(G, G.p.x, G.p.y - 46, 'RACHA CORTADA', C.muted);
   G.combo.n = 0;
 }
 
