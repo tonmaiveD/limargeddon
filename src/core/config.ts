@@ -32,7 +32,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number } }
 
 // Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit';
+// shotHit: el primer proyectil del jefe no hace daño.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -71,10 +72,14 @@ export interface ObstacleDef {
   drift?: { amp: number; freq: number }; // vaivén lateral (por ejemplo, una marcha que se corre de carril)
 }
 
-export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet';
+export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw';
 
 // Chorro: el jefe apunta al carril del Tico y suelta un chorro hacia abajo que empuja de lado (Rochabús).
 export interface BossJet { tele: number; dur: number; w: number; push: number; dmg: number }
+
+// Lanzamiento: tras un aviso, el jefe lanza `count` proyectiles en abanico (`spread` en radianes) hacia el Tico (monedas de la combi).
+// park: segundos que se queda detenido después de lanzar, la ventana para castigarlo.
+export interface BossThrow { tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number }
 
 // Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
 export interface BossSummon { type: string; every: number; from: 'lado' | 'arriba'; count?: number; say?: string }
@@ -92,6 +97,7 @@ export interface BossPhase {
   escorts?: { life: number; hp: number; cols: string[]; contactDmg?: number; look?: VehicleLook; w?: number; h?: number };
   summon?: BossSummon;
   jet?: BossJet;
+  throw?: BossThrow;
 }
 
 export interface BossConfig {

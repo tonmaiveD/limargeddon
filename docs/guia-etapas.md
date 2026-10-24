@@ -31,6 +31,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Jefe** (`boss`): fases por porcentaje de vida.
   - `attack` o `attacks` con peso ("brake", "reverse", "ram", "jet") y tiempos de aviso (`tele`).
   - `jet`: chorro que empuja de lado (`tele`, `dur`, `w`, `push`, `dmg`), ver el Rochabús en `src/stages/centro/config.json`.
+  - `throw`: proyectiles en abanico hacia el Tico (`tele`, `count`, `spread`, `speed`, `dmg`, `r`, `col`, `text`, `park`), ver la Combi Asesina en `src/stages/javier-prado/config.json`. El renderer del jefe muestra el aviso cuando `b.flash === 'throw'`.
   - `summon`: trae vehículos de un tipo, desde un costado o desde arriba.
   - `escorts`: con `look`, `w` y `h` propios.
   - Claxon (`hornEvery`, `hornSound`, `hornCol`, `hornText`) y valets (solo San Isidro).
@@ -38,7 +39,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Ayudas** (`hints`): frases cortas sobre el Tico en los primeros segundos, `{ "at": 1.5, "text": "..." }`. Pensadas para el tutorial, máximo unas ocho palabras.
 - **Dificultades:** vida del jefe, velocidad, frecuencia de ataques y `dmgMult`, el multiplicador del daño que recibe el Tico.
 - **Recompensas:** pago, bono sin daño, `item` y `defeatTip` (consejo al perder).
-  - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine" o "jetHit" (ADR 0020). La `desc` va en minúscula, porque se muestra después de "nombre ·".
+  - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine", "jetHit" o "shotHit" (ADR 0020 y 0021). La `desc` va en minúscula, porque se muestra después de "nombre ·".
 - **Armas, bonus, papeletas, rompemuelles, cruces, calles y recompensas.**
 
 ## Paisaje

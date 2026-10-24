@@ -9,9 +9,10 @@ describe('etapas en orden', () => {
   });
 
   it('el orden de juego sigue el número de cada etapa', () => {
-    expect(STAGE_ORDER).toEqual(['miraflores', 'san-isidro', 'centro']);
+    expect(STAGE_ORDER).toEqual(['miraflores', 'san-isidro', 'centro', 'javier-prado']);
     expect(nextStage('miraflores')).toBe('san-isidro');
-    expect(nextStage('centro')).toBeNull();
+    expect(nextStage('centro')).toBe('javier-prado');
+    expect(nextStage('javier-prado')).toBeNull();
   });
 
   it('sin progreso se empieza en la etapa 1', () => {
@@ -35,6 +36,6 @@ describe('etapas en orden', () => {
   });
 
   it('si se desbloquea una etapa que aún no existe, se queda en la última disponible', () => {
-    expect(stageForUnlocked(4)).toBe('centro');
+    expect(stageForUnlocked(5)).toBe('javier-prado');
   });
 });

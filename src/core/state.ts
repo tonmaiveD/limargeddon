@@ -16,7 +16,7 @@ export interface Player {
   ammo: number; reloadT: number; coneHeld: boolean; lives: number;
 }
 
-export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet';
+export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet' | 'throw';
 export interface Boss {
   x: number; y: number; baseY: number; w: number; h: number; hp: number; max: number;
   tx: number; rx: number; rvx: number; state: string; st: number; act: number; phase: number;
@@ -32,6 +32,8 @@ export interface Car {
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
 export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
+// proyectil del jefe: avanza en línea recta y se pierde al salir de la pista
+export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
@@ -52,7 +54,7 @@ export interface Game {
   hint: { text: string; life: number } | null; hintI: number;
   perks: { item: ItemDef; used: boolean }[];
   p: Player; b: Boss;
-  traffic: Car[]; shots: Shot[]; allies: Ally[]; pickups: Pickup[];
+  traffic: Car[]; shots: Shot[]; foes: Foe[]; allies: Ally[]; pickups: Pickup[];
   bumps: { y: number; hitP: boolean; hitB: boolean }[]; cross: { y: number; name: string }[];
   parts: Particle[]; rings: Ring[]; floats: Float[];
   bubble: { text: string; t: number } | null; bubbleT: number;
@@ -79,7 +81,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
       state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
-    traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
+    traffic: [], shots: [], foes: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
     bubble: null, bubbleT: 2, trafficT: cfg.traffic.first, pickT: cfg.pickups.first, bumpT: cfg.bumps.first, crossT: cfg.crossings.first, streetI: 0,
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
     allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,

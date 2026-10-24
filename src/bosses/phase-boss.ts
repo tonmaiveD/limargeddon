@@ -16,7 +16,7 @@ import { makeCar } from '../core/world';
  */
 
 // Estados que un golpe fuerte (claxon, combi, metro) corta para mandarla de vuelta a su carril.
-const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park', 'teleJet', 'jet'];
+const INTERRUPTIBLE = ['teleRev', 'rev', 'teleRam', 'ram', 'teleBrake', 'brake', 'park', 'teleJet', 'jet', 'teleThrow'];
 
 const ph = (G: Game): BossPhase => phaseDef(G.cfg.boss.phases, G.b.phase);
 const spdK = (G: Game) => G.d.spd / 260;
@@ -50,6 +50,7 @@ function startAttack(G: Game, P: BossPhase, attack: BossAttack): void {
   if (attack === 'brake') { b.state = 'teleBrake'; b.st = P.tele; }
   else if (attack === 'reverse') { b.state = 'teleRev'; b.st = G.d.tele ? P.tele : (P.teleOff ?? P.tele); b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); }
   else if (attack === 'jet' && P.jet) { b.state = 'teleJet'; b.st = P.jet.tele; b.tx = laneX(G.cfg, laneOf(G.cfg, G.p.x)); b.jetHit = false; }
+  else if (attack === 'throw' && P.throw) { b.state = 'teleThrow'; b.st = G.d.tele ? P.throw.tele : P.throw.tele * 0.7; }
   else { b.state = 'teleRam'; b.st = P.tele; b.rx = G.p.x; Sfx.play('bossHorn'); }
 }
 
@@ -104,6 +105,19 @@ const STATES: StateTable<Game> = {
     }
     for (const c of G.traffic) if (!c.invulnerable && overlap(c, z)) c.x += Math.sign(c.x - b.x || 1) * J.push * 0.6 * dt;
     if (b.st <= 0) b.state = 'return';
+  },
+  // lanzamiento: el brazo asoma (aviso) y suelta el abanico de proyectiles apuntado al Tico
+  teleThrow(G, dt) {
+    const b = G.b, T = ph(G).throw!; b.flash = 'throw'; b.st -= dt;
+    if (b.st > 0) return;
+    const x0 = b.x + b.w / 2, y0 = b.y + b.h / 4, aim = Math.atan2(G.p.y - y0, G.p.x - x0);
+    for (let i = 0; i < T.count; i++) {
+      const a = aim + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0);
+      G.foes.push({ x: x0, y: y0, vx: Math.cos(a) * T.speed, vy: Math.sin(a) * T.speed, r: T.r, dmg: T.dmg, col: T.col ?? C.yellow });
+    }
+    if (T.text) floatText(G, x0, y0 - 20, T.text, T.col ?? C.yellow);
+    Sfx.play('kernel');
+    if (T.park) { b.state = 'park'; b.st = T.park; } else b.state = 'return';
   },
   return(G, dt) {
     const b = G.b; b.flash = null; b.y += (b.baseY - b.y) * Math.min(1, dt * 2.2); b.x += step(b.tx - b.x, 120 * dt);

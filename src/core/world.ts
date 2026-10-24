@@ -1,7 +1,7 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { announce, burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, type Car, type Game } from './state';
+import { announce, burst, fine, floatText, hurt, dmgBoss, laneX, say, shake, usePerk, type Car, type Game } from './state';
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateShots } from './weapons';
@@ -183,6 +183,15 @@ export function updateWorld(G: Game, dt: number): void {
     if (c.flash) c.flash -= dt;
   }
   updateShots(G, dt);
+  // proyectiles del jefe: el SOAT los bloquea; el Casco de obra perdona el primero
+  for (const f of G.foes) {
+    f.x += f.vx * dt; f.y += f.vy * dt;
+    if (play && Math.hypot(f.x - p.x, f.y - p.y) < f.r + p.w / 2) {
+      f.dead = true; burst(G, f.x, f.y, f.col, 6, 120);
+      if (p.pw.soat > 0 || !usePerk(G, 'shotHit')) hurt(G, f.dmg); // con SOAT, hurt lo bloquea sin gastar el casco
+    }
+  }
+  G.foes = G.foes.filter((f) => !f.dead && f.y < H + 20 && f.y > -40 && f.x > -40 && f.x < W + 40);
   // aliados: combi kamikaze
   for (const a of G.allies) {
     a.y += a.vy * dt; if (b.state !== 'enter') a.x += step(b.x - a.x, 260 * dt);
