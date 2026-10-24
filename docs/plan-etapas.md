@@ -63,7 +63,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Renombrar a La Loca del Q8 | S | Textos, JSON, nombres de archivo | Hecho (ADR 0014) |
 | Hito 3, motor común | L | Vehículos declarativos, enjambres, obstáculos, guía de etapas | Hecho (ADR 0014) |
 | Hito 4, Miraflores | M | Etapa tutorial, jefe genérico por fases, selector mínimo de etapa | Hecho (ADR 0015) |
-| Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, guardado v2, selector con desbloqueo | Pendiente |
+| Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, guardado v2 (el desbloqueo en orden ya está, ADR 0017) | Pendiente |
 | Centro | M | Paisaje, marchas como muro móvil, Rochabús | Hecho (ADR 0016) |
 | Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Pendiente |
 | Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Pendiente |

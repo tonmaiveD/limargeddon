@@ -37,6 +37,7 @@ h2{font-size:clamp(22px,7vw,30px);color:var(--yellow);text-shadow:2px 2px 0 var(
 button.pick{font:400 13px/1 var(--display);color:var(--bg);background:var(--yellow);border:0;border-radius:4px;padding:12px 14px;cursor:pointer}
 button.pick.alt{background:transparent;color:var(--yellow);box-shadow:inset 0 0 0 2px var(--yellow)}
 button.pick:hover{filter:brightness(1.1)}
+button.pick[hidden]{display:none}
 .setting{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted)}
 .seg{font:600 12px/1 var(--body);color:var(--ink);background:var(--panel);border:0;border-radius:999px;padding:8px 12px;cursor:pointer}
 .seg[aria-checked="true"]{background:var(--orange);color:var(--bg)}

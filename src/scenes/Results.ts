@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import type { Summary } from '../core/world';
-import { STAGES } from '../stages';
+import { STAGES, nextStage } from '../stages';
 
 const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
 import { exportFights, fightStats } from '../core/save';
@@ -28,9 +28,14 @@ export class ResultsScene extends Phaser.Scene {
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas del serenazgo</div>
       ${R.item ? `<div class="badge">${R.item}</div>` : ''}`
       : `<div class="badge off">Consejo: ${R.defeatTip ?? `el punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
-    const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement;
-    const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; this.scene.stop(); };
+    const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement, next = $('next') as HTMLButtonElement;
+    const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; next.onclick = null; this.scene.stop(); };
     again.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId, dk }); };
+    // al ganar se ofrece la etapa siguiente (ya quedó desbloqueada); si era la última disponible, se avisa
+    const nxt = s.win ? nextStage(stageId) : null;
+    next.hidden = !nxt; again.className = nxt ? 'pick alt' : 'pick';
+    if (nxt) next.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId: nxt, dk }); };
+    if (s.win && !nxt) $('endBadges').insertAdjacentHTML('beforeend', '<div class="badge">¡Completaste todas las etapas disponibles! Pronto llegan más distritos.</div>');
     toMenu.onclick = () => { close(); Sfx.engine(0); this.scene.stop('Stage'); this.scene.start('Menu'); };
     const copy = $('copyLog') as HTMLButtonElement;
     copy.textContent = 'Copiar registro';
@@ -38,7 +43,7 @@ export class ResultsScene extends Phaser.Scene {
       try { await navigator.clipboard.writeText(JSON.stringify(exportFights())); copy.textContent = 'Registro copiado'; }
       catch { copy.textContent = 'No se pudo copiar'; }
     };
-    end.hidden = false; again.focus();
+    end.hidden = false; (nxt ? next : again).focus();
   }
 }
 

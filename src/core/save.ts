@@ -13,7 +13,8 @@ const MAX_FIGHTS = 300;
 export interface FightRecord { stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number }
 export interface Settings { fireMode?: FireMode; stageId?: string }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
-interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings }
+// progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
+interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number } }
 
 function load(): SaveV1 {
   try {
@@ -50,4 +51,24 @@ export const exportFights = (): FightRecord[] => load().fights;
 export function getSettings(): Settings { return load().settings ?? {}; }
 export function setSettings(patch: Settings): void {
   const data = load(); data.settings = { ...data.settings, ...patch }; store(data);
+}
+
+/*
+ * Progreso: las etapas se juegan en orden (1, 2, 3...). Ganar la etapa n desbloquea la n+1.
+ * Si no hay progreso guardado, se reconstruye con las victorias ya registradas en el dispositivo.
+ */
+export function unlockedStage(numberOf: (stageId: string) => number | undefined): number {
+  const data = load();
+  if (data.progress) return data.progress.unlocked;
+  let won = 0;
+  for (const f of data.fights) if (f.win) won = Math.max(won, numberOf(f.stage) ?? 0);
+  return won + 1;
+}
+
+export function unlockNext(stageNumber: number, numberOf: (stageId: string) => number | undefined): number {
+  const data = load();
+  const current = data.progress?.unlocked ?? unlockedStage(numberOf);
+  data.progress = { unlocked: Math.max(current, stageNumber + 1) };
+  store(data);
+  return data.progress.unlocked;
 }
