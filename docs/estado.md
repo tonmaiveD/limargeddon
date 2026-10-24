@@ -4,15 +4,16 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #15 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #16 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
-- **Cuatro etapas, en orden y con desbloqueo** (ADR 0017):
+- **Cinco etapas, en orden y con desbloqueo** (ADR 0017):
   1. Miraflores (tutorial), con la Camioneta del Serenazgo.
   2. San Isidro, con La Loca del Q8.
   3. Centro de Lima, con El Rochabús.
   4. Javier Prado, con La Combi Asesina (ADR 0021).
+  5. Gamarra, con El Camión de Gamarra (ADR 0022).
 - **Controles** (ADR 0008, 0011, 0013): acelerador sin freno (soltar es esquivar). El pulgar izquierdo gira y el derecho tiene aceite, claxon, acelerar y conos. Dos modos de disparo elegibles en el menú: "por toque" (reserva de 3 conos y combo de punto ciego) y "acelerar es atacar".
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
@@ -45,6 +46,7 @@
 
 ## Pendiente
 - **Pruebas en el teléfono** con el registro nuevo: 3 o 4 peleas por modo. Con eso se decide si la vida del jefe baja solo en el modo por toque. La auditoría propone ensayar el Q8 en Normal por toque con 1584 de vida (-12%). Referencias humanas hasta ahora: San Isidro por toque, 2:03 (victoria) y 2:06 (derrota). Centro por toque, 1:52 (victoria), 2:29 y 3:33 (derrotas).
+- **Pasada de dificultad final** con el juego completo. Ya se sabe que con las mejoras típicas, Difícil se vuelve fácil desde la Etapa 4.
 - **Auditoría de octubre de 2026, lo que queda:** tutorial completo, señal del punto ciego, daño por fuente en la pista, aviso de reversa del Q8 en Difícil, blancos táctiles de 44 px, meta de ahorro elegida y un bot con restricciones de pulgar.
-- **Etapas siguientes:** Gamarra o Callao (medianas). Después Vía Expresa (saltos) y Panamericana (clima y nivel de búsqueda), la Costa Verde (final) y la Línea Amarilla del Terror (secreta), según `docs/plan-etapas.md`.
+- **Etapas siguientes:** Callao (mediana). Después Vía Expresa (saltos) y Panamericana (clima y nivel de búsqueda), la Costa Verde (final) y la Línea Amarilla del Terror (secreta), según `docs/plan-etapas.md`.
 - **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.

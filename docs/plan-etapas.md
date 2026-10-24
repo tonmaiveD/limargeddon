@@ -66,7 +66,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Hito 5, taller y progresión | L | Escena Garage, soles, mejoras, parada entre etapas | Hecho (ADR 0017 y 0018) |
 | Centro | M | Paisaje, marchas como muro móvil, Rochabús | Hecho (ADR 0016) |
 | Javier Prado | M | Obras y cráteres, semáforos, Combi Asesina | Hecho (ADR 0021) |
-| Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Pendiente |
+| Gamarra | M | Cables que castigan acelerar, rollos de tela, camión | Hecho (ADR 0022) |
 | Callao | M | Contenedores que caen, tráiler | Pendiente |
 | Vía Expresa | L | Saltos y rampas (motor), bus articulado | Pendiente |
 | Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Pendiente |

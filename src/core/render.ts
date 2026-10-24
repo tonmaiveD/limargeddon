@@ -4,7 +4,7 @@ import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
 import type { Car, Game, Pickup } from './state';
 import type { VehicleLook } from './config';
-import { jetZone } from '../bosses/phase-boss';
+import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
@@ -48,9 +48,39 @@ function drawBici(g: Gfx, c: Car): void {
   g.restore();
 }
 
+// Mototaxi: tres ruedas, cabina con toldo del color del vehículo y el techo (roof) como lona.
+function drawMototaxi(g: Gfx, c: Car): void {
+  const w = c.w, h = c.h;
+  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.12 : 0);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-w / 2 + 2, -h / 2 + 3, w, h);
+  g.fillStyle = '#1b1b22'; g.fillRect(-2, -h / 2, 4, 6); g.fillRect(-w / 2, h / 2 - 7, 4, 7); g.fillRect(w / 2 - 4, h / 2 - 7, 4, 7); // ruedas
+  g.fillStyle = c.col; g.fillRect(-w / 2 + 1, -h / 2 + 7, w - 2, h - 10);                   // carrocería
+  g.fillStyle = c.look?.roof ?? '#2a2238'; g.roundRect(-w / 2 + 2, -h / 2 + h * 0.36, w - 4, h * 0.5, 3); g.fill(); // toldo
+  g.fillStyle = '#10131c'; g.fillRect(-w / 2 + 3, -h / 2 + h * 0.26, w - 6, 3);             // parabrisas
+  if (c.look?.label) { g.fillStyle = c.look.labelCol ?? '#fff'; g.font = FONT(c.look.labelSize ?? 4); g.textAlign = 'center'; g.fillText(c.look.label, 0, -h / 2 + h * (c.look.labelY ?? 0.66)); }
+  if (c.flash && c.flash > 0) { g.fillStyle = 'rgba(255,255,255,.6)'; g.fillRect(-w / 2, -h / 2, w, h); }
+  g.restore();
+}
+
+// Triciclo de carga: el que pedalea atrás y la plataforma adelante con fardos apilados.
+function drawTriciclo(g: Gfx, c: Car): void {
+  const w = c.w, h = c.h;
+  g.save(); g.translate(c.x, c.y);
+  g.fillStyle = '#1b1b22'; g.fillRect(-w / 2, -h / 2 + 2, 3, 7); g.fillRect(w / 2 - 3, -h / 2 + 2, 3, 7); g.fillRect(-1, h / 2 - 7, 2, 7);
+  g.fillStyle = '#4a4452'; g.fillRect(-w / 2 + 1, -h / 2 + 1, w - 2, h * 0.55);                // plataforma
+  const box = c.look?.box ?? '#e0954a';
+  g.fillStyle = box; g.fillRect(-w / 2 + 2, -h / 2 + 2, w - 4, h * 0.25); g.fillRect(-w / 2 + 3, -h / 2 + 2 + h * 0.27, w - 6, h * 0.24);
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-w / 2 + 2, -h / 2 + 2 + h * 0.25, w - 4, 1.5);
+  g.fillStyle = c.col; g.fillRect(-3, h * 0.08, 6, 8);                                        // el que pedalea
+  g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(0, h * 0.08 + 1, 3, 0, 7); g.fill();
+  g.restore();
+}
+
 function drawTraffic(g: Gfx, G: Game, c: Car): void {
   if (c.look?.kind === 'moto') { drawMoto(g, c); return; }
   if (c.look?.kind === 'bici') { drawBici(g, c); return; }
+  if (c.look?.kind === 'mototaxi') { drawMototaxi(g, c); return; }
+  if (c.look?.kind === 'triciclo') { drawTriciclo(g, c); return; }
   const L = c.look;
   drawCar(g, G.t, c, {
     body: c.col, roof: L?.roof, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: L ? (g, w, h) => drawLook(g, G, L, w, h) : undefined,
@@ -63,6 +93,19 @@ function drawObstacles(g: Gfx, G: Game): void {
   const defs = G.cfg.obstacles ?? [];
   for (const ob of G.obstacles) {
     const o = defs[ob.i], x0 = ob.x - ob.w / 2, y0 = ob.y - ob.h / 2;
+    if (o.style === 'cables') {
+      // cables colgando de poste a poste: pasar por debajo acelerando te engancha
+      g.fillStyle = '#15111d'; g.fillRect(x0 - 3, ob.y - 8, 4, 16); g.fillRect(x0 + ob.w - 1, ob.y - 8, 4, 16);
+      g.strokeStyle = o.col; g.lineWidth = 1.4;
+      for (let i = 0; i < 4; i++) {
+        const sag = 4 + i * 2.5, yy = ob.y - 5 + i * 3;
+        g.beginPath(); g.moveTo(x0, yy);
+        for (let k = 1; k <= 8; k++) { const u = k / 8; g.lineTo(x0 + ob.w * u, yy + sag * 4 * u * (1 - u)); }
+        g.stroke();
+      }
+      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(6); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y - 9); }
+      continue;
+    }
     if (o.style === 'crater') {
       g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(ob.x, ob.y + 2, ob.w / 2, ob.h / 2, 0, 0, 7); g.fill();
       g.fillStyle = o.col; g.beginPath(); g.ellipse(ob.x, ob.y, ob.w / 2 - 3, ob.h / 2 - 3, 0, 0, 7); g.fill();
@@ -108,13 +151,21 @@ function drawObstacles(g: Gfx, G: Game): void {
   }
 }
 
-// Aviso del lanzamiento (ataque 'throw'): línea punteada parpadeante desde el costado del jefe hacia el Tico.
+// Aviso del lanzamiento (ataque 'throw'): líneas punteadas parpadeantes por donde van a pasar los proyectiles.
 function drawThrow(g: Gfx, G: Game): void {
   const b = G.b, T = phaseDef(G.cfg.boss.phases, b.phase).throw;
   if (b.state !== 'teleThrow' || !T) return;
-  const x0 = b.x + b.w / 2, y0 = b.y + b.h / 4, dx = G.p.x - x0, dy = G.p.y - y0, d = Math.hypot(dx, dy) || 1;
-  g.fillStyle = Math.floor(G.t * 10) % 2 ? (T.col ?? '#ffe14d') : '#ffffff';
-  for (let s = 20; s < d - 30; s += 22) g.fillRect(x0 + (dx / d) * s - 2, y0 + (dy / d) * s - 2, 4, 4);
+  const { x: x0, y: y0 } = throwOrigin(G);
+  g.fillStyle = Math.floor(G.t * 10) % 2 ? (T.col ?? T.cols?.[0] ?? '#ffe14d') : '#ffffff';
+  if (T.aim !== 'abajo') { // apuntado al Tico: una sola línea hasta él
+    const dx = G.p.x - x0, dy = G.p.y - y0, d = Math.hypot(dx, dy) || 1;
+    for (let s = 20; s < d - 30; s += 22) g.fillRect(x0 + (dx / d) * s - 2, y0 + (dy / d) * s - 2, 4, 4);
+    return;
+  }
+  for (let i = 0; i < T.count; i++) { // cae hacia abajo: una línea por proyectil, sobre su trayectoria
+    const a = Math.PI / 2 + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0), cx = Math.cos(a), cy = Math.sin(a);
+    for (let s = 16; y0 + cy * s < H; s += 22) g.fillRect(x0 + cx * s - 2, y0 + cy * s - 2, 4, 4);
+  }
 }
 
 // Chorro del jefe (ataque 'jet'): aviso con línea punteada sobre el carril y luego la columna de agua.
@@ -248,6 +299,14 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   }
   drawJet(g, G); drawThrow(g, G);
   for (const f of G.foes) {
+    if (f.look === 'rollo') { // rollo de tela rodando: cilindro visto desde arriba, con las vueltas de tela marcadas
+      const rw = f.r * 2.4, rh = f.r * 1.4, roll = (G.t * 10 + f.x) % 4;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
+      g.fillStyle = f.col; g.roundRect(f.x - rw / 2, f.y - rh / 2, rw, rh, 3); g.fill();
+      g.fillStyle = 'rgba(0,0,0,.22)'; for (let i = 0; i < 3; i++) g.fillRect(f.x - rw / 2 + 1, f.y - rh / 2 + ((i * 4 + roll) % rh), rw - 2, 1.5);
+      g.fillStyle = '#e8e2d0'; g.fillRect(f.x - rw / 2 - 2, f.y - 2, 3, 4); g.fillRect(f.x + rw / 2 - 1, f.y - 2, 3, 4); // tubo de cartón
+      continue;
+    }
     g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(f.x + 2, f.y + 2, f.r, 0, 7); g.fill();
     g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
     g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);

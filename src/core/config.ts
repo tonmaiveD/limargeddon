@@ -18,7 +18,7 @@ export interface PowerDef {
 
 // Aspecto declarativo de un vehículo: el motor lo dibuja sin código por tipo.
 export interface VehicleLook {
-  kind?: 'auto' | 'moto' | 'bici';   // auto por defecto
+  kind?: 'auto' | 'moto' | 'bici' | 'mototaxi' | 'triciclo';   // auto por defecto
   roof?: string;                     // color del techo
   panel?: string;                    // franja ancha sobre el techo (fondo del rótulo del serenazgo)
   siren?: boolean;                   // circulina roja y azul intermitente
@@ -32,8 +32,8 @@ export interface VehicleMove { zigzag?: { amp: number; freq: number } }
 
 // Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
-// shotHit: el primer proyectil del jefe no hace daño.
-export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit';
+// shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
+export type PerkEffect = 'contactFine' | 'anyFine' | 'jetHit' | 'shotHit' | 'obstacleHit';
 export interface ItemDef { id: string; name: string; desc: string; effect: PerkEffect; icon: string; col: string }
 
 export interface TrafficType {
@@ -59,7 +59,7 @@ export interface SwarmDef {
 export interface ObstacleDef {
   k: string;
   kind: 'bloque' | 'hueco';
-  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter';
+  style: 'conos' | 'barrera' | 'caja' | 'crater' | 'peatones' | 'scooter' | 'cables';
   diffs?: DiffKey[];                 // todas si se omite
   first: number; every: [number, number];
   lanes: number;                     // carriles que ocupa
@@ -70,6 +70,8 @@ export interface ObstacleDef {
   dmg: number;                       // daño al chocar (bloque) o al caer (hueco)
   fine?: number;                     // papeleta al chocarlo
   drift?: { amp: number; freq: number }; // vaivén lateral (por ejemplo, una marcha que se corre de carril)
+  accelOnly?: boolean;               // hueco que solo hace daño si se cruza acelerando (cables bajos de Gamarra)
+  hitText?: string;                  // texto al recibir el daño de un hueco (por defecto, ¡HUECO!)
 }
 
 export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw';
@@ -79,7 +81,12 @@ export interface BossJet { tele: number; dur: number; w: number; push: number; d
 
 // Lanzamiento: tras un aviso, el jefe lanza `count` proyectiles en abanico (`spread` en radianes) hacia el Tico (monedas de la combi).
 // park: segundos que se queda detenido después de lanzar, la ventana para castigarlo.
-export interface BossThrow { tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number }
+// from: sale de la puerta derecha (por defecto) o de atrás. aim: apunta al Tico (por defecto) o cae recto hacia abajo.
+// look: moneda (por defecto) o rollo de tela.
+export interface BossThrow {
+  tele: number; count: number; spread: number; speed: number; dmg: number; r: number; col?: string; text?: string; park?: number;
+  from?: 'derecha' | 'atras'; aim?: 'tico' | 'abajo'; look?: 'moneda' | 'rollo'; cols?: string[];
+}
 
 // Invocación: el jefe trae vehículos de un tipo de traffic.types, desde un costado (como el valet) o desde arriba.
 export interface BossSummon { type: string; every: number; from: 'lado' | 'arriba'; count?: number; say?: string }
