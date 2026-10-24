@@ -9,6 +9,9 @@ import { drawCombiAsesina } from '../bosses/combi-render';
 import { drawCamion } from '../bosses/camion-render';
 import { drawTrailer } from '../bosses/trailer-render';
 import { drawArticulado } from '../bosses/articulado-render';
+import { drawComandante } from '../bosses/comandante-render';
+import panamericanaConfig from './panamericana/config.json';
+import { drawWorld as panamericanaWorld } from './panamericana/scenery';
 import viaExpresaConfig from './via-expresa/config.json';
 import { drawWorld as viaExpresaWorld } from './via-expresa/scenery';
 import callaoConfig from './callao/config.json';
@@ -39,6 +42,7 @@ export const STAGES: Record<string, StageDef> = {
   'javier-prado': { cfg: javierPradoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCombiAsesina, drawWorld: javierPradoWorld },
   'via-expresa': { cfg: viaExpresaConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawArticulado, drawWorld: viaExpresaWorld },
   miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
+  panamericana: { cfg: panamericanaConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawComandante, drawWorld: panamericanaWorld },
   'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
 };
 

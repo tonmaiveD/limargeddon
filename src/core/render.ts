@@ -5,6 +5,7 @@ import { BODY, FONT, Gfx } from './gfx';
 import type { Car, Game, Pickup } from './state';
 import type { VehicleLook } from './config';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
+import { gateClosed } from './world';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
@@ -93,6 +94,20 @@ function drawObstacles(g: Gfx, G: Game): void {
   const defs = G.cfg.obstacles ?? [];
   for (const ob of G.obstacles) {
     const o = defs[ob.i], x0 = ob.x - ob.w / 2, y0 = ob.y - ob.h / 2;
+    if (o.style === 'peaje') {
+      // peaje abandonado: casetas entre carriles y una barrera por carril que sube y baja sola
+      const { left, laneWidth, lanes } = G.cfg.road;
+      for (let l = 0; l < lanes; l++) {
+        const lx = left + l * laneWidth, closed = gateClosed(G, ob, l);
+        if (closed) { for (let x = lx + 6, i = 0; x < lx + laneWidth - 6; x += 8, i++) { g.fillStyle = i % 2 ? '#f4f6fb' : '#ff3355'; g.fillRect(x, ob.y - 2, 8, 4); } }
+        else { g.fillStyle = '#ff3355'; g.fillRect(lx + 6, ob.y - 2, 4, 4); g.fillStyle = '#f4f6fb'; g.fillRect(lx + 6, ob.y - 10, 3, 8); }
+      }
+      g.fillStyle = o.col;
+      for (let l = 0; l <= lanes; l++) { const bx = left + l * laneWidth; g.fillRect(bx - 5, ob.y - ob.h / 2 - 4, 10, ob.h + 8); }
+      g.fillStyle = o.col2 ?? '#15111d'; for (let l = 0; l <= lanes; l++) g.fillRect(left + l * laneWidth - 3, ob.y - 3, 6, 4);
+      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(7); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y - ob.h / 2 - 8); }
+      continue;
+    }
     if (o.style === 'rampa') {
       // rampa de tierra con franjas: el lado oscuro es la subida
       g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x0 + 2, y0 + 3, ob.w, ob.h);
@@ -177,6 +192,19 @@ function drawThrow(g: Gfx, G: Game): void {
   }
 }
 
+// Garúa: una capa gris que baja desde arriba hasta `depth` del alto, más espesa arriba, con hilos de llovizna.
+function drawFog(g: Gfx, G: Game): void {
+  const F = G.cfg.weather?.fog, k = G.fog.k;
+  if (!F || k <= 0) return;
+  const bottom = H * F.depth, bands = 12;
+  for (let i = 0; i < bands; i++) {
+    const y0 = 44 + ((bottom - 44) * i) / bands, a = k * 0.9 * (1 - (i / bands) ** 2);
+    g.fillStyle = `rgba(186,190,204,${a.toFixed(3)})`; g.fillRect(-view.extra, y0, W + 2 * view.extra, (bottom - 44) / bands + 1);
+  }
+  g.fillStyle = `rgba(230,234,244,${(k * 0.35).toFixed(3)})`;
+  for (let i = 0; i < 40; i++) { const x = ((i * 53 + G.t * 30) % (W + 40)) - 20, y = 44 + ((i * 97 + G.t * 260) % (bottom - 44)); g.fillRect(x, y, 1, 7); }
+}
+
 // Chorro del jefe (ataque 'jet'): aviso con línea punteada sobre el carril y luego la columna de agua.
 function drawJet(g: Gfx, G: Game): void {
   const b = G.b;
@@ -244,6 +272,11 @@ function drawHUD(g: Gfx, G: Game): void {
   g.fillStyle = '#2b2238'; g.fillRect(12, 24, bw, 10);
   g.fillStyle = cur.bar; g.fillRect(12, 24, bw * r, 10);
   g.fillStyle = C.bg; for (const ph of phases) if (ph.from < 1) g.fillRect(12 + bw * ph.from, 24, 2, 10);
+  // nivel de búsqueda: cinco estrellas bajo la barra del jefe
+  if (cfg.wanted) {
+    g.textAlign = 'center'; g.font = FONT(11); // centradas, para no quedar bajo el botón de pausa
+    for (let i = 0; i < cfg.wanted.max; i++) { g.fillStyle = i < G.stars ? C.yellow : 'rgba(255,255,255,.22)'; g.fillText('★', W / 2 + (i - (cfg.wanted.max - 1) / 2) * 14, 54); }
+  }
   // poderes activos
   let py = 52;
   for (const k of ['turbo', 'cancha', 'soat'] as const) if (p.pw[k] > 0) {
@@ -310,8 +343,17 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
       g.strokeStyle = 'rgba(120,60,20,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 7, 0, 3); g.stroke(); g.restore();
     } else { g.fillStyle = '#3b2f17'; g.beginPath(); g.ellipse(s.x, s.y, 8, 6, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(61,255,154,.5)'; g.beginPath(); g.arc(s.x - 2, s.y - 2, 2, 0, 7); g.fill(); }
   }
+  drawFog(g, G); // la garúa tapa tráfico y obstáculos, pero no los avisos del jefe ni sus proyectiles
   drawJet(g, G); drawThrow(g, G);
   for (const f of G.foes) {
+    if (f.look === 'rompellantas') { // tira de clavos que rueda hacia abajo
+      const rw = f.r * 3.2, rh = f.r * 0.9;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
+      g.fillStyle = '#2a2632'; g.fillRect(f.x - rw / 2, f.y - rh / 2, rw, rh);
+      g.fillStyle = '#c9ccd3';
+      for (let x = f.x - rw / 2 + 2; x < f.x + rw / 2 - 1; x += 4) { g.beginPath(); g.moveTo(x, f.y - rh / 2); g.lineTo(x + 2, f.y - rh / 2 - 4); g.lineTo(x + 4, f.y - rh / 2); g.fill(); }
+      continue;
+    }
     if (f.look === 'contenedor') { // contenedor que se soltó: caja larga con nervaduras, girando apenas
       const cw = f.r * 1.6, chh = f.r * 3;
       g.save(); g.translate(f.x, f.y); g.rotate(Math.sin(G.t * 3 + f.x) * 0.12);

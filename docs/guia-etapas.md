@@ -26,6 +26,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Obstáculos** (`obstacles`):
   - `kind` "bloque": sólido, empuja y desvía al tráfico. Estilo "conos", "barrera" o "caja".
   - `kind` "hueco": se cruza y hace daño; con turbo se vuela. Estilo "crater", "scooter" o "cables". Con `accelOnly` solo daña si se cruza acelerando, y `hitText` cambia el aviso.
+  - `kind` "peaje" (estilo "peaje", `gatePeriod`): casetas con una barrera por carril que sube y baja; romper una cerrada daña y suma estrella.
   - `kind` "rampa" (estilo "rampa", `jump` en segundos): acelerando, el Tico salta y en el aire nada lo toca.
   - Bloques también con estilo "peatones" (por ejemplo, turistas: papeleta sin daño).
   - Otros campos: `lanes`, `h`, `w` (si es más angosto que los carriles), `drift` (vaivén lateral: `amp`, `freq`), `col`, `col2`, `label`, `dmg`, `fine` y, opcional, `diffs`.
@@ -33,16 +34,18 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
   - `attack` o `attacks` con peso ("brake", "reverse", "ram", "jet") y tiempos de aviso (`tele`).
   - `jet`: chorro que empuja de lado (`tele`, `dur`, `w`, `push`, `dmg`), ver el Rochabús en `src/stages/centro/config.json`.
   - `swing`: coletazo de la mitad trasera hacia el lado del Tico (`tele`, `dur`, `reach`, `dmg`, `push`), ver el bus en `src/stages/via-expresa/config.json`.
-  - `throw`: proyectiles en abanico hacia el Tico (`tele`, `count`, `spread`, `speed`, `dmg`, `r`, `col`, `text`, `park`, `from` "atras", `aim` "abajo", `look` "rollo" o "contenedor" y `cols`), ver la Combi Asesina en `src/stages/javier-prado/config.json` y el camión en `src/stages/gamarra/config.json`. El renderer del jefe muestra el aviso cuando `b.flash === 'throw'`.
+  - `throw`: proyectiles en abanico hacia el Tico (`tele`, `count`, `spread`, `speed`, `dmg`, `r`, `col`, `text`, `park`, `from` "atras", `aim` "abajo", `look` "rollo", "contenedor" o "rompellantas", `cols` y `stun`), ver la Combi Asesina en `src/stages/javier-prado/config.json` y el camión en `src/stages/gamarra/config.json`. El renderer del jefe muestra el aviso cuando `b.flash === 'throw'`.
   - `summon`: trae vehículos de un tipo, desde un costado o desde arriba.
   - `escorts`: con `look`, `w` y `h` propios.
   - Claxon (`hornEvery`, `hornSound`, `hornCol`, `hornText`) y valets (solo San Isidro).
   - Frases (`lines`) y réplicas (`quips`).
 - **Ayudas** (`hints`): frases cortas sobre el Tico en los primeros segundos, `{ "at": 1.5, "text": "..." }`. Pensadas para el tutorial, máximo unas ocho palabras.
 - **Pista:** `road.exclusive` pinta un carril exclusivo (`lane`, `label`, `col`). Para quitar cruces o rompemuelles, poner `first` muy alto.
+- **Clima** (`weather.fog`): garúa en oleadas que tapa la parte de arriba.
+- **Nivel de búsqueda** (`wanted`): estrellas por faltas, patrulleros que persiguen y bloqueos (ver ADR 0025).
 - **Dificultades:** vida del jefe, velocidad, frecuencia de ataques y `dmgMult`, el multiplicador del daño que recibe el Tico.
 - **Recompensas:** pago, bono sin daño, `item` y `defeatTip` (consejo al perder).
-  - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine", "jetHit", "shotHit", "obstacleHit", "ramHit" o "swingHit" (ADR 0020 a 0024). La `desc` va en minúscula, porque se muestra después de "nombre ·".
+  - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine", "jetHit", "shotHit", "obstacleHit", "ramHit", "swingHit" o "wantedHit" (ADR 0020 a 0025). La `desc` va en minúscula, porque se muestra después de "nombre ·".
 - **Armas, bonus, papeletas, rompemuelles, cruces, calles y recompensas.**
 
 ## Paisaje
