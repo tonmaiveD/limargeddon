@@ -4,6 +4,9 @@ import type { BossAI, Game } from '../core/state';
 import { PhaseBoss } from '../bosses/phase-boss';
 import { drawQ8 } from '../bosses/q8-render';
 import { drawSerenazgo } from '../bosses/serenazgo-render';
+import { drawRochabus } from '../bosses/rochabus-render';
+import centroConfig from './centro/config.json';
+import { drawWorld as centroWorld } from './centro/scenery';
 import mirafloresConfig from './miraflores/config.json';
 import { drawWorld as mirafloresWorld } from './miraflores/scenery';
 import sanIsidroConfig from './san-isidro/config.json';
@@ -18,6 +21,7 @@ export interface StageDef {
 }
 
 export const STAGES: Record<string, StageDef> = {
+  centro: { cfg: centroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawRochabus, drawWorld: centroWorld },
   miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
   'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },
 };

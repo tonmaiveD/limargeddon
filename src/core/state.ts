@@ -16,11 +16,11 @@ export interface Player {
   ammo: number; reloadT: number; coneHeld: boolean;
 }
 
-export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn';
+export type BossFlash = null | 'brake' | 'rev' | 'hazard' | 'horn' | 'jet';
 export interface Boss {
   x: number; y: number; baseY: number; w: number; h: number; hp: number; max: number;
   tx: number; rx: number; rvx: number; state: string; st: number; act: number; phase: number;
-  slip: number; phoneOff: number; hornT: number; valetT: number; summonT: number; flash: BossFlash; hitFlash: number; ang: number; bumpT: number;
+  slip: number; phoneOff: number; hornT: number; valetT: number; summonT: number; jetHit: boolean; flash: BossFlash; hitFlash: number; ang: number; bumpT: number;
 }
 
 export interface Car {
@@ -30,7 +30,7 @@ export interface Car {
   look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
-export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean }
+export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean }
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
@@ -74,7 +74,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
-      state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
+      state: 'enter', st: 0, act: bc.firstAction, phase: 1, slip: 0, phoneOff: 0, hornT: 4, valetT: 3, summonT: Infinity, jetHit: false, flash: null, hitFlash: 0, ang: 0, bumpT: 0 },
     traffic: [], shots: [], allies: [], pickups: [], bumps: [], cross: [], parts: [], rings: [], floats: [],
     bubble: null, bubbleT: 2, trafficT: cfg.traffic.first, pickT: cfg.pickups.first, bumpT: cfg.bumps.first, crossT: cfg.crossings.first, streetI: 0,
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
