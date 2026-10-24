@@ -8,7 +8,8 @@ import catalog from './upgrades.json';
 
 export interface UpgradeOp { path: string; op: 'add' | 'mul' | 'set'; value: number | boolean }
 export interface UpgradeLevel { price: number; desc: string; ops: UpgradeOp[] }
-export interface Upgrade { id: string; cat: string; name: string; levels: UpgradeLevel[] }
+// requires: número de etapa que hay que tener desbloqueada para comprarla (mejoras de lujo)
+export interface Upgrade { id: string; cat: string; name: string; requires?: number; levels: UpgradeLevel[] }
 export interface Category { id: string; name: string }
 
 export const CATEGORIES = catalog.categories as Category[];
@@ -35,11 +36,13 @@ export function applyUpgrades(cfg: StageConfig, levels: Levels): StageConfig {
 }
 
 export const nextLevel = (u: Upgrade, levels: Levels): UpgradeLevel | null => u.levels[levels[u.id] ?? 0] ?? null;
+export const isLocked = (u: Upgrade, unlocked: number): boolean => (u.requires ?? 1) > unlocked;
 
 // Recomendación simple: la mejora más barata que alcanza, para que siempre haya un premio a mano.
-export function recommended(levels: Levels, wallet: number): string | null {
+export function recommended(levels: Levels, wallet: number, unlocked = Infinity): string | null {
   let best: { id: string; price: number } | null = null;
   for (const u of UPGRADES) {
+    if (isLocked(u, unlocked)) continue;
     const L = nextLevel(u, levels);
     if (L && L.price <= wallet && (!best || L.price < best.price)) best = { id: u.id, price: L.price };
   }
@@ -47,9 +50,10 @@ export function recommended(levels: Levels, wallet: number): string | null {
 }
 
 // La meta más cercana que todavía no alcanza: "Te faltan S/ X para ...".
-export function nextGoal(levels: Levels, wallet: number): { name: string; missing: number } | null {
+export function nextGoal(levels: Levels, wallet: number, unlocked = Infinity): { name: string; missing: number } | null {
   let best: { name: string; missing: number } | null = null;
   for (const u of UPGRADES) {
+    if (isLocked(u, unlocked)) continue;
     const L = nextLevel(u, levels);
     if (L && L.price > wallet && (!best || L.price - wallet < best.missing)) best = { name: u.name, missing: L.price - wallet };
   }

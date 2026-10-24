@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { UPGRADES, applyUpgrades, nextGoal, recommended } from '../src/garage/upgrades';
+import { UPGRADES, applyUpgrades, isLocked, nextGoal, recommended } from '../src/garage/upgrades';
 import { addEarnings, buyUpgrade, getGarage, settleFight, unlockedStage } from '../src/core/save';
 import { stageNumber } from '../src/stages';
 import { STAGES } from '../src/stages';
@@ -92,5 +92,36 @@ describe('efectos en la pista', () => {
     expect(G.p.lives).toBe(0);
     G.p.pw.soat = 0; G.p.hp = 0; stepPort(G, DT);
     expect(G.mode).toBe('over');
+  }));
+});
+
+describe('mejoras de lujo', () => {
+  function play(levels: Record<string, number>, stage: 'miraflores' | 'san-isidro', fn: (G: ReturnType<typeof startPort>) => void): void {
+    const r = seedRandom(14);
+    try { const G = startPort('normal', applyUpgrades(STAGES[stage].cfg, levels)); for (let i = 0; i < 400 && G.b.state === 'enter'; i++) stepPort(G, DT); fn(G); } finally { r(); }
+  }
+
+  it('quedan bloqueadas hasta la etapa requerida y no se recomiendan antes', () => {
+    const lujo = UPGRADES.filter((u) => u.cat === 'lujo');
+    expect(lujo.map((u) => u.id)).toEqual(['sticker', 'socio-combi']);
+    expect(lujo.every((u) => isLocked(u, 2) && !isLocked(u, 3))).toBe(true);
+    expect(['sticker', 'socio-combi']).not.toContain(recommended({}, 99999, 2));
+  });
+
+  it('con el sticker no hay papeletas y el serenazgo abre paso', () => play({ sticker: 1 }, 'miraflores', (G) => {
+    G.p.pw.soat = 999; G.b.act = 99; G.p.hitCd = 0;
+    G.traffic.push({ k: 'sereno', x: G.p.x, y: G.p.y - 51, w: 30, h: 52, vy: 0, hp: 999, max: 999, col: '#1f4fbf', spin: 0, seed: 1, invulnerable: true, contactDmg: 0 });
+    const sereno = G.traffic[G.traffic.length - 1], x0 = sereno.x;
+    for (let i = 0; i < 30; i++) stepPort(G, DT);
+    expect(G.fines).toBe(0);
+    expect(Math.abs(sereno.x - x0)).toBeGreaterThan(10);
+  }));
+
+  it('el Socio de la Combi manda una combi que embiste al jefe', () => play({ 'socio-combi': 1 }, 'san-isidro', (G) => {
+    G.p.pw.soat = 999; G.p.hp = 999;
+    const hp0 = G.b.hp; let llego = false;
+    for (let i = 0; i < 60 * 16; i++) { stepPort(G, DT); if (G.allies.length) llego = true; }
+    expect(llego).toBe(true);
+    expect(hp0 - G.b.hp).toBeGreaterThanOrEqual(80);
   }));
 });

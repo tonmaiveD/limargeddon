@@ -6,10 +6,10 @@ import { Sfx } from '../core/audio/sfx';
 import { drawCar } from '../core/damage-render';
 import { FONT } from '../core/gfx';
 import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
-import { buyUpgrade, getGarage, type Garage } from '../core/save';
+import { buyUpgrade, getGarage, unlockedStage, type Garage } from '../core/save';
 import { C } from '../core/util';
-import { CATEGORIES, UPGRADES, applyUpgrades, nextGoal, nextLevel, recommended } from '../garage/upgrades';
-import { STAGES } from '../stages';
+import { CATEGORIES, UPGRADES, applyUpgrades, isLocked, nextGoal, nextLevel, recommended } from '../garage/upgrades';
+import { STAGES, stageNumber } from '../stages';
 
 export interface GarageData { stageId: string; dk: DiffKey }
 
@@ -36,7 +36,7 @@ export class GarageScene extends Phaser.Scene {
     setupCamera(this);
     this.L = createLayers(this);
     this.garage = getGarage();
-    const rec = recommended(this.garage.levels, this.garage.wallet);
+    const rec = recommended(this.garage.levels, this.garage.wallet, unlockedStage(stageNumber));
     if (rec) this.cat = UPGRADES.find((u) => u.id === rec)!.cat; // abre en la categoría de lo recomendado
     const cfg = STAGES[this.data0.stageId].cfg;
     const go = $('gGo') as HTMLButtonElement;
@@ -55,8 +55,9 @@ export class GarageScene extends Phaser.Scene {
     this.look = applyUpgrades(STAGES[this.data0.stageId].cfg, levels).player.look;
     const w = $('gWallet'); w.textContent = money(wallet);
     if (bought) { w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); }
-    const goal = nextGoal(levels, wallet);
-    $('gGoal').textContent = goal ? `Te faltan ${money(goal.missing)} para ${goal.name}.` : 'Tienes para todo lo que hay. ¡A la pista!';
+    const unlocked = unlockedStage(stageNumber);
+    const goal = nextGoal(levels, wallet, unlocked);
+    $('gGoal').textContent = goal ? `Te faltan ${money(goal.missing)} para ${goal.name}.` : 'Te alcanza para cualquier mejora. ¡Elige bien!';
     const cats = $('gCats'); cats.innerHTML = '';
     for (const c of CATEGORIES) {
       const b = document.createElement('button');
@@ -65,18 +66,18 @@ export class GarageScene extends Phaser.Scene {
       b.onclick = () => { this.cat = c.id; this.paint(); };
       cats.appendChild(b);
     }
-    const rec = recommended(levels, wallet), list = $('gList'); list.innerHTML = '';
+    const rec = recommended(levels, wallet, unlocked), list = $('gList'); list.innerHTML = '';
     for (const u of UPGRADES.filter((x) => x.cat === this.cat)) {
-      const lvl = levels[u.id] ?? 0, next = nextLevel(u, levels), card = document.createElement('div');
-      card.className = 'upg' + (u.id === rec ? ' rec' : '') + (u.id === bought ? ' flash' : '');
+      const lvl = levels[u.id] ?? 0, next = nextLevel(u, levels), card = document.createElement('div'), locked = isLocked(u, unlocked);
+      card.className = 'upg' + (u.id === rec ? ' rec' : '') + (u.id === bought ? ' flash' : '') + (locked ? ' locked' : '');
       const pips = u.levels.map((_, i) => `<i class="${i < lvl ? 'on' : ''}"></i>`).join('');
-      card.innerHTML = `<h3>${u.name}${u.id === rec ? '<em>RECOMENDADO</em>' : ''}</h3><div class="lv">${pips}</div><p>${next ? next.desc : 'Al máximo.'}</p>`;
+      card.innerHTML = `<h3>${u.name}${u.id === rec ? '<em>RECOMENDADO</em>' : ''}</h3><div class="lv">${pips}</div><p>${next ? next.desc : 'Al máximo.'}${locked ? ` <b>Disponible desde la Etapa ${u.requires}.</b>` : ''}</p>`;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = next ? money(next.price) : 'MÁX';
-      btn.disabled = !next || next.price > wallet;
+      btn.textContent = locked ? `Etapa ${u.requires}` : next ? money(next.price) : 'MÁX';
+      btn.disabled = locked || !next || next.price > wallet;
       btn.onclick = () => {
-        if (!next) return;
+        if (!next || locked) return;
         const res = buyUpgrade(u.id, next.price, u.levels.length);
         if (!res) return;
         this.garage = res; Sfx.init(); Sfx.play('pickup');

@@ -108,6 +108,8 @@ export interface StageConfig {
     bossPush: number; bossHitCd: number; trafficPush: number; trafficHitCd: number;
     // mejoras del taller (ADR 0018): armadura (fracción de daño evitado), vida por segundo, vidas extra y piezas visibles
     armor?: number; regen?: number; lives?: number; look?: { bumper?: boolean; plates?: boolean };
+    // mejoras de lujo: sin papeletas y con paso libre ante uniformados; combi aliada cada allyEvery s con allyDmg de daño
+    privilege?: boolean; allyEvery?: number; allyDmg?: number;
   };
   weapons: {
     cone: {

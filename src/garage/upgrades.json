@@ -15,6 +15,10 @@
     {
       "id": "especiales",
       "name": "Especiales"
+    },
+    {
+      "id": "lujo",
+      "name": "De lujo"
     }
   ],
   "upgrades": [
@@ -393,6 +397,49 @@
               "path": "player.lives",
               "op": "add",
               "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sticker",
+      "cat": "lujo",
+      "name": "Sticker \"Mi papá es socio del Golf\"",
+      "requires": 3,
+      "levels": [
+        {
+          "price": 3000,
+          "desc": "Se acaban las papeletas, y el serenazgo y la policía te abren paso",
+          "ops": [
+            {
+              "path": "player.privilege",
+              "op": "set",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "socio-combi",
+      "cat": "lujo",
+      "name": "Socio de la Combi",
+      "requires": 3,
+      "levels": [
+        {
+          "price": 3500,
+          "desc": "Cada 25 s una combi aliada embiste al jefe (80 de daño)",
+          "ops": [
+            {
+              "path": "player.allyEvery",
+              "op": "set",
+              "value": 25
+            },
+            {
+              "path": "player.allyDmg",
+              "op": "set",
+              "value": 80
             }
           ]
         }
