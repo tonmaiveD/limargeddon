@@ -32,3 +32,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0026](0026-pista-curva-peligros-y-jefe-serpiente-costa-verde.md) | Pista curva, peligros del malecón, jefe serpiente y Etapa 9 Costa Verde | Aceptada |
 | [0027](0027-pasada-de-dificultad-con-campana.md) | Pasada de dificultad con simulador de campaña | Aceptada |
 | [0028](0028-correcciones-de-la-segunda-auditoria.md) | Correcciones de la segunda auditoría | Aceptada |
+| [0029](0029-jugador-puntaje-ranking-y-reinicio.md) | Nombre del jugador, puntaje, ranking local y empezar de nuevo | Aceptada |

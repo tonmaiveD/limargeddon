@@ -8,23 +8,27 @@ import { exportFights, fightStats } from '../core/save';
 const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
 const money = (n: number) => 'S/ ' + n.toLocaleString('es-PE');
 
-interface ResultsData { summary: Summary; stageId: string; dk: DiffKey; earned: number; replay: boolean; wallet: number }
+interface ResultsData {
+  summary: Summary; stageId: string; dk: DiffKey; earned: number; replay: boolean; wallet: number;
+  score: { points: number; best: number; record: boolean; test: boolean } | null;
+}
 
 /* Resultados: overlay DOM sobre la etapa, que sigue animando humo y partículas detrás. */
 export class ResultsScene extends Phaser.Scene {
   constructor() { super('Results'); }
 
   create(data: ResultsData): void {
-    const { summary: s, stageId, dk, earned, replay, wallet } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
+    const { summary: s, stageId, dk, earned, replay, wallet, score } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
     const $ = (id: string) => document.getElementById(id)!;
     const bossName = cfg.boss.title;
     $('endEyebrow').textContent = s.win ? `Etapa ${cfg.number} completa` : `Etapa ${cfg.number} · fallida`;
     $('endTitle').textContent = s.win ? `${bossName} cayó` : `Te ganó ${bossName.replace(/^(La|El) /, (m) => m.toLowerCase())}`;
-    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`}<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
+    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}${score ? `<dt>Puntaje${score.test ? ' (modo prueba)' : ''}</dt><dd style="color:var(--yellow)">${score.points.toLocaleString('es-PE')}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`}<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
       ${s.fireMode !== 'mantener' ? `<dt>Mejor racha</dt><dd style="color:var(--green)">${s.bestCombo}</dd>` : ''}<dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>
       <dt>Cobrado${replay ? ' (etapa repetida: 50%)' : ''}</dt><dd style="color:var(--yellow)">${money(earned)}</dd>
       <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
     $('endBadges').innerHTML = s.win ? `${R.winLine ? `<div class="badge">${R.winLine}</div>` : ''}
+      ${score?.record ? `<div class="badge">¡Récord personal en esta etapa! · ${score.points.toLocaleString('es-PE')} puntos</div>` : ''}
       <div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>
       <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas</div>

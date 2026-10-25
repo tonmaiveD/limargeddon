@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #23 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #24 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -23,6 +23,7 @@
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
 - **Tutorial**: ayudas breves sobre el Tico en Miraflores (ADR 0019).
+- **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
 - **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.
 
 ## Motor (resumen)
@@ -71,14 +72,7 @@ Ordenado como se acordó: primero datos reales y balance, después la etapa secr
    - Un taller que compare dos opciones (ofensiva y supervivencia) con su efecto, y que diga dónde sirve cada objeto de victoria.
    - Agrupar los números de daño: hoy hay hasta 20 textos a la vez.
    - Objetivos opcionales por etapa y récord personal, sin rachas diarias ni presión.
-9. **Nombre del jugador y ranking** (pedido del dueño, 24 de octubre de 2026):
-   - El jugador pone su nombre: hasta 12 caracteres, solo letras y números.
-   - Ranking de los 12 mejores con su puntaje.
-   - Por decidir:
-     - Cómo se calcula el puntaje.
-     - Si el ranking es por dispositivo (posible hoy, sin servidor) o compartido entre todos los jugadores. Esto último necesita un servicio externo, porque GitHub Pages es estático, y obliga a pensar en privacidad y en nombres ofensivos.
-   - La segunda auditoría propone una fórmula de hasta 10.000 puntos por etapa (tiempo, daño por la derecha, racha, limpieza y un objetivo de la etapa), que premia la habilidad y no el grindeo, y empezar con un ranking local. Ver `docs/auditorias/2026-10-24-segunda-auditoria.md`, sección 7.
-10. **Empezar de nuevo:** una opción en el menú para borrar el progreso y volver a la Etapa 1, con confirmación, para quien quedó a medio camino y quiere recomenzar. Hoy solo se puede borrando los datos del navegador.
-11. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
-12. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
-13. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
+9. **Ranking compartido** entre dispositivos (hoy es local, ADR 0029): necesita servicio externo, validación de puntajes y moderación de nombres. Opcional, una clasificación con equipamiento fijo.
+10. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
+11. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
+12. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
