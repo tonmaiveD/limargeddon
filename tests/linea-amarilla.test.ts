@@ -90,6 +90,37 @@ describe('Línea Amarilla del Terror', () => {
     expect(H.route.attempts).toBe(n - 1);
   }));
 
+  it('perder el avión tres veces termina la partida y el contador nunca baja de 0 (auditoría N02)', () => withSeed(8, () => {
+    const G = game(); goTo(G, 'pista');
+    expect(G.route.attempts).toBe(3);
+    for (let i = 0; i < 60 * 120 && G.mode === 'play'; i++) { G.p.x = 60; G.p.y = 600; if (G.p.hp > 0) G.p.hp = G.p.max; stepPort(G, DT); }
+    expect(G.result).toEqual({ win: false });
+    expect(G.route.attempts).toBe(0);
+    expect(G.lastHit).toBe('SE FUE EL AVIÓN');
+    // el SOAT de verdad no salva de perder el avión, y muerte y avión comparten los intentos
+    const H = game(); goTo(H, 'pista'); H.p.lives = 1;
+    H.p.hp = 0; stepPort(H, DT); // la vida extra salva la muerte, no gasta intento
+    H.p.lives = 0; H.p.hp = 0; stepPort(H, DT); // muerte: quedan 2
+    expect(H.route.attempts).toBe(2);
+    for (let i = 0; i < 60 * 120 && H.mode === 'play'; i++) { H.p.x = 60; H.p.y = 600; if (H.p.hp > 0) H.p.hp = H.p.max; stepPort(H, DT); }
+    expect(H.result).toEqual({ win: false }); expect(H.route.attempts).toBe(0);
+  }));
+
+  it('el Socio de la Combi no rompe la ruta y despeja el tráfico delante del Tico (auditoría N01)', () => withSeed(9, () => {
+    const cfg = structuredClone(la); cfg.player.allyEvery = 25; cfg.player.allyDmg = 80;
+    const G = startPort('normal', cfg); stepPort(G, DT);
+    G.p.pw.soat = 99; G.p.hp = 9999; G.p.max = 9999;
+    let seen = false;
+    for (let i = 0; i < 60 * 14; i++) {
+      if (G.allies.length && !seen) { seen = true; G.traffic.push({ ...G.traffic[0] ?? {}, k: 'auto', x: G.allies[0].x, y: 300, w: 28, h: 48, vy: 0, hp: 30, max: 30, seed: 777, spin: 0, col: '#fff' } as never); }
+      stepPort(G, DT);
+    }
+    expect(seen).toBe(true);
+    expect(G.mode).toBe('play');
+    expect(G.traffic.some((c) => c.seed === 777 && c.hp > 0)).toBe(false); // la combi se lo llevó
+    expect(G.b.hp).toBeGreaterThan(0);
+  }));
+
   it('textos sin dos puntos, punto y coma ni guiones largos', () => {
     const texts = [la.tip, la.rewards.defeatTip!, la.rewards.winLine!, ...la.route!.tramos.flatMap((t) => [t.name, t.banner ?? '']), ...(la.obstacles ?? []).map((o) => o.label ?? '')];
     for (const t of texts) expect(t).not.toMatch(/[:;—]/);

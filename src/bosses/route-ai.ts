@@ -36,6 +36,18 @@ function init(G: Game): void {
   enter(G, 0);
 }
 
+// Gasta un intento, sea por morir o por perder el avión (auditoría N02). Si era el último, la partida se pierde:
+// el contador queda en 0 y no se cura ni se reinicia el tramo. Devuelve true si hubo reintento.
+function spend(G: Game, why: string): boolean {
+  if (G.route.attempts <= 1) {
+    G.route.attempts = 0;
+    if (G.p.hp > 0) { G.p.hp = 0; G.p.lives = 0; G.lastHit = why; } // perder el avión no lo salva el SOAT
+    return false;
+  }
+  retry(G, why === 'SE FUE EL AVIÓN' ? why : 'OTRA VEZ');
+  return true;
+}
+
 // Vuelve al inicio del tramo actual, con la vida llena y la pista limpia.
 function retry(G: Game, why: string): void {
   G.route.attempts--; G.route.dist = G.route.start;
@@ -75,7 +87,7 @@ function updatePlane(G: Game, dt: number): void {
     if (pl.t > P.hold) { pl.phase = 'out'; pl.t = 0; Sfx.play('skid'); say(G, '¡Despegamos!'); }
   } else if (pl.phase === 'out') {
     pl.y -= (P.speed + pl.t * 400) * dt;
-    if (pl.y < -P.h) { retry(G, 'SE FUE EL AVIÓN'); return; }
+    if (pl.y < -P.h) { spend(G, 'SE FUE EL AVIÓN'); return; }
   }
   const ramp = rampBox(G);
   if (ramp && pl.phase !== 'in' && overlap(G.p, ramp)) {
@@ -108,9 +120,5 @@ export const RouteAI: BossAI = {
     if (T.plane) updatePlane(G, dt);
   },
 
-  onDeath(G) {
-    if (G.route.attempts <= 1) return false;
-    retry(G, 'OTRA VEZ');
-    return true;
-  },
+  onDeath(G) { return spend(G, 'OTRA VEZ'); },
 };

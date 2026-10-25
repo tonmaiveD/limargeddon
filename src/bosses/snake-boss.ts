@@ -53,6 +53,8 @@ function split(G: Game, ch: Chain, i: number): void {
   const dead = ch.segs[i], tail = ch.segs.slice(i + 1);
   burst(G, dead.x, dead.y, C.orange, 22, 200); burst(G, dead.x, dead.y, '#777', 10, 90); shake(G, 0.3); Sfx.play('boom');
   ch.segs = ch.segs.slice(0, i);
+  for (const t of tail) t.ang = 0; // la cola que se suelta deja el anillo
+  if (ch.main) syncCoil(G, ch);
   if (tail.length) {
     const [lead, ...rest] = tail;
     G.chains.push(makeChain(G, rest, lead));
@@ -121,11 +123,13 @@ function blendRing(G: Game, k: number): void {
   });
 }
 
-// El anillo es sólido salvo en el hueco: el Tico que lo toca queda del lado en que estaba.
+// El anillo es sólido donde hay un auto: el Tico que lo toca queda del lado en que estaba. El choque sale de los mismos
+// casilleros que el dibujo, así que romper un auto abre hueco en el mismo cuadro (auditoría N04).
 function ringBlock(G: Game): void {
-  const c = G.coil, p = G.p, band = G.cfg.boss.body!.w / 2;
+  const c = G.coil, p = G.p, B = G.cfg.boss.body!, band = B.w / 2;
   const dx = p.x - c.cx, dy = p.y - c.cy, d = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
-  if (Math.abs(angDiff(a, c.gap)) < c.half) return;
+  const reach = (B.h / 2) / c.r + ((p.w / 2) / c.r) * 0.7;
+  if (!c.slots.some((s) => Math.abs(angDiff(a, s)) < reach)) return;
   const pr = Math.abs(Math.cos(a)) * p.w / 2 + Math.abs(Math.sin(a)) * p.h / 2;
   if (Math.abs(d - c.r) >= band + pr) return;
   const nd = d < c.r ? Math.max(0, c.r - band - pr) : c.r + band + pr;
@@ -144,12 +148,20 @@ function escaped(G: Game): void {
   Sfx.play('pickup');
 }
 
+// Si se rompió un auto del anillo, su casillero queda libre en el acto; con menos del mínimo, el anillo se deshace.
+function syncCoil(G: Game, main: Chain): void {
+  const c = G.coil, K = coilDef(G);
+  if (c.st === 'off' || !K || main.segs.length >= c.slots.length) return;
+  c.slots.length = main.segs.length;
+  if (c.st !== 'release' && main.segs.length < K.minSegs) { c.st = 'release'; c.t = K.release; floatText(G, c.cx, c.cy - c.r - 20, '¡SE ROMPIÓ EL ANILLO!', C.yellow, 11); }
+}
+
 function updateCoil(G: Game, dt: number): void {
   const c = G.coil, K = coilDef(G), b = G.b, main = G.chains.find((ch) => ch.main);
   // la cabeza expuesta no ataca ni se mueve
   if (c.exposed > 0) {
     c.exposed -= dt; b.act = Math.max(b.act, 0.3); b.tx = b.x; if (b.state === 'cruise') b.flash = 'hazard';
-    if (c.exposed <= 0) G.p.hitCd = Math.max(G.p.hitCd, 1); // al despertar, un respiro para apartarse de la fila
+    if (c.exposed <= 0) { G.p.hitCd = Math.max(G.p.hitCd, 1); b.hornT = Math.max(b.hornT, 1); } // al despertar, un respiro para apartarse
   }
   if (c.st === 'off') {
     if (!K) { c.cd = Infinity; return; }
@@ -160,7 +172,7 @@ function updateCoil(G: Game, dt: number): void {
   }
   b.act = Math.max(b.act, 0.3); b.hornT = Math.max(b.hornT, 0.5); // la cabeza espera mientras el cuerpo encierra
   if (!main || !K) { c.st = 'off'; return; }
-  if (main.segs.length > c.slots.length) c.slots.length = main.segs.length;
+  syncCoil(G, main);
   c.t -= dt;
   if (c.st === 'tele') {
     blendRing(G, 1 - Math.max(0, c.t) / (G.d.tele ? K.tele : K.tele * 0.75));

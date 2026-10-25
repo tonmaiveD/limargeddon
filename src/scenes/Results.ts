@@ -36,7 +36,7 @@ export class ResultsScene extends Phaser.Scene {
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas</div>
       ${cfg.hazards?.cart ? `<div class="badge ${s.cartHits ? 'off' : ''}">Don Frío intacto · nunca tocaste la carretilla (+S/ ${cfg.hazards.cart.bonus})</div>` : ''}
       ${R.item ? `<div class="badge">${R.item.name} · ${R.item.desc}</div>` : ''}`
-      : `<div class="badge off">${R.defeatTip ?? `El punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi.dmg ?? 80}.`}</div>`;
+      : `<div class="badge off">${R.defeatTip ?? `El punto ciego está a la derecha. La Combi Kamikaze quita ${cfg.powers.combi?.dmg ?? 80}.`}</div>`;
     const end = $('end'), again = $('again') as HTMLButtonElement, toMenu = $('toMenu') as HTMLButtonElement, next = $('next') as HTMLButtonElement;
     const close = () => { end.hidden = true; again.onclick = null; toMenu.onclick = null; next.onclick = null; this.scene.stop(); };
     again.onclick = () => { close(); this.scene.get('Stage').scene.restart({ stageId, dk }); };

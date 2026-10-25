@@ -185,7 +185,7 @@ export function updateWorld(G: Game, dt: number): void {
       G.allyT -= dt;
       if (G.allyT <= 0) {
         G.allyT = cfg.player.allyEvery!;
-        G.allies.push({ k: 'combi', x: p.x, y: H + 50, w: 34, h: 70, vy: cfg.powers.combi.vy ?? -560, said: false, dmg: cfg.player.allyDmg });
+        G.allies.push({ k: 'combi', x: p.x, y: H + 50, w: 34, h: 70, vy: cfg.powers.combi?.vy ?? -560, said: false, dmg: cfg.player.allyDmg });
         Sfx.play('combi');
       }
     }
@@ -270,12 +270,15 @@ export function updateWorld(G: Game, dt: number): void {
   }
   G.foes = G.foes.filter((f) => !f.dead && f.y < H + 20 && f.y > -40 && f.x > -40 && f.x < W + 40);
   // aliados: combi kamikaze
+  // en una etapa de ruta no hay jefe: la combi sube por el carril del Tico despejando el tráfico (ADR 0035)
+  const plane = fuselage(G);
   for (const a of G.allies) {
-    a.y += a.vy * dt; if (b.state !== 'enter') a.x += step(b.x - a.x, 260 * dt);
+    a.y += a.vy * dt; if (b.state !== 'enter' && !cfg.route) a.x += step(b.x - a.x, 260 * dt);
+    if (plane && !a.dead && overlap(a, plane)) { a.dead = true; burst(G, a.x, a.y - a.h / 2, C.pink, 16, 160); continue; } // no pasa bajo el carguero
     if (!a.said && a.y < H - 60) { a.said = true; floatText(G, a.x, a.y - 50, '¡AL FONDO HAY SITIO!', C.pink); }
     for (const c of G.traffic) if (!c.invulnerable && overlap(a, c)) c.hp = 0;
-    if (!a.dead && b.state !== 'enter' && overlap(a, b)) {
-      a.dead = true; dmgBoss(G, a.dmg ?? cfg.powers.combi.dmg ?? 80, false); b.slip = Math.max(b.slip, 1); G.ai.interrupt(G); shake(G, 0.7); Sfx.play('boom');
+    if (!a.dead && b.state !== 'enter' && !cfg.route && overlap(a, b)) {
+      a.dead = true; dmgBoss(G, a.dmg ?? cfg.powers.combi?.dmg ?? 80, false); b.slip = Math.max(b.slip, 1); G.ai.interrupt(G); shake(G, 0.7); Sfx.play('boom');
       burst(G, b.x, b.y + 30, C.pink, 30, 240); burst(G, b.x, b.y + 30, C.yellow, 20, 200); say(G, cfg.boss.quips.combi);
     }
   }

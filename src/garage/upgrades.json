@@ -484,7 +484,7 @@
       "levels": [
         {
           "price": 3500,
-          "desc": "Cada 25 s una combi aliada embiste al jefe (80 de daño)",
+          "desc": "Cada 25 s una combi aliada embiste al jefe (80 de daño). En la ruta, despeja el tráfico delante del Tico",
           "ops": [
             {
               "path": "player.allyEvery",

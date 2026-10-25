@@ -57,20 +57,17 @@ Hechos:
 - Claridad del combate (ADR 0032).
 - Taller que explique (ADR 0033).
 - Clímax del jefe final (ADR 0034).
+- A · Correcciones que rompen reglas (ADR 0035).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
-- Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. Conviene esperar el bloque A para la Línea Amarilla y el enrosque.
+- Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
 - Protocolo sugerido por la auditoría:
   - 6 a 8 personas, alternando el modo de disparo.
   - Anotar si reconocen la salida del enrosque, si entienden pagar o romper en el peaje y si entienden qué conserva un reintento.
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
 **Orden**
-1. **A · Correcciones que rompen reglas** (auditoría N01 a N04). Va antes que todo, porque son fallos con la versión publicada.
-   - **Socio de la Combi en la ruta:** hoy rompe la Línea Amarilla a los 12 s. Decisión del dueño: ahí la combi aliada despeja el tráfico delante del Tico, y el taller lo explica. Además, una prueba que juegue cada mejora en las diez etapas.
-   - **Intentos de la ruta:** perder el avión gasta intento igual que morir. Al tercer fallo hay derrota, y el contador nunca baja de 0.
-   - **Cabeza expuesta segura:** durante los 3 s no hay claxon ni daño por contacto de la cabeza, solo empuje.
-   - **Anillo que se rompe:** romper un auto durante el enrosque abre un hueco real en el mismo cuadro. Con menos de 3 autos, el anillo se deshace. Dibujo, golpes y choque salen de las mismas posiciones.
+1. ~~A · Correcciones que rompen reglas~~: hecho (ADR 0035).
 2. **B · Puntaje y resultados honestos** (N05 a N08).
    - **Campaña con tres políticas de compra:** la más barata, ataque y aguante, separando errores de derrotas. Así el balance representa lo que el taller recomienda.
    - **Daño efectivo:** el puntaje cuenta solo la vida que de verdad se le quitó al jefe.
