@@ -3,7 +3,7 @@ import type { DiffKey, FireMode, StageConfig } from '../src/core/config';
 import { PROTOTYPE_CFG, startPort, stepPort } from '../tests/harness/port';
 import { seedRandom } from '../tests/harness/rng';
 import { bot } from '../tests/harness/bot';
-import { evitaCuerpo, rutaBot } from '../tests/harness/evita';
+import { evitaCuerpo, rutaBot, semaforoBot } from '../tests/harness/evita';
 import { STAGES } from '../src/stages';
 import { applyUpgrades } from '../src/garage/upgrades';
 
@@ -15,7 +15,7 @@ function casual(G: any, k: any) { bot(G, k); const tx = G.b.x; k.left = tx < G.p
 // bot "medio": como el experto pero claxon y aceite solo a veces (reacción tardía)
 function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil = false; k.horn = false; } }
 
-const conCuerpo = (fn: (G: any, k: any) => void) => (G: any, k: any) => { fn(G, k); evitaCuerpo(G, k); rutaBot(G, k); };
+const conCuerpo = (fn: (G: any, k: any) => void) => (G: any, k: any) => { fn(G, k); evitaCuerpo(G, k); rutaBot(G, k); semaforoBot(G, k); };
 const BOTS = [['experto', conCuerpo(bot)], ['medio', conCuerpo(medio)], ['casual', conCuerpo(casual)]] as const;
 const SEEDS = 30;
 

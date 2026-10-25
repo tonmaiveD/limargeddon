@@ -5,6 +5,7 @@
   "roadName": "AV. COLONIAL",
   "eyebrow": "Etapa 6 · Callao · Av. Colonial",
   "tip": "En el Callao los contenedores van mal amarrados y la pista está llena de charcos y obras. Cuando se abra la puerta del tráiler, busca el hueco entre los contenedores. Su punto ciego también está a la derecha.",
+  "music": "salsa",
   "hints": [
     {"on": "teleThrow", "text": "Busca el hueco entre los contenedores"}
   ],

@@ -25,6 +25,7 @@
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
 - **Tutorial en contexto** (ADR 0037): ayudas breves sobre el Tico en las diez etapas, la primera vez que se juega cada una.
 - **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
+- **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
 - **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.
 
@@ -61,6 +62,7 @@ Hechos:
 - A · Correcciones que rompen reglas (ADR 0035).
 - B · Puntaje y resultados honestos (ADR 0036).
 - C · Aprender y volver (ADR 0037).
+- D · Ambiente (ADR 0038).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -73,10 +75,7 @@ Hechos:
 1. ~~A · Correcciones que rompen reglas~~: hecho (ADR 0035).
 2. ~~B · Puntaje y resultados honestos~~: hecho (ADR 0036).
 3. ~~C · Aprender y volver~~: hecho (ADR 0037).
-4. **D · Ambiente:**
-   - Música sintetizada por distrito.
-   - Animaciones de cierre: la carretilla Don Frío cruzando la meta y el Tico dentro del carguero.
-   - Semáforos en ola de la Javier Prado como mecánica.
+4. ~~D · Ambiente~~: hecho (ADR 0038).
 5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.

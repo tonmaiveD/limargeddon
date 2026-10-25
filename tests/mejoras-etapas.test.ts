@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { startPort, stepPort } from './harness/port';
 import { seedRandom } from './harness/rng';
 import { bot } from './harness/bot';
-import { evitaCuerpo, rutaBot } from './harness/evita';
+import { evitaCuerpo, rutaBot, semaforoBot } from './harness/evita';
 import { STAGES, STAGE_ORDER } from '../src/stages';
 import { UPGRADES, applyUpgrades, type Levels } from '../src/garage/upgrades';
 import type { FireMode } from '../src/core/config';
@@ -14,7 +14,7 @@ import type { FireMode } from '../src/core/config';
  */
 
 const DT = 1 / 60;
-const drive = (G: any, k: any) => { bot(G, k); evitaCuerpo(G, k); rutaBot(G, k); };
+const drive = (G: any, k: any) => { bot(G, k); evitaCuerpo(G, k); rutaBot(G, k); semaforoBot(G, k); };
 
 function run(id: string, levels: Levels, mode: FireMode): void {
   const r = seedRandom(STAGE_ORDER.indexOf(id) * 31 + 7);

@@ -11,6 +11,7 @@ import { summarize, update, updateWorld } from '../core/world';
 import { DEFAULT_NAME, addMedals, getGarage, getMedals, getPlayerName, getRecord, getSettings, markTutorial, recordScore, settleFight, tutorialSeen, unlockedStage } from '../core/save';
 import { SCORE_VERSION, scoreFight, scorePoints } from '../core/score';
 import { earnedMedals } from '../core/medals';
+import { startEnding, updateEnding } from '../core/ending';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -25,6 +26,9 @@ export class StageScene extends Phaser.Scene {
   private G!: Game;
   private data0: Required<StageData> = { stageId: DEFAULT_STAGE, dk: 'normal' };
   private paused = false;
+  private results: (() => void) | null = null; // abre los resultados una sola vez
+  private skip = false; // un toque o una tecla salta la animación de cierre
+  private onSkip = () => { if (this.G?.ending && this.G.ending.t > 0.3) this.skip = true; };
   private onHidden = () => { if (document.hidden) this.setPaused(true); };
   private onBlur = () => this.setPaused(true);
 
@@ -44,9 +48,10 @@ export class StageScene extends Phaser.Scene {
     cfg.player.items = wonItems(unlockedStage(stageNumber));
     this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
     this.G.hintsOn = !tutorialSeen(this.data0.stageId); // las ayudas salen hasta terminar la primera pelea (ADR 0037)
+    this.results = null; this.skip = false;
     setDeckMode(this.G.fireMode);
     this.paused = false;
-    Sfx.init(); Sfx.music(true);
+    Sfx.init(); Sfx.music(true, cfg.music);
 
     // pausa: botón, teclas P/Escape y automática al salir de la app o perder el foco (llamada, notificación)
     const btn = $('pauseBtn') as HTMLButtonElement;
@@ -59,6 +64,7 @@ export class StageScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       document.removeEventListener('visibilitychange', this.onHidden);
       removeEventListener('blur', this.onBlur);
+      removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
       pauseHook.toggle = null; btn.hidden = true; $('pause').hidden = true;
     });
   }
@@ -72,7 +78,7 @@ export class StageScene extends Phaser.Scene {
       Object.assign(keys, newKeys());
       Sfx.music(false); Sfx.engine(0);
       ($('resume') as HTMLButtonElement).focus();
-    } else Sfx.music(true);
+    } else Sfx.music(true, this.G.cfg.music);
   }
 
   private quitToMenu(): void {
@@ -106,8 +112,19 @@ export class StageScene extends Phaser.Scene {
           const fresh = TEST_MODE ? [] : addMedals(name, stageId, earnedMedals(G));
           const medals = { have: TEST_MODE ? earnedMedals(G) : getMedals(name, stageId), fresh };
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
-          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId, dk: this.data0.dk, earned, replay, wallet, score, medals }));
+          let shown = false;
+          this.results = () => {
+            if (shown) return; shown = true;
+            removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
+            this.scene.launch('Results', { summary, stageId, dk: this.data0.dk, earned, replay, wallet, score, medals });
+          };
+          // cierre de la etapa (ADR 0038): la carretilla cruza la meta o el Tico sube al carguero; si no hay, resultados
+          if (summary.win && G.cfg.ending) { startEnding(G); addEventListener('pointerdown', this.onSkip); addEventListener('keydown', this.onSkip); }
+          else this.time.delayedCall(900, () => this.results?.());
         }
+      } else if (G.ending) {
+        G.t += dt;
+        if (updateEnding(G, dt) || this.skip) this.results?.();
       } else { G.t += dt; updateWorld(G, dt); }
     }
     Sfx.tick();

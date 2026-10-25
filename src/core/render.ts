@@ -7,6 +7,8 @@ import type { VehicleLook } from './config';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { gateClosed } from './world';
 import { drawHazards, drawSplat } from './hazards';
+import { drawEndingUI, drawEndingWorld } from './ending';
+import { drawLights } from './lights';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
@@ -273,15 +275,10 @@ function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: num
   });
 }
 
-function drawPlayer(g: Gfx, G: Game): void {
-  const p = G.p;
-  // en el aire: sombra en el piso y el Tico más grande, como si se acercara a la cámara
-  const lift = p.air > 0 && p.airMax > 0 ? Math.sin(Math.PI * (1 - p.air / p.airMax)) : 0;
-  if (lift > 0) { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(p.x + 6 * lift, p.y + 8 * lift, p.w / 2 + 2, p.h / 2, 0, 0, 7); g.fill(); }
-  const body = lift > 0 ? { x: p.x, y: p.y - 10 * lift, w: p.w * (1 + 0.3 * lift), h: p.h * (1 + 0.3 * lift) } : p;
-  if (p.hitCd > 0 && Math.floor(G.t * 20) % 2) g.globalAlpha = 0.6;
+// El Tico con su pintura y sus mejoras visibles; también lo usa el cierre del carguero.
+function drawTico(g: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
   drawCar(g, G.t, body, {
-    body: '#f2c230', roof: '#e0ae1a', flash: p.flash, brake: G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, dmg: 1 - p.hp / p.max, seed: 7, extra: (g, w, h) => {
+    body: '#f2c230', roof: '#e0ae1a', flash, brake, dmg, seed: 7, extra: (g, w, h) => {
       const look = G.cfg.player.look;
       if (look?.bumper) { g.fillStyle = '#4a4452'; g.fillRect(-w / 2 - 1, -h / 2 - 3, w + 2, 4); g.fillStyle = '#8c869a'; g.fillRect(-w / 2 + 2, -h / 2 - 2, w - 4, 1); } // parachoques de fierro
       if (look?.plates) { g.fillStyle = '#6c7a8c'; g.fillRect(-w / 2 - 2, -h / 4, 2, h / 2); g.fillRect(w / 2, -h / 4, 2, h / 2); }            // blindaje lateral
@@ -289,6 +286,16 @@ function drawPlayer(g: Gfx, G: Game): void {
       g.fillStyle = C.yellow; g.font = FONT(5); g.textAlign = 'center'; g.fillText('TAXI', 0, -h / 2 + h * 0.42 + 5);
     },
   });
+}
+
+function drawPlayer(g: Gfx, G: Game): void {
+  const p = G.p;
+  // en el aire: sombra en el piso y el Tico más grande, como si se acercara a la cámara
+  const lift = p.air > 0 && p.airMax > 0 ? Math.sin(Math.PI * (1 - p.air / p.airMax)) : 0;
+  if (lift > 0) { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(p.x + 6 * lift, p.y + 8 * lift, p.w / 2 + 2, p.h / 2, 0, 0, 7); g.fill(); }
+  const body = lift > 0 ? { x: p.x, y: p.y - 10 * lift, w: p.w * (1 + 0.3 * lift), h: p.h * (1 + 0.3 * lift) } : p;
+  if (p.hitCd > 0 && Math.floor(G.t * 20) % 2) g.globalAlpha = 0.6;
+  drawTico(g, G, body, G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, p.flash, 1 - p.hp / p.max);
   g.globalAlpha = 1;
   if (p.pw.soat > 0) { g.strokeStyle = C.green; g.globalAlpha = 0.5 + Math.sin(G.t * 10) * 0.2; g.lineWidth = 2; g.beginPath(); g.ellipse(p.x, p.y, 24, 34, 0, 0, 7); g.closePath(); g.stroke(); g.globalAlpha = 1; }
   if (p.stun > 0) { g.fillStyle = C.yellow; g.font = FONT(9); g.textAlign = 'center'; g.fillText('★ ★ ★', p.x, p.y - p.h / 2 - 8); }
@@ -371,7 +378,7 @@ function drawBubble(g: Gfx, G: Game): void {
 
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) => void): void {
   const g = L.ents, f = L.fx;
-  drawObstacles(L.world, G);
+  drawLights(L.world, G); drawObstacles(L.world, G);
   G.pickups.forEach((u) => drawPickup(g, G, u));
   G.traffic.forEach((c) => drawTraffic(g, G, c));
   for (const s of G.shots) {
@@ -423,12 +430,15 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
     g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
     g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
   }
-  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawTide(g, G); drawPlayer(g, G);
+  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawTide(g, G); drawEndingWorld(g, G); drawPlayer(g, G);
   for (const r of G.rings) { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; }
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawBlindSpot(L.fx, G); drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
+  drawBlindSpot(L.fx, G); drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G);
+  // dentro del carguero no hay pista: el HUD se oculta (sus textos quedarían sobre el interior del avión)
+  if (G.ending && G.cfg.ending?.kind === 'carguero') drawEndingUI(L.ui, G, (g, box) => drawTico(g, G, box));
+  else { drawHUD(L.ui, G); drawEndingUI(L.ui, G, (g, box) => drawTico(g, G, box)); }
 }
 
 // Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.

@@ -4,8 +4,11 @@
   "district": "Javier Prado",
   "roadName": "AV. JAVIER PRADO",
   "eyebrow": "Etapa 4 · Javier Prado · By-pass en obra",
-  "tip": "En la Javier Prado las combis van en manada y la obra del by-pass nunca termina. Cuando el cobrador saque el brazo, muévete, que lanza monedas. Su punto ciego también está a la derecha.",
+  "tip": "En la Javier Prado los semáforos van en ola. Si te adelantas pasas en rojo, y es papeleta. Cuando el cobrador saque el brazo, muévete, que lanza monedas. Su punto ciego también está a la derecha.",
+  "music": "tecnocumbia",
+  "lights": {"first": 10, "every": [14, 20], "wave": 3, "gap": 200, "greenY": 470, "fine": 50, "bossQuip": "¡El rojo es referencial, causa!"},
   "hints": [
+    {"on": "light", "text": "Pasa en verde, si te adelantas es rojo"},
     {"on": "teleThrow", "text": "Sacó el brazo, muévete que lanza monedas"}
   ],
   "difficulties": {

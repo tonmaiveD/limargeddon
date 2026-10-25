@@ -165,6 +165,10 @@ export interface StageConfig {
   secret?: boolean; // etapa secreta: se desbloquea al terminar el recorrido y el menú la anticipa como pista
   // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
   hints?: HintDef[]; // tutorial en contexto (ADR 0037)
+  music?: string; // canción del distrito en core/audio/songs.ts (ADR 0038); sin ella, la cumbia chicha
+  ending?: { kind: 'carretilla' | 'carguero'; dur: number; text: string }; // cierre al ganar (ADR 0038)
+  // semáforos en ola (ADR 0038): olas de `wave` semáforos separados `gap` px que se ponen en verde al llegar a greenY
+  lights?: { first: number; every: [number, number]; wave: number; gap: number; greenY: number; fine: number; bossQuip?: string };
   difficulties: Record<DiffKey, Difficulty>;
   // exclusive: carril pintado como exclusivo (sátira visual, sin regla para el Tico)
   road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number;

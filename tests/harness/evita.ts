@@ -37,3 +37,14 @@ export function rutaBot(G: any, k: any): void {
     steer(road.left + road.laneWidth * (best + 0.5));
   }
 }
+
+/*
+ * Semáforos en ola (ADR 0038): si viene un semáforo que todavía estaría en rojo al cruzarlo, el bot suelta el
+ * acelerador y vuelve a su línea de crucero, como haría quien ya aprendió la regla. En las demás etapas no hace nada.
+ */
+export function semaforoBot(G: any, k: any): void {
+  const L = G.cfg.lights;
+  if (!L) return;
+  const p = G.p;
+  if (G.lights.some((l: any) => !l.done && l.y < p.y && p.y - l.y < 170 && p.y < L.greenY)) k.up = false;
+}

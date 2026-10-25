@@ -5,6 +5,8 @@
   "roadName": "CIRCUITO DE PLAYAS",
   "eyebrow": "Etapa 9 · Costa Verde · De noche",
   "tip": "De noche hay curvas, neblina y derrumbes. Pégale a la cabeza de la doble fila por la derecha o rómpela en pedazos. A la carretilla Don Frío no la toques, y espanta a las gaviotas con el claxon.",
+  "music": "festejo",
+  "ending": {"kind": "carretilla", "dur": 4.5, "text": "Don Frío llega primero, como siempre"},
   "hints": [
     {"on": "boss", "after": 2, "text": "Pégale a la cabeza o rompe sus autos"},
     {"on": "cart", "text": "A Don Frío no lo toques"},
