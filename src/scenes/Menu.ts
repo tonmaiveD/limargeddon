@@ -5,7 +5,8 @@ import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../c
 import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { DEFAULT_NAME, getPlayerName, getSettings, setSettings, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, getMedals, getPlayerName, getSettings, setSettings, unlockedStage } from '../core/save';
+import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
 import { DEFAULT_STAGE, STAGES, STAGE_ORDER, TEST_MODE, stageForUnlocked, stageNumber, track } from '../stages';
@@ -66,6 +67,7 @@ export class MenuScene extends Phaser.Scene {
     $('secretHint').hidden = !secret || unlocked < 5 || unlocked >= secret.number;
     $('menuBoss').textContent = cfg.boss.title;
     $('menuTip').textContent = cfg.tip;
+    $('menuMedals').innerHTML = medalChips(cfg, getMedals(getPlayerName() ?? DEFAULT_NAME, this.stageId));
     $('menuPowers').innerHTML = Object.values(cfg.powers)
       .map((P) => `<span><i style="background:${P.col}">${P.L}</i>${P.label}</span>`).join('');
     const diffs = $('menuDiffs'); diffs.innerHTML = '';

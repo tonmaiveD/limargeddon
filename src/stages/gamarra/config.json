@@ -648,9 +648,7 @@
     }
   },
   "hints": [
-    {
-      "at": 7,
-      "text": "Pasa los cables sin acelerar"
-    }
+    {"on": "obs:cables", "text": "Pasa los cables sin acelerar"},
+    {"on": "teleThrow", "text": "Se abre la puerta, mira dónde caen"}
   ]
 }

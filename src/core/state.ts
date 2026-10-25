@@ -66,7 +66,8 @@ export interface Game {
   combo: { n: number; best: number }; hitstop: number;
   t: number; mode: 'play' | 'over'; shake: number; bonus: number; fines: number; speed: number;
   announce: { t: string; col: string; life: number } | null;
-  hint: { text: string; life: number } | null; hintI: number;
+  // tutorial (ADR 0037): ayudas activas solo la primera vez en la etapa; hintAt agenda cada ayuda (-1 ya mostrada)
+  hint: { text: string; life: number } | null; hintsOn: boolean; hintAt: (number | undefined)[];
   perks: { item: ItemDef; used: boolean }[];
   fog: { t: number; on: number; k: number };          // garúa: espera a la próxima oleada, duración que le queda e intensidad 0..1
   stars: number; starT: number; chaseQ: number; blockT: number; // nivel de búsqueda
@@ -90,7 +91,8 @@ export interface Game {
   obstacles: Obstacle[]; obsT: number[];
   allyT: number; privilegeT: number; // Socio de la Combi y aviso del sticker (mejoras de lujo)
   // infractions: faltas antes de perdones (puntaje); dmgTaken: daño recibido (la reparación no lo borra)
-  stats: { right: number; total: number; effRight: number; effTotal: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number; rightHits: number };
+  stats: { right: number; total: number; effRight: number; effTotal: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number; rightHits: number;
+    barriers: number; dmgBy: Record<string, number> }; // barreras de peaje rotas y daño recibido por fuente (ADR 0037)
   lastDmg: Float | null; lastHit: string; // último número de daño al jefe (para agrupar) y qué golpeó al Tico por última vez
   result: null | { win: boolean };
 }
@@ -104,7 +106,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   for (const k in keys) keys[k as keyof Keys] = false;
   const cone = cfg.weapons.cone;
   return {
-    cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintI: 0,
+    cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintsOn: true, hintAt: [],
     perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
     fog: { t: cfg.weather?.fog?.first ?? Infinity, on: 0, k: 0 }, stars: 0, starT: 0, chaseQ: 0, blockT: 0,
     slide: { t: cfg.hazards?.rockslide?.first ?? Infinity, phase: 0, st: 0, lanes: [], spawnT: 0 },
@@ -123,7 +125,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
     allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,
     obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
-    stats: { right: 0, total: 0, effRight: 0, effTotal: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0, rightHits: 0 }, lastDmg: null, lastHit: '',
+    stats: { right: 0, total: 0, effRight: 0, effTotal: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0, rightHits: 0, barriers: 0, dmgBy: {} }, lastDmg: null, lastHit: '',
     result: null,
   };
 }
@@ -161,7 +163,7 @@ export function hurt(G: Game, d: number, src = ''): void {
   if (p.pw.soat > 0) { floatText(G, p.x, p.y - 30, 'SOAT', C.green); Sfx.play('block'); return; }
   if (G.d.dmgMult) d = Math.max(1, Math.round(d * G.d.dmgMult));
   if (G.cfg.player.armor) d = Math.max(1, Math.round(d * (1 - G.cfg.player.armor)));
-  G.stats.dmgTaken += Math.min(d, p.hp);
+  G.stats.dmgTaken += Math.min(d, p.hp); const by = src || 'OTRO'; G.stats.dmgBy[by] = (G.stats.dmgBy[by] ?? 0) + Math.min(d, p.hp);
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
   if (src) G.lastHit = src;
   floatText(G, p.x, p.y - 30, src ? `-${d} ${src}` : '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');

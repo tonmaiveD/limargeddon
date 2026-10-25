@@ -15,6 +15,8 @@ import { clamp } from './util';
  * Por dificultad se multiplica: Fácil ×0.7, Normal ×1, Difícil ×1.25 (así no conviene farmear en Fácil).
  */
 export const DIFF_SCORE: Record<string, number> = { facil: 0.7, normal: 1, dificil: 1.25 };
+// Versión de la fórmula: 1 en la ADR 0029; 2 desde la ADR 0036 (daño efectivo y barrera rota como falta).
+export const SCORE_VERSION = 2;
 export interface ScoreParts { time: number; right: number; streak: number; clean: number; goal: number }
 
 export function scoreParts(G: Game): ScoreParts {
@@ -35,8 +37,19 @@ export function scoreParts(G: Game): ScoreParts {
   };
 }
 
+const WEIGHTS = { time: 2000, right: 1500, streak: 1000, clean: 1000, goal: 500 } as const;
+
+// Puntos de cada parte, ya multiplicados por la dificultad (para el detalle del récord). Pueden diferir en 1 del total por redondeo.
+export function scorePoints(G: Game): Record<'base' | keyof ScoreParts, number> {
+  const k = scoreParts(G), m = G.result?.win ? DIFF_SCORE[G.dk] ?? 1 : 0;
+  return {
+    base: Math.round(4000 * m), time: Math.round(WEIGHTS.time * k.time * m), right: Math.round(WEIGHTS.right * k.right * m),
+    streak: Math.round(WEIGHTS.streak * k.streak * m), clean: Math.round(WEIGHTS.clean * k.clean * m), goal: Math.round(WEIGHTS.goal * k.goal * m),
+  };
+}
+
 export function scoreFight(G: Game): number {
   if (!G.result?.win) return 0;
   const k = scoreParts(G);
-  return Math.round((4000 + 2000 * k.time + 1500 * k.right + 1000 * k.streak + 1000 * k.clean + 500 * k.goal) * (DIFF_SCORE[G.dk] ?? 1));
+  return Math.round((4000 + WEIGHTS.time * k.time + WEIGHTS.right * k.right + WEIGHTS.streak * k.streak + WEIGHTS.clean * k.clean + WEIGHTS.goal * k.goal) * (DIFF_SCORE[G.dk] ?? 1));
 }

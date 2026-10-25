@@ -3,14 +3,37 @@ import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import type { Summary } from '../core/world';
 import { STAGES, nextStage } from '../stages';
-import { exportFights, fightStats } from '../core/save';
+import { exportFights, fightStats, type ScoreCtx } from '../core/save';
+import { SCORE_VERSION } from '../core/score';
+import { medalChips } from './medal-chips';
 
 const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
 const money = (n: number) => 'S/ ' + n.toLocaleString('es-PE');
 
 interface ResultsData {
   summary: Summary; stageId: string; dk: DiffKey; earned: number; replay: boolean; wallet: number;
-  score: { points: number; best: number; record: boolean; test: boolean } | null;
+  score: { points: number; best: number; record: boolean; test: boolean; parts: Record<string, number>; prev: { points: number; ctx?: ScoreCtx } | null } | null;
+  medals: { have: string[]; fresh: string[] };
+}
+
+const pts = (n: number) => n.toLocaleString('es-PE');
+
+// Detalle del puntaje (ADR 0037): cuánto aportó cada parte y con qué se hizo el récord anterior.
+function scoreDetail(cfg: (typeof STAGES)[string]['cfg'], score: NonNullable<ResultsData['score']>): { list: string; record: string } {
+  const L: [string, string][] = [['base', 'Ganar'], ['time', 'Tiempo'], ['right', cfg.route ? 'Intentos que sobraron' : 'Daño por la derecha'],
+    ['streak', cfg.route ? 'Esquivar la marea' : 'Racha'], ['clean', 'Limpieza'], ['goal', cfg.hazards?.cart ? 'Don Frío intacto' : 'Vida que cuidaste']];
+  const list = L.map(([k, label]) => `<dt>${label}</dt><dd>${pts(score.parts[k] ?? 0)}</dd>`).join('');
+  const p = score.prev;
+  let record = '';
+  if (score.test) record = 'En modo prueba el puntaje no se guarda.';
+  else if (score.record) record = p ? `Nuevo récord. El anterior era ${pts(p.points)}.` : 'Primer récord en esta etapa.';
+  else if (p) {
+    const c = p.ctx, n = c ? Object.values(c.upgrades).reduce((a, b) => a + b, 0) : 0;
+    record = `Tu récord es ${pts(p.points)}` + (c
+      ? ` (${c.mode ? FIRE_LABEL[c.mode].toLowerCase() + ', ' : ''}${cfg.difficulties[c.dk]?.label ?? c.dk}, ${n} ${n === 1 ? 'mejora' : 'mejoras'}${c.v !== SCORE_VERSION ? ', fórmula anterior' : ''}).`
+      : ', de antes de guardar su detalle.');
+  }
+  return { list, record };
 }
 
 /* Resultados: overlay DOM sobre la etapa, que sigue animando humo y partículas detrás. */
@@ -18,8 +41,13 @@ export class ResultsScene extends Phaser.Scene {
   constructor() { super('Results'); }
 
   create(data: ResultsData): void {
-    const { summary: s, stageId, dk, earned, replay, wallet, score } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
+    const { summary: s, stageId, dk, earned, replay, wallet, score, medals } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
     const $ = (id: string) => document.getElementById(id)!;
+    const detail = score ? scoreDetail(cfg, score) : null;
+    $('endScore').hidden = !detail; ($('endScore') as HTMLDetailsElement).open = false;
+    if (detail) { $('endScoreList').innerHTML = detail.list; $('endRecord').textContent = detail.record; }
+    $('endMedals').hidden = !s.win;
+    $('endMedals').innerHTML = s.win ? medalChips(cfg, medals.have, medals.fresh) : '';
     const bossName = cfg.boss.title;
     const name = cfg.secret ? 'Etapa secreta' : `Etapa ${cfg.number}`;
     $('endEyebrow').textContent = s.win ? `${name} completa` : `${name} · fallida`;

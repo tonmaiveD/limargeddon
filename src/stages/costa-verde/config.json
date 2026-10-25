@@ -5,6 +5,13 @@
   "roadName": "CIRCUITO DE PLAYAS",
   "eyebrow": "Etapa 9 · Costa Verde · De noche",
   "tip": "De noche hay curvas, neblina y derrumbes. Pégale a la cabeza de la doble fila por la derecha o rómpela en pedazos. A la carretilla Don Frío no la toques, y espanta a las gaviotas con el claxon.",
+  "hints": [
+    {"on": "boss", "after": 2, "text": "Pégale a la cabeza o rompe sus autos"},
+    {"on": "cart", "text": "A Don Frío no lo toques"},
+    {"on": "birds", "text": "Toca CLAXON para espantar las gaviotas"},
+    {"on": "slide", "text": "Cae polvo, viene un derrumbe"},
+    {"on": "coil", "text": "Sal por la flecha verde antes que apriete"}
+  ],
   "difficulties": {
     "facil": {
       "label": "Fácil",

@@ -5,6 +5,12 @@
   "roadName": "VÍA DE EVITAMIENTO",
   "eyebrow": "Etapa secreta · Línea Amarilla del Terror",
   "tip": "Del peaje al aeropuerto sin parar. Paga o rompe las barreras, cruza el túnel con los faros y el puente de dos carriles, y acelera a fondo que todos te persiguen. Súbete a la rampa del carguero antes de que despegue.",
+  "hints": [
+    {"on": "obs:peaje", "text": "Paga en una abierta o rompe la barrera"},
+    {"on": "tramo:tunel", "after": 1, "text": "Claxon pegado a la pared, te aturde"},
+    {"on": "tide", "after": 1, "text": "Si sueltas el acelerador, te alcanza"},
+    {"on": "plane", "after": 1, "text": "Ponte detrás y sube a la rampa"}
+  ],
   "difficulties": {
     "facil": {
       "label": "Fácil",

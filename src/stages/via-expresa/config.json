@@ -600,9 +600,7 @@
     }
   },
   "hints": [
-    {
-      "at": 2,
-      "text": "Acelera sobre la rampa para saltar"
-    }
+    {"on": "obs:rampa", "text": "Acelera sobre la rampa para saltar"},
+    {"on": "teleSwing", "text": "Tiembla la cola, aléjate de su costado"}
   ]
 }

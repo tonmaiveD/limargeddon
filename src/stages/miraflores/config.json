@@ -5,14 +5,17 @@
   "roadName": "MALECÓN DE MIRAFLORES",
   "eyebrow": "Etapa 1 · Miraflores · Malecón y Av. Larco",
   "hints": [
-    {
-      "at": 1.5,
-      "text": "Suelta el acelerador para esquivar"
-    },
-    {
-      "at": 6,
-      "text": "Pégale por la derecha, duele el doble"
-    }
+    {"at": 1, "text": "Gira a los lados para cambiar de carril"},
+    {"at": 2.5, "text": "Suelta el acelerador para esquivar"},
+    {"on": "obs:peatones", "text": "A la gente no se la toca, es papeleta"},
+    {"on": "boss", "after": 3, "mode": "toque", "text": "Toca CONOS para lanzar, se recargan"},
+    {"on": "boss", "after": 3, "mode": "acelerar", "text": "Mientras aceleras, lanzas conos"},
+    {"on": "boss", "after": 7, "text": "Pégale por la derecha, duele el doble"},
+    {"on": "teleBrake", "text": "Luz de freno, suelta y abre distancia"},
+    {"on": "pickup", "text": "Pasa por encima del bonus para usarlo"},
+    {"on": "boss", "after": 16, "text": "El ACEITE la hace patinar"},
+    {"on": "teleRam", "text": "Cuando pite, sal de su carril"},
+    {"on": "phase:3", "after": 1.5, "text": "El CLAXON la frena y aparta autos"}
   ],
   "tip": "En Miraflores chocar a un sereno o a los turistas que se toman fotos es papeleta. La camioneta del serenazgo también tiene punto ciego a la derecha. Suelta el acelerador para esquivar y atácala por ahí.",
   "difficulties": {

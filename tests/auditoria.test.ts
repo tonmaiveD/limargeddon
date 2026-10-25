@@ -37,9 +37,9 @@ describe('recompensa por tipo de vehículo', () => {
 describe('ayudas del tutorial', () => {
   it('aparecen en orden en Miraflores y se apagan solas', () => withSeed(4, () => {
     const G = startPort('normal', STAGES.miraflores.cfg as StageConfig), seen: string[] = [];
-    for (let i = 0; i < 60 * 12 && !G.result; i++) { stepPort(G, DT); if (G.hint && seen.at(-1) !== G.hint.text) seen.push(G.hint.text); }
-    expect(seen).toEqual(STAGES.miraflores.cfg.hints!.map((h) => h.text));
-    expect(G.hint).toBeNull();
+    for (let i = 0; i < 60 * 8 && !G.result; i++) { stepPort(G, DT); if (G.hint && seen.at(-1) !== G.hint.text) seen.push(G.hint.text); }
+    // las dos primeras van por tiempo; las demás esperan su evento (ADR 0037, tests/tutorial.test.ts)
+    expect(seen.slice(0, 2)).toEqual(STAGES.miraflores.cfg.hints!.slice(0, 2).map((h) => h.text));
   }));
 
   it('los textos no usan dos puntos, punto y coma ni guiones largos', () => {

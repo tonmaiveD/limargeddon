@@ -5,6 +5,7 @@ import { addStar, hitName, tramoOk, announce, burst, fine, floatText, hurt, dmgB
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateHazards } from './hazards';
+import { updateHints } from './hints';
 import { bossVsObstacles, freeSpot, fuselage, resolveTraffic, solid } from './physics';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
@@ -132,7 +133,7 @@ function updateObstacles(G: Game, dt: number): void {
         ob.hit = true; burst(G, p.x, p.y - p.h / 2, '#ff3355', 12); shake(G, 0.35); Sfx.play('hit');
         if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg, 'BARRERA');
         addStar(G);
-        G.stats.infractions++; // romper la barrera es una falta para la limpieza del puntaje, sin multa extra (ADR 0036)
+        G.stats.infractions++; G.stats.barriers++; // romper la barrera es una falta para la limpieza del puntaje, sin multa extra (ADR 0036)
       } else if (play && !ob.hit && o.toll && overlap(p, ob)) {
         // carril de pago: pasas, pero cobran
         ob.hit = true; G.tolls += o.toll; floatText(G, p.x, p.y - 46, 'PEAJE -S/' + o.toll, C.sky); Sfx.play('pickup');
@@ -321,9 +322,7 @@ export function updateWorld(G: Game, dt: number): void {
 // Un paso de simulación. Devuelve true el cuadro en que termina la pelea.
 export function update(G: Game, dt: number): boolean {
   G.t += dt;
-  const hints = G.cfg.hints;
-  if (hints && G.hintI < hints.length && G.t >= hints[G.hintI].at) G.hint = { text: hints[G.hintI++].text, life: 3.2 };
-  if (G.hint && (G.hint.life -= dt) <= 0) G.hint = null;
+  updateHints(G, dt);
   updatePlayer(G, dt); G.ai.update(G, dt); updateWorld(G, dt);
   // SOAT de verdad (taller): una vida extra por etapa
   if (G.p.hp <= 0 && G.p.lives > 0) {

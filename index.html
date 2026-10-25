@@ -28,6 +28,7 @@
         <p class="eyebrow" id="menuEyebrow"></p>
         <p class="boss">Te espera <b id="menuBoss"></b></p>
         <p class="tip" id="menuTip"></p>
+        <div class="medals" id="menuMedals" aria-label="Medallas de la etapa"></div>
         <div class="powers" id="menuPowers" aria-label="Bonus"></div>
         <div class="setting" id="fireSel" role="radiogroup" aria-labelledby="fireLabel">
           <span id="fireLabel">Disparo</span>
@@ -82,6 +83,8 @@
         <p class="eyebrow" id="endEyebrow"></p>
         <h2 id="endTitle"></h2>
         <dl class="stats" id="endStats"></dl>
+        <details class="score-detail" id="endScore" hidden><summary>Detalle del puntaje</summary><dl class="stats" id="endScoreList"></dl><p class="tip small" id="endRecord"></p></details>
+        <div class="medals" id="endMedals" hidden></div>
         <div class="badges" id="endBadges"></div>
         <div class="row">
           <button class="pick" id="next" hidden>Siguiente etapa</button>

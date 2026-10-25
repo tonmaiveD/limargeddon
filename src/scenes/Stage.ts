@@ -8,8 +8,9 @@ import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { DEFAULT_NAME, getGarage, getPlayerName, getSettings, recordScore, settleFight, unlockedStage } from '../core/save';
-import { scoreFight } from '../core/score';
+import { DEFAULT_NAME, addMedals, getGarage, getMedals, getPlayerName, getRecord, getSettings, markTutorial, recordScore, settleFight, tutorialSeen, unlockedStage } from '../core/save';
+import { SCORE_VERSION, scoreFight, scorePoints } from '../core/score';
+import { earnedMedals } from '../core/medals';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -42,6 +43,7 @@ export class StageScene extends Phaser.Scene {
     const cfg = applyUpgrades(this.def.cfg, getGarage().levels);
     cfg.player.items = wonItems(unlockedStage(stageNumber));
     this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
+    this.G.hintsOn = !tutorialSeen(this.data0.stageId); // las ayudas salen hasta terminar la primera pelea (ADR 0037)
     setDeckMode(this.G.fireMode);
     this.paused = false;
     Sfx.init(); Sfx.music(true);
@@ -89,16 +91,22 @@ export class StageScene extends Phaser.Scene {
       track.scroll += (G.mode === 'play' ? G.speed : this.def.cfg.road.idleScroll) * dt;
       if (G.mode === 'play') {
         if (update(G, dt)) {
-          const summary = summarize(G);
+          const summary = summarize(G), points = scoreFight(G), stageId = this.data0.stageId, upgrades = getGarage().levels;
           const { earned, replay, wallet } = settleFight(
-            { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
-              build: __BUILD__, test: TEST_MODE || undefined, upgrades: getGarage().levels, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined },
+            { stage: stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
+              build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
+              points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined },
             G.cfg.number, summary.pay, stageNumber);
-          // puntaje (ADR 0029): solo las victorias, y el modo prueba no entra al ranking
-          const points = scoreFight(G);
-          const score = points ? { points, test: TEST_MODE, ...(TEST_MODE ? { best: points, record: false } : recordScore(getPlayerName() ?? DEFAULT_NAME, this.data0.stageId, points)) } : null;
+          markTutorial(stageId);
+          // puntaje (ADR 0029) con su contexto (ADR 0037): solo las victorias, y el modo prueba no entra al ranking ni da medallas
+          const name = getPlayerName() ?? DEFAULT_NAME, parts = scorePoints(G);
+          const ctx = { points, v: SCORE_VERSION, mode: G.fireMode, dk: this.data0.dk, upgrades, build: __BUILD__, at: new Date().toISOString(), parts };
+          const prev = getRecord(name, stageId);
+          const score = points ? { points, test: TEST_MODE, parts, prev, ...(TEST_MODE ? { best: points, record: false } : recordScore(name, stageId, points, ctx)) } : null;
+          const fresh = TEST_MODE ? [] : addMedals(name, stageId, earnedMedals(G));
+          const medals = { have: TEST_MODE ? earnedMedals(G) : getMedals(name, stageId), fresh };
           ($('pauseBtn') as HTMLButtonElement).hidden = true;
-          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId: this.data0.stageId, dk: this.data0.dk, earned, replay, wallet, score }));
+          this.time.delayedCall(900, () => this.scene.launch('Results', { summary, stageId, dk: this.data0.dk, earned, replay, wallet, score, medals }));
         }
       } else { G.t += dt; updateWorld(G, dt); }
     }
