@@ -23,16 +23,18 @@ export interface ScoreCtx {
   points: number; v: number; mode?: FireMode; dk: DiffKey; upgrades: Record<string, number>; build?: string; at?: string;
   parts: Record<string, number>;
 }
-export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string }
+// hints: false si el jugador apagó las ayudas en el menú (ADR 0039); por defecto salen
+export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string; hints?: boolean }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
 // garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)
 // scores: mejor puntaje de cada jugador en cada etapa, { nombre: { etapa: puntos } } (ADR 0029)
-// scoreCtx: contexto de cada récord; medals: medallas de cada jugador por etapa; tutorial: etapas con las ayudas vistas (ADR 0037)
+// scoreCtx: contexto de cada récord; medals: medallas de cada jugador por etapa (ADR 0037)
+// hints: ayudas ya leídas, como "etapa|modo|texto" (ADR 0039; reemplaza a `tutorial`, que marcaba la etapa entera)
 interface SaveV1 {
   v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string };
   scores?: Record<string, Record<string, number>>; scoreCtx?: Record<string, Record<string, ScoreCtx>>;
-  medals?: Record<string, Record<string, string[]>>; tutorial?: string[];
+  medals?: Record<string, Record<string, string[]>>; tutorial?: string[]; hints?: string[];
 }
 
 function load(): SaveV1 {
@@ -188,11 +190,21 @@ export function addMedals(name: string, stageId: string, ids: string[]): string[
   return fresh;
 }
 
-/* Tutorial en contexto (ADR 0037): las ayudas de una etapa salen hasta terminar la primera pelea en ella. */
-export function tutorialSeen(stageId: string): boolean { return (load().tutorial ?? []).includes(stageId); }
-export function markTutorial(stageId: string): void {
-  const data = load(), list = data.tutorial ?? [];
-  if (!list.includes(stageId)) { data.tutorial = [...list, stageId]; store(data); }
+/* Tutorial en contexto (ADR 0037 y 0039): cada ayuda se recuerda por etapa y modo de disparo una vez leída. */
+const hintKey = (stageId: string, mode: string, text: string) => `${stageId}|${mode}|${text}`;
+export function knownHints(stageId: string, mode: string): string[] {
+  const pre = `${stageId}|${mode}|`;
+  return (load().hints ?? []).filter((k) => k.startsWith(pre)).map((k) => k.slice(pre.length));
+}
+export function learnHints(stageId: string, mode: string, texts: string[]): void {
+  const data = load(), have = new Set(data.hints ?? []), add = texts.map((t) => hintKey(stageId, mode, t)).filter((k) => !have.has(k));
+  if (add.length) { data.hints = [...have, ...add]; store(data); }
+}
+// "Ver ayudas otra vez": la etapa vuelve a enseñar todo, en los dos modos. No toca billetera, mejoras ni medallas.
+export function forgetHints(stageId: string): void {
+  const data = load();
+  if (!data.hints) return;
+  data.hints = data.hints.filter((k) => !k.startsWith(`${stageId}|`)); store(data);
 }
 
 export interface RankRow { name: string; total: number; stages: number }
@@ -210,7 +222,7 @@ export function ranking(): RankRow[] {
 // Conserva nombre, ranking, medallas y registro de peleas.
 export function resetProgress(): void {
   const data = load();
-  delete data.tutorial;
+  delete data.tutorial; delete data.hints;
   data.progress = { unlocked: 1 }; // explícito: si faltara, el progreso se reconstruiría desde el registro de peleas
   data.garage = { wallet: 0, levels: {} };
   if (data.settings) delete data.settings.stageId;

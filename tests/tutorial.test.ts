@@ -3,10 +3,10 @@ import { startPort, stepPort } from './harness/port';
 import { seedRandom } from './harness/rng';
 import { STAGES, STAGE_ORDER } from '../src/stages';
 import { hurt } from '../src/core/state';
-import { validHintEvent } from '../src/core/hints';
+import { READ_TIME, learnedHints, validHintEvent } from '../src/core/hints';
 import { earnedMedals, medalsFor } from '../src/core/medals';
 import { scoreFight, scorePoints } from '../src/core/score';
-import { addMedals, getMedals, getRecord, markTutorial, recordScore, resetProgress, tutorialSeen } from '../src/core/save';
+import { addMedals, forgetHints, getMedals, getRecord, knownHints, learnHints, recordScore, resetProgress } from '../src/core/save';
 
 /* Aprender y volver (ADR 0037): tutorial en contexto, medallas y récord con contexto. */
 
@@ -41,25 +41,69 @@ describe('tutorial en contexto', () => {
     }
   }));
 
-  it('un aviso de peligro entra al instante y las ayudas se apagan después de la primera pelea', () => withSeed(2, () => {
+  it('un aviso de peligro entra al instante, y una ayuda ya leída en este modo no vuelve a salir', () => withSeed(2, () => {
     const G = startPort('normal', STAGES.centro.cfg);
     for (let i = 0; i < 400 && G.b.state === 'enter'; i++) stepPort(G, DT);
     G.hint = { text: 'otra', life: 3.2 };
     G.b.state = 'teleJet'; G.b.st = 1; stepPort(G, DT);
     expect(G.hint?.text).toBe('Brilla la boquilla, cámbiate de carril');
-    const H = startPort('normal', STAGES.centro.cfg); H.hintsOn = false;
+    const H = startPort('normal', STAGES.centro.cfg); H.hintKnown = ['Brilla la boquilla, cámbiate de carril'];
     for (let i = 0; i < 400 && H.b.state === 'enter'; i++) stepPort(H, DT);
     H.b.state = 'teleJet'; H.b.st = 1; stepPort(H, DT);
     expect(H.hint).toBeNull();
   }));
 
-  it('se recuerda qué etapas ya enseñaron, y empezar de nuevo las vuelve a mostrar', () => {
+  it('con las ayudas apagadas en el menú no sale ninguna, ni los avisos', () => withSeed(7, () => {
+    const G = startPort('normal', STAGES.miraflores.cfg); G.hintsOn = false; G.p.pw.soat = 999;
+    for (let i = 0; i < 60 * 12; i++) { G.b.act = 99; stepPort(G, DT); expect(G.hint).toBeNull(); }
+    G.b.state = 'teleBrake'; G.b.st = 1; stepPort(G, DT);
+    expect(G.hint).toBeNull();
+    expect(learnedHints(G)).toEqual([]); // apagadas no cuentan como leídas
+  }));
+
+  it('una explicación interrumpida vuelve después y solo cuenta como leída con 2,4 s en pantalla (auditoría R02)', () => withSeed(5, () => {
+    const G = startPort('normal', STAGES.centro.cfg); G.p.pw.soat = 999;
+    const marcha = STAGES.centro.cfg.hints!.findIndex((h) => h.on === 'obs:peatones');
+    for (let i = 0; i < 400 && G.b.state === 'enter'; i++) stepPort(G, DT);
+    G.hintAt[marcha] = G.t; G.hintPrev[marcha] = true; G.b.act = 99; stepPort(G, DT); // sale la ayuda de la marcha
+    expect(G.hint?.text).toBe(STAGES.centro.cfg.hints![marcha].text);
+    for (let i = 0; i < 30; i++) { G.b.act = 99; stepPort(G, DT); }
+    G.b.state = 'teleJet'; G.b.st = 2; stepPort(G, DT); // la interrumpe un aviso a los 0,5 s
+    expect(G.hint?.text).toBe('Brilla la boquilla, cámbiate de carril');
+    expect(learnedHints(G)).not.toContain(STAGES.centro.cfg.hints![marcha].text);
+    const seen: string[] = [];
+    for (let i = 0; i < 60 * 8; i++) { G.b.act = 99; if (G.b.state === 'jet') G.b.state = 'cruise'; stepPort(G, DT); if (G.hint && seen.at(-1) !== G.hint.text) seen.push(G.hint.text); }
+    expect(seen).toContain(STAGES.centro.cfg.hints![marcha].text); // volvió
+    expect(learnedHints(G)).toContain(STAGES.centro.cfg.hints![marcha].text);
+    expect(G.hintShown[marcha]).toBeGreaterThanOrEqual(READ_TIME);
+  }));
+
+  it('un aviso de peligro que ya pasó no sale fuera de contexto', () => withSeed(6, () => {
+    const G = startPort('normal', STAGES['costa-verde'].cfg); G.p.pw.soat = 999;
+    const list = STAGES['costa-verde'].cfg.hints!, cart = list.findIndex((h) => h.on === 'cart'), coil = list.findIndex((h) => h.on === 'coil');
+    for (let i = 0; i < 400 && G.b.state === 'enter'; i++) stepPort(G, DT);
+    G.slide.t = 99; G.flock.t = 99; G.cart.t = 99; G.b.act = 99;
+    G.coil.st = 'tele'; G.coil.t = 5; G.hintPrev[coil] = false; G.coil.cd = 99;
+    G.hint = { text: list[cart].text, life: 3.2 }; G.hintIdx = cart; G.hintShown[cart] = 0.1; G.hintAt[cart] = -1; // otro aviso recién salido
+    stepPort(G, DT);
+    expect(G.hint?.text).toBe(list[cart].text); // el del anillo espera: el anterior lleva poco
+    G.coil.st = 'off'; // el anillo se deshizo antes de poder avisarlo
+    for (let i = 0; i < 60 * 4; i++) { G.b.act = 99; stepPort(G, DT); }
+    expect(G.hintAt[coil]).toBeUndefined();
+    expect(learnedHints(G)).not.toContain(list[coil].text);
+  }));
+
+  it('se recuerda cada ayuda por etapa y modo, y se pueden volver a ver (auditoría R01)', () => {
     memStorage();
-    expect(tutorialSeen('centro')).toBe(false);
-    markTutorial('centro'); markTutorial('centro');
-    expect(tutorialSeen('centro')).toBe(true);
+    learnHints('centro', 'toque', ['a', 'b']); learnHints('centro', 'toque', ['a']);
+    expect(knownHints('centro', 'toque')).toEqual(['a', 'b']);
+    expect(knownHints('centro', 'acelerar')).toEqual([]); // el otro modo sigue enseñando
+    learnHints('gamarra', 'toque', ['c']);
+    forgetHints('centro');
+    expect(knownHints('centro', 'toque')).toEqual([]);
+    expect(knownHints('gamarra', 'toque')).toEqual(['c']);
     resetProgress();
-    expect(tutorialSeen('centro')).toBe(false);
+    expect(knownHints('gamarra', 'toque')).toEqual([]);
   });
 });
 

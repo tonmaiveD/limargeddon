@@ -5,7 +5,7 @@
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
 - Repo público: `tonmaiveD/limargeddon`. PR #1 a #30 fusionados.
-- Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
+- Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
 - **Nueve etapas, en orden y con desbloqueo** (ADR 0017):
@@ -23,7 +23,7 @@
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
-- **Tutorial en contexto** (ADR 0037): ayudas breves sobre el Tico en las diez etapas, la primera vez que se juega cada una.
+- **Tutorial en contexto** (ADR 0037 y 0039): ayudas breves sobre el Tico en las diez etapas, hasta que cada una se alcanza a leer, por modo de disparo. "Ver ayudas otra vez" e interruptor de ayudas en el menú.
 - **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
@@ -53,7 +53,7 @@
 - Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026. Cada bloque es un PR.
+Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026, y con la cuarta (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) el mismo día. Cada bloque es un PR.
 
 Hechos:
 - Claridad del combate (ADR 0032).
@@ -63,6 +63,7 @@ Hechos:
 - B · Puntaje y resultados honestos (ADR 0036).
 - C · Aprender y volver (ADR 0037).
 - D · Ambiente (ADR 0038).
+- F · Ayudas que se alcanzan a leer y regreso a etapas ganadas (ADR 0039, cuarta auditoría).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -76,6 +77,7 @@ Hechos:
 2. ~~B · Puntaje y resultados honestos~~: hecho (ADR 0036).
 3. ~~C · Aprender y volver~~: hecho (ADR 0037).
 4. ~~D · Ambiente~~: hecho (ADR 0038).
+4b. ~~F · Cuarta auditoría (R01 a R04)~~: hecho (ADR 0039), antes del bloque E por decisión del dueño.
 5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.

@@ -66,8 +66,10 @@ export interface Game {
   combo: { n: number; best: number }; hitstop: number;
   t: number; mode: 'play' | 'over'; shake: number; bonus: number; fines: number; speed: number;
   announce: { t: string; col: string; life: number } | null;
-  // tutorial (ADR 0037): ayudas activas solo la primera vez en la etapa; hintAt agenda cada ayuda (-1 ya mostrada)
+  // tutorial (ADR 0037 y 0039): hintAt agenda cada ayuda (-1 en pantalla o ya mostrada), hintShown suma su tiempo en
+  // pantalla, hintPrev recuerda si su evento ya estaba ocurriendo, hintKnown son las que el jugador ya leyó antes
   hint: { text: string; life: number } | null; hintsOn: boolean; hintAt: (number | undefined)[];
+  hintShown: number[]; hintPrev: boolean[]; hintIdx: number; hintKnown: string[];
   perks: { item: ItemDef; used: boolean }[];
   fog: { t: number; on: number; k: number };          // garúa: espera a la próxima oleada, duración que le queda e intensidad 0..1
   stars: number; starT: number; chaseQ: number; blockT: number; // nivel de búsqueda
@@ -108,7 +110,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
   for (const k in keys) keys[k as keyof Keys] = false;
   const cone = cfg.weapons.cone;
   return {
-    cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintsOn: true, hintAt: [],
+    cfg, dk, d, keys, ai, fireMode: fireMode ?? cone.mode ?? 'mantener', combo: { n: 0, best: 0 }, hitstop: 0, t: 0, mode: 'play', shake: 0, bonus: 0, fines: 0, speed: cfg.road.speed, announce: null, hint: null, hintsOn: true, hintAt: [], hintShown: [], hintPrev: [], hintIdx: -1, hintKnown: [],
     perks: (cfg.player.items ?? []).map((item) => ({ item, used: false })),
     fog: { t: cfg.weather?.fog?.first ?? Infinity, on: 0, k: 0 }, stars: 0, starT: 0, chaseQ: 0, blockT: 0,
     slide: { t: cfg.hazards?.rockslide?.first ?? Infinity, phase: 0, st: 0, lanes: [], spawnT: 0 },

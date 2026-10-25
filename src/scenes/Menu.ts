@@ -5,7 +5,7 @@ import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../c
 import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { DEFAULT_NAME, getMedals, getPlayerName, getSettings, setSettings, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
 import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
@@ -21,9 +21,10 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     setupCamera(this);
     this.L = createLayers(this);
-    // Las etapas se juegan en orden: el menú ofrece la más avanzada desbloqueada. Solo el modo prueba deja elegir.
+    // Las etapas se juegan en orden: el menú ofrece la más avanzada desbloqueada y deja volver a las ya ganadas
+    // (ADR 0039). Solo el modo prueba deja elegir cualquiera y recuerda la última elegida.
     const saved = getSettings().stageId;
-    this.stageId = TEST_MODE ? (saved && STAGES[saved] ? saved : DEFAULT_STAGE) : stageForUnlocked(unlockedStage(stageNumber));
+    this.stageId = TEST_MODE ? (saved && STAGES[saved] ? saved : DEFAULT_STAGE) : this.latest();
     this.setupStageSelector();
     this.showStage();
     this.setupPlayer();
@@ -34,27 +35,35 @@ export class MenuScene extends Phaser.Scene {
     const name = document.getElementById('toName')!;
     const label = () => { name.textContent = `Jugador · ${getPlayerName() ?? DEFAULT_NAME}`; };
     label();
-    name.onclick = () => openName(false, label);
+    name.onclick = () => openName(false, () => { label(); this.showStage(); }); // las medallas son del jugador (auditoría R04)
     document.getElementById('toRanking')!.onclick = () => openRanking();
+    // interruptor de ayudas (ADR 0039): apagadas no sale ninguna; al prenderlas vuelven solo las no leídas
+    const hints = document.getElementById('toHintsOnOff')!;
+    const paintHints = () => { const on = getSettings().hints !== false; hints.textContent = on ? 'Ayudas activadas' : 'Ayudas desactivadas'; hints.setAttribute('aria-pressed', String(on)); };
+    hints.onclick = () => { setSettings({ hints: getSettings().hints === false }); paintHints(); this.showStage(); };
+    paintHints();
     document.getElementById('toReset')!.onclick = () => openReset(() => this.scene.restart());
     if (!getPlayerName()) openName(true, label);
   }
 
-  // Selector de etapa, solo en modo prueba (?prueba en la dirección). Recuerda la última elegida.
+  private latest(): string { return stageForUnlocked(unlockedStage(stageNumber)); }
+
+  // Selector de etapa: las ya desbloqueadas, para volver por medallas o récords (ADR 0039). En modo prueba, todas.
   private setupStageSelector(): void {
-    const box = document.getElementById('stageSel')!;
-    box.hidden = !TEST_MODE;
+    const box = document.getElementById('stageSel')!, unlocked = unlockedStage(stageNumber);
+    const ids = STAGE_ORDER.filter((id) => TEST_MODE || STAGES[id].cfg.number <= unlocked);
     box.innerHTML = '';
-    if (!TEST_MODE) return;
-    STAGE_ORDER.forEach((id) => {
+    box.hidden = ids.length < 2;
+    ids.forEach((id) => {
       const b = document.createElement('button');
-      b.type = 'button'; b.className = 'seg'; b.setAttribute('role', 'radio'); b.dataset.stage = id;
+      b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.stage = id;
       // solo el número, para que entren las diez etapas; el nombre completo se ve abajo y en el lector de pantalla
       b.className = 'seg num'; b.textContent = String(STAGES[id].cfg.number);
       b.setAttribute('aria-label', `${STAGES[id].cfg.number} · ${STAGES[id].cfg.district}`); b.title = STAGES[id].cfg.district;
-      b.onclick = () => { this.stageId = id; setSettings({ stageId: id }); this.showStage(); };
+      b.onclick = () => { this.stageId = id; if (TEST_MODE) setSettings({ stageId: id }); this.showStage(); };
       box.appendChild(b);
     });
+    document.getElementById('toLatest')!.onclick = () => { this.stageId = this.latest(); this.showStage(); };
   }
 
   private showStage(): void {
@@ -68,6 +77,12 @@ export class MenuScene extends Phaser.Scene {
     $('menuBoss').textContent = cfg.boss.title;
     $('menuTip').textContent = cfg.tip;
     $('menuMedals').innerHTML = medalChips(cfg, getMedals(getPlayerName() ?? DEFAULT_NAME, this.stageId));
+    // volver a una etapa ya ganada: se avisa que paga la mitad y se ofrece seguir el recorrido
+    $('replayNote').hidden = TEST_MODE || this.stageId === this.latest();
+    // "Ver ayudas otra vez" aparece si esta etapa ya enseñó algo, en cualquiera de los dos modos (auditoría R01)
+    const hintsBtn = $('toHints') as HTMLButtonElement, learned = FIRE_MODES.some((m) => knownHints(this.stageId, m).length > 0);
+    hintsBtn.hidden = !learned || getSettings().hints === false; hintsBtn.textContent = 'Ver ayudas otra vez';
+    hintsBtn.onclick = () => { forgetHints(this.stageId); hintsBtn.textContent = 'Las ayudas vuelven a salir'; };
     $('menuPowers').innerHTML = Object.values(cfg.powers)
       .map((P) => `<span><i style="background:${P.col}">${P.L}</i>${P.label}</span>`).join('');
     const diffs = $('menuDiffs'); diffs.innerHTML = '';
@@ -80,7 +95,7 @@ export class MenuScene extends Phaser.Scene {
       });
       diffs.appendChild(b);
     });
-    this.setupFireSelector(cfg.weapons.cone.mode !== undefined);
+    this.setupFireSelector(cfg.weapons.cone.mode !== undefined, !!cfg.route);
     ($('toGarage') as HTMLButtonElement).onclick = () => {
       $('menu').hidden = true; this.scene.start('Garage', { stageId: this.stageId, dk: getSettings().dk ?? 'normal' });
     };
@@ -91,11 +106,16 @@ export class MenuScene extends Phaser.Scene {
   }
 
   // Selector del modo de disparo (los dos son opciones permanentes, ADR 0013); la elección se guarda en el dispositivo.
-  private setupFireSelector(enabled: boolean): void {
+  private setupFireSelector(enabled: boolean, route = false): void {
     const box = document.getElementById('fireSel')!, tip = document.getElementById('fireTip')!;
     box.hidden = !enabled; tip.hidden = !enabled;
     if (!enabled) return;
-    const TIPS: Record<FireMode, string> = {
+    // en la ruta no hay jefe: el texto habla de abrirse paso y llegar al carguero, no de racha ni punto ciego
+    const TIPS: Record<FireMode, string> = route ? {
+      toque: 'Cada toque lanza un cono para abrirte paso. Acelera a fondo, que la marea no espera, y sube a la rampa del carguero.',
+      acelerar: 'Mientras aceleras, el Tico lanza conos solo y te abre paso. No sueltes, que la marea no espera.',
+      mantener: '',
+    } : {
       toque: 'Cada toque lanza un cono. Tienes 3 y se recargan de a uno, y si pegas seguido por la derecha armas una racha que suma daño, hasta +30%.',
       acelerar: 'Mientras aceleras, el Tico lanza conos solo. Atacar te obliga a acercarte.',
       mantener: '',

@@ -8,10 +8,11 @@ import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
 import { summarize, update, updateWorld } from '../core/world';
-import { DEFAULT_NAME, addMedals, getGarage, getMedals, getPlayerName, getRecord, getSettings, markTutorial, recordScore, settleFight, tutorialSeen, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, addMedals, getGarage, getMedals, getPlayerName, getRecord, getSettings, knownHints, learnHints, recordScore, settleFight, unlockedStage } from '../core/save';
 import { SCORE_VERSION, scoreFight, scorePoints } from '../core/score';
 import { earnedMedals } from '../core/medals';
 import { startEnding, updateEnding } from '../core/ending';
+import { learnedHints } from '../core/hints';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -47,7 +48,8 @@ export class StageScene extends Phaser.Scene {
     const cfg = applyUpgrades(this.def.cfg, getGarage().levels);
     cfg.player.items = wonItems(unlockedStage(stageNumber));
     this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
-    this.G.hintsOn = !tutorialSeen(this.data0.stageId); // las ayudas salen hasta terminar la primera pelea (ADR 0037)
+    this.G.hintKnown = knownHints(this.data0.stageId, this.G.fireMode); // las ya leídas en este modo no salen (ADR 0039)
+    this.G.hintsOn = getSettings().hints !== false; // el jugador puede apagarlas en el menú
     this.results = null; this.skip = false;
     setDeckMode(this.G.fireMode);
     this.paused = false;
@@ -81,7 +83,13 @@ export class StageScene extends Phaser.Scene {
     } else Sfx.music(true, this.G.cfg.music);
   }
 
+  // Guarda las ayudas que se alcanzaron a leer. El modo prueba no gasta el tutorial (auditoría R01).
+  private saveHints(): void {
+    if (!TEST_MODE) learnHints(this.data0.stageId, this.G.fireMode, learnedHints(this.G));
+  }
+
   private quitToMenu(): void {
+    this.saveHints();
     this.paused = false; $('pause').hidden = true;
     Sfx.music(false); Sfx.engine(0);
     this.scene.start('Menu');
@@ -103,7 +111,7 @@ export class StageScene extends Phaser.Scene {
               build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
               points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined },
             G.cfg.number, summary.pay, stageNumber);
-          markTutorial(stageId);
+          this.saveHints();
           // puntaje (ADR 0029) con su contexto (ADR 0037): solo las victorias, y el modo prueba no entra al ranking ni da medallas
           const name = getPlayerName() ?? DEFAULT_NAME, parts = scorePoints(G);
           const ctx = { points, v: SCORE_VERSION, mode: G.fireMode, dk: this.data0.dk, upgrades, build: __BUILD__, at: new Date().toISOString(), parts };
