@@ -5,6 +5,10 @@
   "roadName": "AV. ABANCAY",
   "eyebrow": "Etapa 3 · Centro de Lima · Av. Abancay",
   "tip": "En el Centro todo es desvío, con rejas, carretillas y marchas que cierran media pista. Cuando brille la boquilla del Rochabús, cámbiate de carril, que el chorro va directo al tuyo. Su punto ciego también está a la derecha.",
+  "hints": [
+    {"on": "teleJet", "text": "Brilla la boquilla, cámbiate de carril"},
+    {"on": "obs:peatones", "text": "A la marcha no se la toca, rodéala"}
+  ],
   "difficulties": {
     "facil": {
       "label": "Fácil",

@@ -15,13 +15,25 @@ export interface FightRecord {
   // contexto para comparar peleas (opcionales: los registros viejos no los tienen)
   build?: string; test?: boolean; upgrades?: Record<string, number>; bossPct?: number;
   gross?: number; fines?: number; earned?: number; replay?: boolean; tolls?: number;
+  // puntaje con su versión de fórmula, último golpe y daño recibido por fuente (ADR 0037, auditoría N09)
+  points?: number; scoreV?: number; lastHit?: string; dmgBy?: Record<string, number>;
+}
+// Contexto de un récord (ADR 0037): con qué se hizo y cuánto aportó cada parte, para explicarlo aunque cambie el balance.
+export interface ScoreCtx {
+  points: number; v: number; mode?: FireMode; dk: DiffKey; upgrades: Record<string, number>; build?: string; at?: string;
+  parts: Record<string, number>;
 }
 export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
 // garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)
 // scores: mejor puntaje de cada jugador en cada etapa, { nombre: { etapa: puntos } } (ADR 0029)
-interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string }; scores?: Record<string, Record<string, number>> }
+// scoreCtx: contexto de cada récord; medals: medallas de cada jugador por etapa; tutorial: etapas con las ayudas vistas (ADR 0037)
+interface SaveV1 {
+  v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string };
+  scores?: Record<string, Record<string, number>>; scoreCtx?: Record<string, Record<string, ScoreCtx>>;
+  medals?: Record<string, Record<string, string[]>>; tutorial?: string[];
+}
 
 function load(): SaveV1 {
   try {
@@ -145,12 +157,42 @@ export function setPlayerName(raw: string): string {
   return name;
 }
 
-// Guarda el puntaje si es el mejor de ese jugador en esa etapa. Repetir una pelea igual no suma.
-export function recordScore(name: string, stageId: string, points: number): { best: number; record: boolean } {
+// Guarda el puntaje si es el mejor de ese jugador en esa etapa, con su contexto. Repetir una pelea igual no suma.
+export function recordScore(name: string, stageId: string, points: number, ctx?: ScoreCtx): { best: number; record: boolean } {
   const data = load(), all = data.scores ?? {}, mine = { ...(all[name] ?? {}) };
   const prev = mine[stageId] ?? 0, record = points > prev;
-  if (record) { mine[stageId] = points; data.scores = { ...all, [name]: mine }; store(data); }
+  if (record) {
+    mine[stageId] = points; data.scores = { ...all, [name]: mine };
+    if (ctx) { const cx = data.scoreCtx ?? {}; data.scoreCtx = { ...cx, [name]: { ...(cx[name] ?? {}), [stageId]: ctx } }; }
+    else if (data.scoreCtx?.[name]?.[stageId]) delete data.scoreCtx[name][stageId]; // el contexto viejo ya no es de este récord
+    store(data);
+  }
   return { best: Math.max(prev, points), record };
+}
+
+// Récord de un jugador en una etapa, con su contexto si se guardó (los récords anteriores a la ADR 0037 no lo tienen).
+export function getRecord(name: string, stageId: string): { points: number; ctx?: ScoreCtx } | null {
+  const data = load(), points = data.scores?.[name]?.[stageId];
+  return points ? { points, ctx: data.scoreCtx?.[name]?.[stageId] } : null;
+}
+
+/* Medallas (ADR 0037): se ganan una vez por jugador y etapa, y quedan. */
+export function getMedals(name: string, stageId: string): string[] { return load().medals?.[name]?.[stageId] ?? []; }
+export function addMedals(name: string, stageId: string, ids: string[]): string[] {
+  const data = load(), had = data.medals?.[name]?.[stageId] ?? [], fresh = ids.filter((id) => !had.includes(id));
+  if (fresh.length) {
+    const all = data.medals ?? {};
+    data.medals = { ...all, [name]: { ...(all[name] ?? {}), [stageId]: [...had, ...fresh] } };
+    store(data);
+  }
+  return fresh;
+}
+
+/* Tutorial en contexto (ADR 0037): las ayudas de una etapa salen hasta terminar la primera pelea en ella. */
+export function tutorialSeen(stageId: string): boolean { return (load().tutorial ?? []).includes(stageId); }
+export function markTutorial(stageId: string): void {
+  const data = load(), list = data.tutorial ?? [];
+  if (!list.includes(stageId)) { data.tutorial = [...list, stageId]; store(data); }
 }
 
 export interface RankRow { name: string; total: number; stages: number }
@@ -164,9 +206,11 @@ export function ranking(): RankRow[] {
     .slice(0, RANKING_SIZE);
 }
 
-// Empezar de nuevo: vuelve a la Etapa 1 con la billetera en cero y sin mejoras. Conserva nombre, ranking y registro de peleas.
+// Empezar de nuevo: vuelve a la Etapa 1 con la billetera en cero y sin mejoras, y las ayudas vuelven a salir.
+// Conserva nombre, ranking, medallas y registro de peleas.
 export function resetProgress(): void {
   const data = load();
+  delete data.tutorial;
   data.progress = { unlocked: 1 }; // explícito: si faltara, el progreso se reconstruiría desde el registro de peleas
   data.garage = { wallet: 0, levels: {} };
   if (data.settings) delete data.settings.stageId;

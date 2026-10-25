@@ -5,6 +5,9 @@
   "roadName": "AV. JAVIER PRADO",
   "eyebrow": "Etapa 4 · Javier Prado · By-pass en obra",
   "tip": "En la Javier Prado las combis van en manada y la obra del by-pass nunca termina. Cuando el cobrador saque el brazo, muévete, que lanza monedas. Su punto ciego también está a la derecha.",
+  "hints": [
+    {"on": "teleThrow", "text": "Sacó el brazo, muévete que lanza monedas"}
+  ],
   "difficulties": {
     "facil": {
       "label": "Fácil",

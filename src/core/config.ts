@@ -157,11 +157,14 @@ export interface BossConfig {
   body?: { count: number; spacing: number; hp: number; w: number; h: number; contactDmg: number; cols: string[]; bodyDmgShare: number; lean?: number }; // lean: corrimiento lateral por segmento (negativo, a la izquierda)
 }
 
+// Ayuda del tutorial: por tiempo (`at`) o por evento (`on`, ver core/hints.ts), solo en un modo de disparo si se indica.
+export interface HintDef { text: string; at?: number; on?: string; after?: number; mode?: FireMode }
+
 export interface StageConfig {
   id: string; number: number; district: string; roadName: string; eyebrow: string; tip: string;
   secret?: boolean; // etapa secreta: se desbloquea al terminar el recorrido y el menú la anticipa como pista
   // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
-  hints?: { at: number; text: string }[];
+  hints?: HintDef[]; // tutorial en contexto (ADR 0037)
   difficulties: Record<DiffKey, Difficulty>;
   // exclusive: carril pintado como exclusivo (sátira visual, sin regla para el Tico)
   road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number;

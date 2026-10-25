@@ -5,6 +5,10 @@
   "roadName": "AV. CAMINO REAL",
   "eyebrow": "Etapa 2 · San Isidro · Av. Camino Real",
   "tip": "Va hablando por celular y apenas ve sobre el timón. Atácala por la derecha, que su punto ciego recibe el doble. Ojo con el serenazgo, cada roce es papeleta.",
+  "hints": [
+    {"on": "teleRev", "text": "Luces blancas, viene en reversa"},
+    {"on": "phase:3", "after": 1.5, "text": "Sus amigas te encierran, usa el CLAXON"}
+  ],
   "difficulties": {
     "facil": { "label": "Fácil", "hp": 1350, "spd": 230, "freq": 1.33, "tele": true },
     "normal": { "label": "Normal", "hp": 1800, "spd": 260, "freq": 1, "tele": true },

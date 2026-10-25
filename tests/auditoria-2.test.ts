@@ -47,8 +47,9 @@ describe('segunda auditoría', () => {
 
   it('Gamarra y la Vía Expresa enseñan su regla nueva con una ayuda antes de exigirla', () => {
     const ga = STAGES.gamarra.cfg, ve = STAGES['via-expresa'].cfg;
-    expect(ga.hints![0].at).toBeLessThan(ga.obstacles!.find((o) => o.k === 'cables')!.first);
-    expect(ve.hints![0].at).toBeLessThan(ve.obstacles!.find((o) => o.k === 'rampa')!.first);
+    // desde la ADR 0037 la ayuda sale cuando el obstáculo aparece en pantalla, antes de llegar al Tico
+    expect(ga.hints![0].on).toBe('obs:cables');
+    expect(ve.hints![0].on).toBe('obs:rampa');
     for (const t of [...ga.hints!, ...ve.hints!].map((h) => h.text).concat(ve.rewards.defeatTip!, ve.tip)) expect(t).not.toMatch(/[:;—]/);
     expect(ve.rewards.defeatTip).not.toMatch(/nada te toca/);
   });

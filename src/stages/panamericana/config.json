@@ -5,6 +5,12 @@
   "roadName": "PANAMERICANA NORTE",
   "eyebrow": "Etapa 8 · Panamericana Norte · Garúa",
   "tip": "En la Panamericana la garúa tapa lo que viene. Cada papeleta o choque con la policía suma una estrella, y con muchas te persiguen y te bloquean. En los peajes pasa por una barrera abierta. Su punto ciego también está a la derecha.",
+  "hints": [
+    {"on": "fog", "text": "En la garúa, atento a lo que aparece"},
+    {"on": "obs:peaje", "text": "Pasa por una barrera abierta"},
+    {"on": "stars", "text": "Con muchas estrellas te persiguen"},
+    {"on": "teleThrow", "text": "Esquiva los rompellantas, te pinchan"}
+  ],
   "difficulties": {
     "facil": {
       "label": "Fácil",

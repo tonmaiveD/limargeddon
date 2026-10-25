@@ -23,7 +23,8 @@
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
-- **Tutorial**: ayudas breves sobre el Tico en Miraflores (ADR 0019).
+- **Tutorial en contexto** (ADR 0037): ayudas breves sobre el Tico en las diez etapas, la primera vez que se juega cada una.
+- **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
 - **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.
 
@@ -59,6 +60,7 @@ Hechos:
 - Clímax del jefe final (ADR 0034).
 - A · Correcciones que rompen reglas (ADR 0035).
 - B · Puntaje y resultados honestos (ADR 0036).
+- C · Aprender y volver (ADR 0037).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -70,10 +72,7 @@ Hechos:
 **Orden**
 1. ~~A · Correcciones que rompen reglas~~: hecho (ADR 0035).
 2. ~~B · Puntaje y resultados honestos~~: hecho (ADR 0036).
-3. **C · Aprender y volver** (bloque 4 anterior, más N09).
-   - Tutorial completo.
-   - Objetivos opcionales por etapa y récord personal, sin presión.
-   - Cada récord guarda su contexto: modo, dificultad, mejoras, versión de la fórmula y puntos por componente. Así un récord se puede explicar después de rebalancear.
+3. ~~C · Aprender y volver~~: hecho (ADR 0037).
 4. **D · Ambiente:**
    - Música sintetizada por distrito.
    - Animaciones de cierre: la carretilla Don Frío cruzando la meta y el Tico dentro del carguero.
