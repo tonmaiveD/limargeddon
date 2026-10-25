@@ -6,6 +6,7 @@ import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateHazards } from './hazards';
 import { updateHints } from './hints';
+import { updateLights } from './lights';
 import { bossVsObstacles, freeSpot, fuselage, resolveTraffic, solid } from './physics';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
@@ -300,7 +301,7 @@ export function updateWorld(G: Game, dt: number): void {
     }
     return c.y < H + 80 && c.y > -140;
   });
-  if (play) { updateFog(G, dt); updateWanted(G, dt); updateHazards(G, dt); }
+  if (play) { updateFog(G, dt); updateWanted(G, dt); updateHazards(G, dt); updateLights(G, dt); }
   for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.96; q.vy *= 0.96; q.life -= dt; }
   G.parts = G.parts.filter((q) => q.life > 0);
   for (const r of G.rings) { r.r += (r.max / r.life) * dt * 0.9; r.life -= dt; } G.rings = G.rings.filter((r) => r.life > 0);

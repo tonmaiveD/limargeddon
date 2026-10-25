@@ -1,4 +1,6 @@
-/* Audio 100% sintetizado con WebAudio, independiente de Phaser. Portado tal cual de prototipo/san-isidro-v3.html. */
+/* Audio 100% sintetizado con WebAudio, independiente de Phaser. Portado de prototipo/san-isidro-v3.html; la música por
+ * distrito (ADR 0038) toca las canciones de songs.ts con el mismo secuenciador. */
+import { DEFAULT_SONG, SONGS, type Drum, type Song, type Voice } from './songs';
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
@@ -7,8 +9,8 @@ export type SfxName =
 let ac: AudioContext | null = null;
 let master: GainNode, music: GainNode, noiseBuf: AudioBuffer;
 let eng: OscillatorNode, engGain: GainNode, engFilt: BiquadFilterNode;
-let on = true, playing = false, step = 0, nextT = 0;
-const STEP = 60 / 104 / 2; // corcheas a 104 BPM
+let on = true, playing = false, step = 0, nextT = 0, song: Song = SONGS[DEFAULT_SONG];
+const stepDur = () => 60 / song.bpm / song.sub;
 
 function init(): void {
   if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
@@ -42,25 +44,52 @@ function noise(dur: number, vol = 0.3, freq = 1200, type: BiquadFilterType = 'lo
   s.connect(f); f.connect(g); g.connect(dest); s.start(t); s.stop(t + dur + 0.03);
 }
 
-// cumbia chicha: bajo raíz-quinta, güiro en corcheas, punteo pentatónico; Am / G
 const N = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
-const BASS = [[45, 0, 52, 0, 45, 0, 52, 57], [43, 0, 50, 0, 43, 0, 50, 55]];
-const MEL = [69, 0, 72, 74, 76, 0, 74, 72, 69, 0, 67, 69, 72, 0, 69, 0, 76, 0, 74, 72, 74, 0, 72, 69, 67, 0, 69, 72, 69, 0, 0, 0];
+
+function voice(v: Voice | undefined, i: number, w: number): void {
+  if (!v) return;
+  const n = v.notes[i % v.notes.length];
+  for (const m of Array.isArray(n) ? n : n ? [n] : []) {
+    tone(N(m), v.dur, v.wave, v.vol, null, w, music);
+    if (v.double) tone(N(m) * 1.005, v.dur, v.wave, v.double, null, w, music); // segunda voz desafinada, como la chicha
+  }
+}
+
+// Percusión sintetizada; k es 1 en un golpe y 1,7 en uno fuerte.
+function drum(d: Drum, k: number, w: number): void {
+  switch (d) {
+    case 'kick': tone(110, 0.12, 'sine', 0.5 * k, 50, w, music); break;
+    case 'snare': noise(0.12, 0.2 * k, 1800, 'bandpass', w, music); break;
+    case 'hat': noise(0.03, 0.08 * k, 8000, 'highpass', w, music); break;
+    case 'guiro': // como el prototipo: el golpe fuerte raspa dos veces
+      noise(0.05, k > 1 ? 0.22 : 0.12, 6000, 'highpass', w, music);
+      if (k > 1) noise(0.04, 0.1, 7000, 'highpass', w + stepDur() / 2, music);
+      break;
+    case 'clave': tone(2500, 0.05, 'triangle', 0.16 * k, null, w, music); break;
+    case 'cowbell': tone(560, 0.08, 'square', 0.07 * k, null, w, music); tone(845, 0.08, 'square', 0.05 * k, null, w, music); break;
+    case 'cajon': tone(140, 0.1, 'sine', 0.4 * k, 70, w, music); if (k > 1) noise(0.08, 0.2, 2500, 'bandpass', w, music); break;
+    case 'shaker': noise(0.04, 0.06 * k, 5000, 'highpass', w, music); break;
+    case 'bombo': tone(90, 0.2, 'sine', 0.5 * k, 45, w, music); break;
+    case 'quijada': noise(0.18, 0.12 * k, 3000, 'bandpass', w, music); break;
+  }
+}
 
 function schedule(i: number, t: number): void {
-  const w = t - ac!.currentTime, bar = Math.floor(i / 8) % 2, s = i % 8;
-  const bn = BASS[bar][s]; if (bn) tone(N(bn), 0.22, 'triangle', 0.5, null, w, music);
-  noise(0.05, s % 2 ? 0.22 : 0.12, 6000, 'highpass', w, music); if (s % 2) noise(0.04, 0.1, 7000, 'highpass', w + STEP / 2, music);
-  const m = MEL[i % 32]; if (m) { tone(N(m), 0.18, 'square', 0.13, null, w, music); tone(N(m) * 1.005, 0.18, 'square', 0.06, null, w, music); }
-  if (s === 0 || s === 4) tone(110, 0.12, 'sine', 0.5, 50, w, music);
+  const w = t - ac!.currentTime;
+  voice(song.bass, i, w); voice(song.chords, i, w); voice(song.lead, i, w);
+  for (const [d, pat] of Object.entries(song.drums) as [Drum, string][]) {
+    const c = pat[i % pat.length];
+    if (c === 'x' || c === 'X') drum(d, c === 'X' ? 1.7 : 1, w);
+  }
 }
 
 export const Sfx = {
   init,
   get on() { return on; },
   toggle(): boolean { on = !on; if (master && ac) master.gain.setTargetAtTime(on ? 0.55 : 0, ac.currentTime, 0.02); return on; },
-  music(v: boolean): void { playing = v; if (v && ac) { nextT = ac.currentTime + 0.05; step = 0; } },
-  tick(): void { if (!ac || !playing) return; while (nextT < ac.currentTime + 0.15) { schedule(step, nextT); nextT += STEP; step++; } },
+  // id: canción del distrito (songs.ts); sin id, o con uno desconocido, la cumbia chicha del prototipo
+  music(v: boolean, id?: string): void { playing = v; if (v) song = SONGS[id ?? DEFAULT_SONG] ?? SONGS[DEFAULT_SONG]; if (v && ac) { nextT = ac.currentTime + 0.05; step = 0; } },
+  tick(): void { if (!ac || !playing) return; while (nextT < ac.currentTime + 0.15) { schedule(step, nextT); nextT += stepDur(); step++; } },
   engine(level: number): void {
     if (!ac) return; const t = ac.currentTime;
     engGain.gain.setTargetAtTime(level > 0 ? 0.05 + level * 0.03 : 0, t, 0.08);

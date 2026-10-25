@@ -18,6 +18,7 @@
     {"on": "phase:3", "after": 1.5, "text": "El CLAXON la frena y aparta autos"}
   ],
   "tip": "En Miraflores chocar a un sereno o a los turistas que se toman fotos es papeleta. La camioneta del serenazgo también tiene punto ciego a la derecha. Suelta el acelerador para esquivar y atácala por ahí.",
+  "music": "lounge",
   "difficulties": {
     "facil": {
       "label": "Fácil",

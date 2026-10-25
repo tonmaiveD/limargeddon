@@ -77,6 +77,8 @@ export interface Game {
   splat: { t: number; max: number; blots: { x: number; y: number; r: number }[] };
   cart: { t: number; on: boolean; x: number; y: number; dir: number; hit: boolean; hits: number };
   chains: Chain[]; snakeReady: boolean; coil: Coil;
+  ending: { t: number; crossed: boolean } | null; // animación de cierre en curso (ADR 0038)
+  lights: { y: number; done: boolean; boss: boolean }[]; lightT: number; // semáforos en ola (ADR 0038)
   tolls: number; // peajes pagados en la pelea (se descuentan del cobro)
   // etapa de ruta: tramo actual, intentos, avance, marea y avión
   route: { ready: boolean; base: { road: StageConfig['road']; minY: number; every: [number, number] } | null; i: number; attempts: number; dist: number; start: number; tideY: number; tideCd: number; tideHits: number;
@@ -113,7 +115,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     flock: { t: cfg.hazards?.birds?.first ?? Infinity, on: false, x: 0, y: 0, vy: 0, scared: false, hit: false },
     splat: { t: 0, max: 1, blots: [] },
     cart: { t: cfg.hazards?.cart?.first ?? Infinity, on: false, x: 0, y: 0, dir: 1, hit: false, hits: 0 },
-    chains: [], snakeReady: false, tolls: 0,
+    chains: [], snakeReady: false, tolls: 0, ending: null, lights: [], lightT: cfg.lights?.first ?? Infinity,
     coil: { st: 'off', t: 0, cd: Infinity, cx: 0, cy: 0, r: 0, gap: 0, half: 0, slots: [], exposed: 0 },
     route: { ready: false, base: null, i: 0, attempts: cfg.route?.attempts ?? 0, dist: 0, start: 0, tideY: 9999, tideCd: 0, tideHits: 0, plane: { phase: 'off', x: 0, y: -400, t: 0 } },
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,

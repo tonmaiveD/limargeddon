@@ -10,7 +10,7 @@ import { tramo, type Game } from './state';
 const TELE = ['teleBrake', 'teleRev', 'teleRam', 'teleJet', 'teleThrow', 'teleSwing'];
 
 // Eventos que puede esperar una ayuda. Los que llevan dos puntos reciben un parámetro: fase, estilo de obstáculo o tramo.
-export const HINT_EVENTS = ['boss', 'pickup', 'cart', 'birds', 'slide', 'coil', 'stars', 'fog', 'tide', 'plane', ...TELE] as const;
+export const HINT_EVENTS = ['boss', 'pickup', 'cart', 'birds', 'slide', 'coil', 'stars', 'fog', 'tide', 'plane', 'light', ...TELE] as const;
 export const HINT_PREFIXES = ['phase:', 'obs:', 'tramo:'] as const;
 
 export function validHintEvent(on: string): boolean {
@@ -37,6 +37,7 @@ function happened(G: Game, on: string): boolean {
     case 'fog': return G.fog.k > 0.3;
     case 'tide': return G.route.tideY < 5000;
     case 'plane': return G.route.plane.phase !== 'off';
+    case 'light': return G.lights.some((l) => l.y > 40);
   }
   return false;
 }
