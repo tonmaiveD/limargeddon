@@ -5,6 +5,7 @@ import { addStar, tramoOk, announce, burst, fine, floatText, hurt, dmgBoss, lane
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateHazards } from './hazards';
+import { bossVsObstacles, freeSpot, fuselage, resolveTraffic, solid } from './physics';
 import { updateShots } from './weapons';
 import { activate, spawnPickup } from './powerups';
 import { W } from './constants';
@@ -19,7 +20,14 @@ export function spawnCar(G: Game): void {
   const sum = G.cfg.route ? T.reduce((a, x) => a + x.weight, 0) : 1;
   let r = Math.random() * sum, t = T[T.length - 1];
   for (const ty of T) { if (r < ty.weight) { t = ty; break; } r -= ty.weight; }
-  G.traffic.push(makeCar(t, laneX(G.cfg, lane), -60));
+  // física sólida: si el carril sorteado está ocupado arriba, prueba los demás; si no hay lugar, no aparece
+  let l = lane;
+  if (solid(G)) {
+    const lanes = G.cfg.road.lanes, ok = (k: number) => freeSpot(G, { x: laneX(G.cfg, k), y: -60, w: t.w, h: t.h });
+    l = -1; for (let k = 0; k < lanes; k++) if (ok((lane + k) % lanes)) { l = (lane + k) % lanes; break; }
+    if (l < 0) return;
+  }
+  G.traffic.push(makeCar(t, laneX(G.cfg, l), -60));
 }
 
 // Crea un vehículo de un tipo del JSON. Mismo orden de sorteos que el prototipo: velocidad, color (si hay varios), zigzag, semilla.
@@ -71,6 +79,7 @@ function pushAside(G: Game, c: Car, b: { x: number; y: number; w: number; h: num
 
 // Barrera de un carril del peaje: cada carril con su desfase, para que siempre haya alguna abierta.
 export function gateClosed(G: Game, ob: Obstacle, lane: number): boolean {
+  if (ob.bossLane === lane) return false; // al jefe se le levanta la barrera
   const o = G.cfg.obstacles![ob.i];
   // peaje de pago: `payLanes` carriles abiertos fijos (cobran), el resto cerrado; cuáles, según la fase del peaje
   if (o.payLanes) return ((lane + Math.floor((ob.ph ?? 0) * 10)) % G.cfg.road.lanes) >= o.payLanes;
@@ -80,8 +89,17 @@ export function gateClosed(G: Game, ob: Obstacle, lane: number): boolean {
 
 export function spawnObstacle(G: Game, i: number): void {
   const o = G.cfg.obstacles![i], { lanes, laneWidth, left } = G.cfg.road;
-  const n = Math.min(o.lanes, lanes), first = Math.floor(Math.random() * (lanes - n + 1));
+  const n = Math.min(o.lanes, lanes);
+  let first = Math.floor(Math.random() * (lanes - n + 1));
+  // física sólida: una marcha o un grupo de peatones deja libre el carril del jefe, para que nunca tenga que atravesarlos
+  if (solid(G) && o.style === 'peatones' && !G.cfg.route) {
+    const bl = laneOf(G.cfg, G.b.x);
+    if (bl >= first && bl < first + n) first = bl >= n ? bl - n : bl + 1 <= lanes - n ? bl + 1 : first;
+  }
   const w = Math.min(o.w ?? Infinity, n * laneWidth - 10), x = left + first * laneWidth + (n * laneWidth) / 2;
+  // física sólida: un bloque no cae encima de otro ni bajo el fuselaje del carguero (si no cabe, se salta este)
+  if ((o.kind === 'bloque' || o.kind === 'peaje') && solid(G) && G.obstacles.some((ob) => Math.abs(ob.y + o.h) < (ob.h + o.h) / 2 + 30 && Math.abs(ob.x - x) < (ob.w + w) / 2)) return;
+  if (o.kind === 'bloque' && solid(G)) { const f = fuselage(G); if (f && Math.abs(f.x - x) < (f.w + w) / 2) return; }
   G.obstacles.push({ i, x, y: -o.h, w, h: o.h, hit: false, bx: x, ph: o.drift || o.kind === 'peaje' ? Math.random() * 6 : undefined });
 }
 
@@ -91,10 +109,12 @@ function updateObstacles(G: Game, dt: number): void {
   for (const ob of G.obstacles) {
     ob.y += G.speed * dt;
     const o = defs[ob.i];
-    if (o.drift && ob.ph !== undefined) {
+    // la gente deja de correrse cuando el jefe pasa por su lado: así el hueco no se cierra encima de nadie
+    const nearBoss = solid(G) && o.style === 'peatones' && !G.cfg.route && Math.abs(ob.y - G.b.y) < (ob.h + G.b.h) / 2 + 40;
+    if (o.drift && ob.ph !== undefined && !nearBoss) {
       ob.ph += dt * o.drift.freq;
       ob.x = clamp(ob.bx! + Math.sin(ob.ph) * o.drift.amp, G.cfg.road.left + ob.w / 2, G.cfg.road.right - ob.w / 2);
-    }
+    } else if (nearBoss && ob.bx !== undefined) ob.x += (ob.bx - ob.x) * Math.min(1, dt * 4); // vuelve a su lugar y deja el carril libre entero
     if (o.kind === 'rampa') {
       // rampa: acelerando (o con turbo) el Tico sale volando; sin acelerar, solo un saltito
       if (play && !ob.hit && p.air <= 0 && overlap(p, ob)) {
@@ -227,6 +247,7 @@ export function updateWorld(G: Game, dt: number): void {
     }
     if (c.flash) c.flash -= dt;
   }
+  resolveTraffic(G); bossVsObstacles(G);
   updateShots(G, dt);
   // proyectiles del jefe: el SOAT los bloquea; el Casco de obra perdona el primero
   for (const f of G.foes) {

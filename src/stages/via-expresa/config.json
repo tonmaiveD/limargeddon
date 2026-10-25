@@ -318,7 +318,8 @@
         "contactDmg": 7,
         "selfDmg": 10
       }
-    ]
+    ],
+    "solid": true
   },
   "swarms": [
     {

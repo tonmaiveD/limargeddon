@@ -28,7 +28,7 @@ describe('nombre del jugador', () => {
     expect(cleanName('abcdefghijklmnop')).toBe('abcdefghijkl');
     expect(cleanName('<b>x</b>')).toBe('bxb');
   });
-  it('vacío queda como TAXISTA y se recuerda', () => {
+  it('vacío queda como JUGADOR y se recuerda', () => {
     expect(getPlayerName()).toBeNull();
     expect(setPlayerName(' ;; ')).toBe(DEFAULT_NAME);
     setPlayerName('Rosa'); expect(getPlayerName()).toBe('Rosa');

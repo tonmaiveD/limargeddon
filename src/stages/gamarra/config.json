@@ -320,7 +320,8 @@
         "contactDmg": 6,
         "selfDmg": 10
       }
-    ]
+    ],
+    "solid": true
   },
   "swarms": [
     {

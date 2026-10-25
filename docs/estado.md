@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #25 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #26 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -51,29 +51,33 @@
 - Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-Ordenado como se acordó: primero datos reales y balance, después la etapa secreta, y en paralelo el pulido.
+Orden acordado con el dueño el 25 de octubre de 2026. Cada bloque es un PR.
 
-1. **Partidas reales:** que el tester juegue 3 o 4 peleas por modo con la versión actual y comparta "Copiar registro". Con eso se confirma la pasada de dificultad (ADR 0027) y se decide si la vida del jefe baja solo en el modo por toque.
-2. **Línea Amarilla, pulido:** animación del Tico dentro del avión y confirmar con personas la dificultad del túnel y la marea, que el bot no puede medir.
-3. **Pruebas en el teléfono de la etapa secreta.**
-4. **Música sintetizada por distrito** (cumbia chicha, criolla, salsa), como pide el concepto. Hoy solo hay efectos.
-5. **Animación del cierre:** la carretilla Don Frío cruzando la meta (hoy es texto).
-6. **Semáforos en ola** de la Javier Prado como mecánica (hoy son paisaje).
-7. **Auditoría de octubre, lo que queda:**
-   - Tutorial completo.
+**En paralelo y desde ya (dueño y tester, sin código)**
+- Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. Confirman la dificultad (ADR 0027 y 0031) y la del túnel y la marea, que el bot no puede medir.
+- Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
+
+1. **Claridad del combate:**
+   - Agrupar los números de daño (hoy hasta 20 a la vez).
    - Señal del punto ciego.
-   - Daño por fuente en la pista.
-   - Aviso de reversa del Q8 en Difícil.
+   - Mostrar qué te pegó.
+   - Aviso de la reversa del Q8 en Difícil.
    - Blancos táctiles de 44 px.
+   - Compactar el menú en modo prueba.
+2. **Taller que explique:**
+   - Dos opciones, ofensiva y supervivencia, con su efecto.
+   - Dónde sirve cada objeto de victoria.
    - Meta de ahorro elegida.
+3. **Clímax del jefe final:** el enrosque de la serpiente con un solo hueco (plan 5b).
+4. **Aprender y volver:**
+   - Tutorial completo.
+   - Objetivos opcionales por etapa y récord personal, sin presión.
+5. **Ambiente:**
+   - Música sintetizada por distrito.
+   - Animaciones de cierre: la carretilla Don Frío cruzando la meta y el Tico dentro del carguero.
+   - Semáforos en ola de la Javier Prado como mecánica.
+6. **Con los datos reales:**
+   - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Bot con restricciones de pulgar.
-   - Las propuestas aplazadas (gracia de aceleración, pagos por fase, repetición mejor pagada) solo si los datos lo piden.
-8. **Segunda auditoría, propuestas grandes** (ADR 0028):
-   - El enrosque final de la serpiente con un solo hueco, que se acordó en el plan 5b y no se construyó.
-   - Un taller que compare dos opciones (ofensiva y supervivencia) con su efecto, y que diga dónde sirve cada objeto de victoria.
-   - Agrupar los números de daño: hoy hay hasta 20 textos a la vez.
-   - Objetivos opcionales por etapa y récord personal, sin rachas diarias ni presión.
-9. **Ranking compartido** entre dispositivos (hoy es local, ADR 0029): necesita servicio externo, validación de puntajes y moderación de nombres. Opcional, una clasificación con equipamiento fijo.
-10. **Menú en modo prueba:** con nueve etapas se aprieta en pantallas chicas.
-11. **Pruebas en el teléfono** de Javier Prado a Costa Verde: el salto, la garúa, la curva y la serpiente.
-12. **Correo en commits viejos:** la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
+   - Las propuestas aplazadas de las auditorías, solo si los datos las piden.
+7. **Opcional:** ranking compartido entre dispositivos. Necesita servicio externo, validación de puntajes y moderación de nombres.

@@ -191,7 +191,8 @@ export interface StageConfig {
   powers: Record<PowerKey, PowerDef>;
   pickups: { first: number; every: [number, number]; fall: number; rare: PowerKey[]; rareReroll: number; rerollTo: PowerKey[] };
   // yieldToBoss: el tráfico se aparta del jefe en vez de pasarle por debajo (el prototipo no lo hacía)
-  traffic: { first: number; every: [number, number]; lastPhaseMult: number; yieldToBoss: boolean; killBonus: number; types: TrafficType[] };
+  // solid: física sólida (ADR 0031), nada se superpone; la réplica del prototipo no la usa
+  traffic: { first: number; every: [number, number]; lastPhaseMult: number; yieldToBoss: boolean; killBonus: number; types: TrafficType[]; solid?: boolean };
   swarms?: SwarmDef[];
   obstacles?: ObstacleDef[];
   fines: { amount: number; contact: string; shot: string };

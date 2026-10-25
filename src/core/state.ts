@@ -32,7 +32,8 @@ export interface Car {
   look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
-export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number }
+// bossLane: carril del peaje cuya barrera se levanta para el jefe
+export interface Obstacle { i: number; x: number; y: number; w: number; h: number; hit: boolean; bx?: number; ph?: number; bossLane?: number }
 export interface Ally { k: 'combi'; x: number; y: number; w: number; h: number; vy: number; said: boolean; dead?: boolean; dmg?: number }
 // proyectil del jefe: avanza en línea recta y se pierde al salir de la pista
 export interface Foe { x: number; y: number; vx: number; vy: number; r: number; dmg: number; col: string; look?: 'moneda' | 'rollo' | 'contenedor' | 'rompellantas' | 'piedra'; stun?: number; dead?: boolean }
@@ -171,7 +172,7 @@ export function addStar(G: Game): void {
 // contact: la papeleta viene de un roce con un intocable (la perdona el Silbato antes que el Bolso).
 export function fine(G: Game, x: number, y: number, amt: number, why: string, contact = false): void {
   G.stats.infractions++; // cuenta para el puntaje aunque después la perdonen
-  // Sticker "Mi papá es socio del Golf": nadie le pone papeletas
+  // Sticker "Club de los Búfalos Mojados": nadie le pone papeletas
   if (G.cfg.player.privilege) {
     if (G.privilegeT <= 0) { floatText(G, x, y - 34, '¿Usted sabe quién soy yo?', C.yellow); G.privilegeT = 2; }
     return;

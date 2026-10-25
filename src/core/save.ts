@@ -122,7 +122,7 @@ export function settleFight(f: Omit<FightRecord, 'at'>, stageNumber: number, pay
 }
 
 /* Jugador y ranking local (ADR 0029). */
-export const DEFAULT_NAME = 'TAXISTA';
+export const DEFAULT_NAME = 'JUGADOR';
 export const NAME_MAX = 12;
 export const RANKING_SIZE = 12;
 

@@ -2,6 +2,7 @@ import { Sfx } from '../core/audio/sfx';
 import { H, W } from '../core/constants';
 import { announce, burst, floatText, hurt, laneX, say, shake, type BossAI, type Game } from '../core/state';
 import { C, clamp, overlap } from '../core/util';
+import { fuselage } from '../core/physics';
 
 /*
  * Etapa de ruta (ADR 0030): no hay jefe que pelear. El "jefe" es el recorrido: la barra muestra lo que falta, cada
@@ -80,6 +81,13 @@ function updatePlane(G: Game, dt: number): void {
   if (ramp && pl.phase !== 'in' && overlap(G.p, ramp)) {
     G.b.hp = 0; G.b.x = G.p.x; G.b.y = G.p.y; // ganó: el Tico entra al carguero
     floatText(G, G.p.x, G.p.y - 50, '¡ADENTRO!', C.yellow, 14); burst(G, G.p.x, G.p.y, C.yellow, 40, 260);
+    return;
+  }
+  // el resto del fuselaje es sólido: se entra solo por la rampa
+  const f = fuselage(G), p = G.p;
+  if (f && p.air <= 0 && overlap(p, f)) {
+    const dx = p.x - f.x, ox = (p.w + f.w) / 2 - Math.abs(dx), oy = (p.h + f.h) / 2 - Math.abs(p.y - f.y);
+    if (ox < oy) p.x += Math.sign(dx || 1) * ox; else p.y = f.y + (p.h + f.h) / 2;
   }
 }
 
