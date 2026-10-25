@@ -1,6 +1,6 @@
 import { Sfx } from './audio/sfx';
 import { C, rnd } from './util';
-import { burst, dmgBoss, fine, floatText, say, type Game } from './state';
+import { burst, dmgBoss, fine, floatText, say, tramo, type Game } from './state';
 import { scareFlock } from './hazards';
 
 /* Armas del Tico: conos, aceite, claxon y la canchita del bonus. Cooldowns y daño salen del JSON. */
@@ -20,7 +20,10 @@ export function fire(G: Game): void {
     if (Math.hypot(p.x - b.x, p.y - b.y) <= h.reach && b.state !== 'enter') {
       b.phoneOff = h.phoneOff; dmgBoss(G, h.dmg, false); say(G, G.cfg.boss.quips.horn); G.ai.interrupt(G);
     }
-    G.traffic.forEach((c) => { if (Math.hypot(c.x - p.x, c.y - p.y) < h.trafficRadius) c.x += Math.sign(c.x - p.x || 1) * h.trafficPush; });
+    // en el túnel el claxon hace eco: aparta tráfico más lejos, pero pegado a la pared te aturde a ti
+    const echo = tramo(G)?.dark, radius = h.trafficRadius * (echo ? 1.6 : 1);
+    G.traffic.forEach((c) => { if (Math.hypot(c.x - p.x, c.y - p.y) < radius) c.x += Math.sign(c.x - p.x || 1) * h.trafficPush; });
+    if (echo && (p.x - G.cfg.road.left < 34 || G.cfg.road.right - p.x < 34)) { p.stun = Math.max(p.stun, 0.4); floatText(G, p.x, p.y - 46, '¡ECO!', C.yellow); }
   }
 }
 
@@ -79,7 +82,7 @@ export function updateShots(G: Game, dt: number): void {
       if (!s.ret && s.vy > 0) { s.ret = true; s.hit = false; } // de regreso puede volver a golpear
       if ((s.ret && s.y > p.y + 30) || s.t! > Wp.picaron.life) s.dead = true;
     }
-    if (!s.dead && !s.hit && b.state !== 'enter' && Math.abs(s.x - b.x) < b.w / 2 + s.r && Math.abs(s.y - b.y) < b.h / 2) {
+    if (!s.dead && !s.hit && b.state !== 'enter' && !G.cfg.route && Math.abs(s.x - b.x) < b.w / 2 + s.r && Math.abs(s.y - b.y) < b.h / 2) {
       const fr = s.x > b.x;
       if (s.k === 'cone') { s.dead = true; s.hitBoss = true; coneHit(G, fr, s.x, s.y); burst(G, s.x, s.y, C.orange, 6, 120); }
       else if (s.k === 'kernel') { s.dead = true; dmgBoss(G, Wp.cancha.dmg, fr); burst(G, s.x, s.y, '#fff3c2', 3, 80); }

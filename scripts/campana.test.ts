@@ -6,7 +6,7 @@ import { bot } from '../tests/harness/bot';
 import { STAGES, STAGE_ORDER, wonItems } from '../src/stages';
 import { UPGRADES, applyUpgrades, nextLevel, recommended, type Levels } from '../src/garage/upgrades';
 import { summarize } from '../src/core/world';
-import { evitaCuerpo } from '../tests/harness/evita';
+import { evitaCuerpo, rutaBot } from '../tests/harness/evita';
 
 /*
  * Simulador de campaña (npm run campana): el bot medio juega las etapas en orden con lo que va comprando en el taller.
@@ -15,7 +15,7 @@ import { evitaCuerpo } from '../tests/harness/evita';
  */
 
 const CAMPANAS = Number(process.env.CAMPANAS ?? 20), INTENTOS = 6;
-function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil = false; k.horn = false; } evitaCuerpo(G, k); }
+function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil = false; k.horn = false; } evitaCuerpo(G, k); rutaBot(G, k); }
 
 function pelea(cfg: StageConfig, dk: DiffKey, mode: FireMode, seed: number) {
   const r = seedRandom(seed);

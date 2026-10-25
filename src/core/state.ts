@@ -45,6 +45,8 @@ export interface Float { x: number; y: number; text: string; col: string; life: 
 export interface BossAI {
   update(G: Game, dt: number): void;
   interrupt(G: Game): void;
+  // etapa de ruta: al morir, ¿se retoma desde el inicio del tramo? (true si gastó un intento)
+  onDeath?(G: Game): boolean;
   // jefes con partes golpeables además del cuerpo principal (serpiente): devuelve true si el disparo pegó en una
   hitShot?(G: Game, s: Shot): boolean;
 }
@@ -70,6 +72,10 @@ export interface Game {
   splat: { t: number; max: number; blots: { x: number; y: number; r: number }[] };
   cart: { t: number; on: boolean; x: number; y: number; dir: number; hit: boolean; hits: number };
   chains: Chain[]; snakeReady: boolean;
+  tolls: number; // peajes pagados en la pelea (se descuentan del cobro)
+  // etapa de ruta: tramo actual, intentos, avance, marea y avión
+  route: { ready: boolean; base: { road: StageConfig['road']; minY: number; every: [number, number] } | null; i: number; attempts: number; dist: number; start: number; tideY: number; tideCd: number; tideHits: number;
+    plane: { phase: 'off' | 'in' | 'hold' | 'out'; x: number; y: number; t: number } };
   p: Player; b: Boss;
   traffic: Car[]; shots: Shot[]; foes: Foe[]; allies: Ally[]; pickups: Pickup[];
   bumps: { y: number; hitP: boolean; hitB: boolean }[]; cross: { y: number; name: string }[];
@@ -100,7 +106,8 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     flock: { t: cfg.hazards?.birds?.first ?? Infinity, on: false, x: 0, y: 0, vy: 0, scared: false, hit: false },
     splat: { t: 0, max: 1, blots: [] },
     cart: { t: cfg.hazards?.cart?.first ?? Infinity, on: false, x: 0, y: 0, dir: 1, hit: false, hits: 0 },
-    chains: [], snakeReady: false,
+    chains: [], snakeReady: false, tolls: 0,
+    route: { ready: false, base: null, i: 0, attempts: cfg.route?.attempts ?? 0, dist: 0, start: 0, tideY: 9999, tideCd: 0, tideHits: 0, plane: { phase: 'off', x: 0, y: -400, t: 0 } },
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0, air: 0, airMax: 0 },
     b: { x: laneX(cfg, bc.lane), y: bc.startY, baseY: bc.baseY, w: bc.w, h: bc.h, hp: d.hp, max: d.hp, tx: laneX(cfg, bc.lane), rx: 0, rvx: 0,
@@ -128,6 +135,7 @@ export function shake(G: Game, v: number): void { if (!reduceMotion) G.shake = M
 export function announce(G: Game, t: string, col: string): void { G.announce = { t, col, life: 1.3 }; }
 
 export function dmgBoss(G: Game, amount: number, fromRight: boolean, size?: number): number {
+  if (G.cfg.route) return 0; // en una etapa de ruta la barra es el recorrido: nada la daña
   const b = G.b, bc = G.cfg.boss;
   let m = fromRight ? bc.weakSideMult : 1; if (b.slip > 0) m *= bc.slipMult;
   const v = Math.round(amount * m); b.hp = Math.max(0, b.hp - v); b.hitFlash = 0.12;
@@ -174,3 +182,7 @@ export function fine(G: Game, x: number, y: number, amt: number, why: string, co
 }
 
 export const playerMaxY = (G: Game) => H - G.cfg.player.bottomMargin;
+
+// Etapa de ruta: el tramo en curso (undefined si la etapa no es de ruta) y si algo declarado para ciertos tramos está activo ahora.
+export const tramo = (G: Game) => G.cfg.route?.tramos[G.route.i];
+export const tramoOk = (G: Game, list?: string[]) => !list || !G.cfg.route || list.includes(G.cfg.route.tramos[G.route.i]?.id);

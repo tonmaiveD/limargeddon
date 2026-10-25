@@ -11,3 +11,24 @@ export function evitaCuerpo(G: any, k: any): void {
     }
   }
 }
+
+/*
+ * Bot de ruta (Línea Amarilla): en los peajes busca un carril de pago abierto, mantiene el acelerador contra la marea
+ * y en la pista se alinea con la rampa del carguero y acelera a fondo. En las demás etapas no hace nada.
+ */
+export function rutaBot(G: any, k: any): void {
+  const R = G.cfg.route;
+  if (!R) return;
+  const p = G.p, road = G.cfg.road, lane = (x: number) => Math.max(0, Math.min(road.lanes - 1, Math.floor((x - road.left) / road.laneWidth)));
+  const steer = (tx: number) => { k.left = tx < p.x - 6; k.right = tx > p.x + 6; };
+  k.up = true;
+  const pl = G.route.plane, P = R.plane;
+  if (P && pl.phase !== 'off') { steer(pl.x); if (pl.phase === 'in') k.up = p.y > 300; return; }
+  const toll = G.obstacles.find((o: any) => G.cfg.obstacles[o.i].kind === 'peaje' && o.y < p.y && p.y - o.y < 220);
+  if (toll) {
+    const o = G.cfg.obstacles[toll.i], ph = Math.floor((toll.ph ?? 0) * 10);
+    let best = lane(p.x), dist = Infinity;
+    for (let l = 0; l < road.lanes; l++) if ((l + ph) % road.lanes < (o.payLanes ?? road.lanes)) { const d = Math.abs(l - lane(p.x)); if (d < dist) { dist = d; best = l; } }
+    steer(road.left + road.laneWidth * (best + 0.5));
+  }
+}

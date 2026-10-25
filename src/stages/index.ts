@@ -12,6 +12,10 @@ import { drawArticulado } from '../bosses/articulado-render';
 import { drawComandante } from '../bosses/comandante-render';
 import { drawDobleFila } from '../bosses/doblefila-render';
 import { SnakeBoss } from '../bosses/snake-boss';
+import { RouteAI } from '../bosses/route-ai';
+import { drawCarguero } from '../bosses/carguero-render';
+import lineaAmarillaConfig from './linea-amarilla/config.json';
+import { drawWorld as lineaAmarillaWorld } from './linea-amarilla/scenery';
 import costaVerdeConfig from './costa-verde/config.json';
 import { drawWorld as costaVerdeWorld } from './costa-verde/scenery';
 import panamericanaConfig from './panamericana/config.json';
@@ -46,6 +50,7 @@ export const STAGES: Record<string, StageDef> = {
   gamarra: { cfg: gamarraConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCamion, drawWorld: gamarraWorld },
   'javier-prado': { cfg: javierPradoConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawCombiAsesina, drawWorld: javierPradoWorld },
   'via-expresa': { cfg: viaExpresaConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawArticulado, drawWorld: viaExpresaWorld },
+  'linea-amarilla': { cfg: lineaAmarillaConfig as unknown as StageConfig, ai: RouteAI, drawBoss: drawCarguero, drawWorld: lineaAmarillaWorld },
   miraflores: { cfg: mirafloresConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawSerenazgo, drawWorld: mirafloresWorld },
   panamericana: { cfg: panamericanaConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawComandante, drawWorld: panamericanaWorld },
   'san-isidro': { cfg: sanIsidroConfig as unknown as StageConfig, ai: PhaseBoss, drawBoss: drawQ8, drawWorld: sanIsidroWorld },

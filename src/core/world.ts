@@ -1,7 +1,7 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { addStar, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
+import { addStar, tramoOk, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateHazards } from './hazards';
@@ -12,8 +12,12 @@ import { W } from './constants';
 /* Mundo: apariciones, rompemuelles, cruces, tráfico, aliados, bonus, partículas y fin de partida. */
 
 export function spawnCar(G: Game): void {
-  const T = G.cfg.traffic.types, lane = Math.floor(Math.random() * G.cfg.road.lanes);
-  let r = Math.random(), t = T[T.length - 1];
+  const all = G.cfg.traffic.types;
+  // en una etapa de ruta solo salen los tipos del tramo, con los pesos renormalizados
+  const T = G.cfg.route ? all.filter((x) => tramoOk(G, x.tramos)) : all, lane = Math.floor(Math.random() * G.cfg.road.lanes);
+  if (!T.length) return;
+  const sum = G.cfg.route ? T.reduce((a, x) => a + x.weight, 0) : 1;
+  let r = Math.random() * sum, t = T[T.length - 1];
   for (const ty of T) { if (r < ty.weight) { t = ty; break; } r -= ty.weight; }
   G.traffic.push(makeCar(t, laneX(G.cfg, lane), -60));
 }
@@ -67,7 +71,10 @@ function pushAside(G: Game, c: Car, b: { x: number; y: number; w: number; h: num
 
 // Barrera de un carril del peaje: cada carril con su desfase, para que siempre haya alguna abierta.
 export function gateClosed(G: Game, ob: Obstacle, lane: number): boolean {
-  const period = G.cfg.obstacles![ob.i].gatePeriod ?? 2;
+  const o = G.cfg.obstacles![ob.i];
+  // peaje de pago: `payLanes` carriles abiertos fijos (cobran), el resto cerrado; cuáles, según la fase del peaje
+  if (o.payLanes) return ((lane + Math.floor((ob.ph ?? 0) * 10)) % G.cfg.road.lanes) >= o.payLanes;
+  const period = o.gatePeriod ?? 2;
   return ((G.t / period + lane * 0.37 + (ob.ph ?? 0)) % 1) < 0.5;
 }
 
@@ -104,6 +111,9 @@ function updateObstacles(G: Game, dt: number): void {
         ob.hit = true; burst(G, p.x, p.y - p.h / 2, '#ff3355', 12); shake(G, 0.35); Sfx.play('hit');
         if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg);
         floatText(G, p.x, p.y - 46, o.hitText ?? '¡BARRERA!', C.yellow); addStar(G);
+      } else if (play && !ob.hit && o.toll && overlap(p, ob)) {
+        // carril de pago: pasas, pero cobran
+        ob.hit = true; G.tolls += o.toll; floatText(G, p.x, p.y - 46, 'PEAJE -S/' + o.toll, C.sky); Sfx.play('pickup');
       }
       continue;
     }
@@ -139,12 +149,12 @@ export function updateWorld(G: Game, dt: number): void {
     G.pickT -= dt; if (G.pickT <= 0 && b.state !== 'enter') { spawnPickup(G); G.pickT = rnd(...cfg.pickups.every); }
     G.bumpT -= dt; if (G.bumpT <= 0) { G.bumps.push({ y: -10, hitP: false, hitB: false }); G.bumpT = rnd(...cfg.bumps.every); }
     G.swarmT.forEach((t, i) => {
-      if (!isFinite(t) || b.state === 'enter') return;
+      if (!isFinite(t) || b.state === 'enter' || !tramoOk(G, G.cfg.swarms![i].tramos)) return;
       G.swarmT[i] = t - dt;
       if (G.swarmT[i] <= 0) { spawnSwarm(G, i); G.swarmT[i] = rnd(...G.cfg.swarms![i].every); }
     });
     G.obsT.forEach((t, i) => {
-      if (!isFinite(t) || b.state === 'enter') return;
+      if (!isFinite(t) || b.state === 'enter' || !tramoOk(G, G.cfg.obstacles![i].tramos)) return;
       G.obsT[i] = t - dt;
       if (G.obsT[i] <= 0) { spawnObstacle(G, i); G.obsT[i] = rnd(...G.cfg.obstacles![i].every); }
     });
@@ -284,6 +294,8 @@ export function update(G: Game, dt: number): boolean {
     G.p.lives--; G.p.hp = 40; G.p.pw.soat = 2.5; G.p.hitCd = 1;
     floatText(G, G.p.x, G.p.y - 50, '¡EL SOAT TE SALVÓ!', C.green, 12); burst(G, G.p.x, G.p.y, C.green, 24, 200); Sfx.play('block');
   }
+  // etapa de ruta: morir gasta un intento y se retoma el tramo
+  if (G.p.hp <= 0 && G.ai.onDeath?.(G)) return false;
   if (G.b.hp <= 0 || G.p.hp <= 0) {
     const win = G.b.hp <= 0;
     G.mode = 'over'; G.result = { win };
@@ -307,7 +319,7 @@ export function summarize(G: Game): Summary {
   const clean = win && !s.dmgP3, blind = win && pct >= R.blindPct, honest = G.fines === 0;
   // carretilla protegida: si nunca se tocó, paga su bono al ganar
   const cartBonus = win && G.cfg.hazards?.cart && G.cart.hits === 0 ? G.cfg.hazards.cart.bonus : 0;
-  const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus + cartBonus : G.bonus, pay = Math.max(0, gross - G.fines);
+  const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus + cartBonus : G.bonus, pay = Math.max(0, gross - G.fines - G.tolls);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
   return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
     bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits };

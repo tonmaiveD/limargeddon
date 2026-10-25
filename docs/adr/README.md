@@ -33,3 +33,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0027](0027-pasada-de-dificultad-con-campana.md) | Pasada de dificultad con simulador de campaña | Aceptada |
 | [0028](0028-correcciones-de-la-segunda-auditoria.md) | Correcciones de la segunda auditoría | Aceptada |
 | [0029](0029-jugador-puntaje-ranking-y-reinicio.md) | Nombre del jugador, puntaje, ranking local y empezar de nuevo | Aceptada |
+| [0030](0030-etapa-secreta-linea-amarilla.md) | Etapa secreta, la Línea Amarilla del Terror | Aceptada |

@@ -40,7 +40,7 @@ export class GarageScene extends Phaser.Scene {
     if (rec) this.cat = UPGRADES.find((u) => u.id === rec)!.cat; // abre en la categoría de lo recomendado
     const cfg = STAGES[this.data0.stageId].cfg;
     const go = $('gGo') as HTMLButtonElement;
-    go.textContent = `Seguir a la Etapa ${cfg.number}`;
+    go.textContent = cfg.secret ? `Seguir a la ${cfg.district}` : `Seguir a la Etapa ${cfg.number}`;
     go.onclick = () => { this.close(); this.scene.start('Stage', { stageId: this.data0.stageId, dk: this.data0.dk }); };
     ($('gMenu') as HTMLButtonElement).onclick = () => { this.close(); this.scene.start('Menu'); };
     this.paint();
