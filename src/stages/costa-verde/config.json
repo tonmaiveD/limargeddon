@@ -585,7 +585,8 @@
         "stun": 0.8,
         "hornSound": "bossHorn",
         "hornCol": "#ffe14d",
-        "hornText": "¡BOCINAZO!"
+        "hornText": "¡BOCINAZO!",
+        "coil": { "first": 4, "every": 16, "tele": 1, "hold": 2.2, "release": 0.6, "dmg": 6, "stun": 0.7, "exposed": 3, "minSegs": 3 }
       }
     ],
     "lines": {
@@ -609,6 +610,11 @@
         "¡Tercera fila, cuarta fila, la que sea!",
         "¡El que se mueve pierde el sitio!",
         "¡Hasta el último carro de la fila!"
+      ],
+      "coil": [
+        "¡Te encerramos en doble fila, compadre!",
+        "¡Rodeado, como en la playa un domingo!",
+        "¡De aquí no sales sin pagar el sitio!"
       ]
     },
     "quips": {

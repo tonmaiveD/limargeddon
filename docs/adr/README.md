@@ -37,3 +37,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0031](0031-fisica-solida-y-ajustes-del-dueno.md) | Física sólida, sticker de los Búfalos Mojados y nombre JUGADOR | Aceptada |
 | [0032](0032-claridad-del-combate.md) | Claridad del combate | Aceptada |
 | [0033](0033-taller-que-explica.md) | Taller que explica | Aceptada |
+| [0034](0034-enrosque-de-la-serpiente.md) | Enrosque de la serpiente | Aceptada |

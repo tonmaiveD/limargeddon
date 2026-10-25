@@ -55,7 +55,9 @@ export interface BossAI {
 
 // Serpiente (ADR 0026): segmentos que siguen a su guía. La cadena principal sigue a la cabeza (el jefe);
 // al romper un segmento, la cola se suelta como otra cadena que deambula hasta salir por abajo.
-export interface Seg { x: number; y: number; w: number; h: number; hp: number; max: number; col: string; flash: number }
+export interface Seg { x: number; y: number; w: number; h: number; hp: number; max: number; col: string; flash: number; ang?: number }
+// Enrosque (ADR 0034): el cuerpo rodea al Tico en anillo con un hueco. `slots` es el ángulo de cada segmento en el anillo.
+export interface Coil { st: 'off' | 'tele' | 'hold' | 'release'; t: number; cd: number; cx: number; cy: number; r: number; gap: number; half: number; slots: number[]; exposed: number }
 export interface Chain { main: boolean; segs: Seg[]; lead: Seg | null; hist: number[]; tx: number; t: number }
 
 export interface Game {
@@ -73,7 +75,7 @@ export interface Game {
   flock: { t: number; on: boolean; x: number; y: number; vy: number; scared: boolean; hit: boolean };
   splat: { t: number; max: number; blots: { x: number; y: number; r: number }[] };
   cart: { t: number; on: boolean; x: number; y: number; dir: number; hit: boolean; hits: number };
-  chains: Chain[]; snakeReady: boolean;
+  chains: Chain[]; snakeReady: boolean; coil: Coil;
   tolls: number; // peajes pagados en la pelea (se descuentan del cobro)
   // etapa de ruta: tramo actual, intentos, avance, marea y avión
   route: { ready: boolean; base: { road: StageConfig['road']; minY: number; every: [number, number] } | null; i: number; attempts: number; dist: number; start: number; tideY: number; tideCd: number; tideHits: number;
@@ -110,6 +112,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     splat: { t: 0, max: 1, blots: [] },
     cart: { t: cfg.hazards?.cart?.first ?? Infinity, on: false, x: 0, y: 0, dir: 1, hit: false, hits: 0 },
     chains: [], snakeReady: false, tolls: 0,
+    coil: { st: 'off', t: 0, cd: Infinity, cx: 0, cy: 0, r: 0, gap: 0, half: 0, slots: [], exposed: 0 },
     route: { ready: false, base: null, i: 0, attempts: cfg.route?.attempts ?? 0, dist: 0, start: 0, tideY: 9999, tideCd: 0, tideHits: 0, plane: { phase: 'off', x: 0, y: -400, t: 0 } },
     p: { x: laneX(cfg, pc.lane), y: pc.y, w: pc.w, h: pc.h, vx: 0, vy: 0, hp: pc.hp, max: pc.hp, stun: 0, hitCd: 0, flash: 0,
       cd: { cone: 0, oil: 0, horn: 0, cancha: 0 }, pw: { turbo: 0, cancha: 0, soat: 0 }, ammo: cone.ammo ?? 0, reloadT: 0, coneHeld: false, lives: pc.lives ?? 0, air: 0, airMax: 0 },
