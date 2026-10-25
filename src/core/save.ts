@@ -21,7 +21,7 @@ export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey;
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
 // garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)
 // scores: mejor puntaje de cada jugador en cada etapa, { nombre: { etapa: puntos } } (ADR 0029)
-interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number> }; scores?: Record<string, Record<string, number>> }
+interface SaveV1 { v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string }; scores?: Record<string, Record<string, number>> }
 
 function load(): SaveV1 {
   try {
@@ -84,10 +84,16 @@ export function unlockNext(stageNumber: number, numberOf: (stageId: string) => n
 }
 
 /* Taller: billetera y mejoras. */
-export interface Garage { wallet: number; levels: Record<string, number> }
+// goal: mejora elegida como meta de ahorro (ADR 0033)
+export interface Garage { wallet: number; levels: Record<string, number>; goal?: string }
 export function getGarage(): Garage {
   const g = load().garage;
-  return { wallet: g?.wallet ?? 0, levels: { ...(g?.levels ?? {}) } };
+  return { wallet: g?.wallet ?? 0, levels: { ...(g?.levels ?? {}) }, goal: g?.goal };
+}
+export function setGoal(id: string | null): void {
+  const data = load(), g = data.garage ?? { wallet: 0, levels: {} };
+  if (id) g.goal = id; else delete g.goal;
+  data.garage = g; store(data);
 }
 
 // Suma lo cobrado en una pelea. Repetir una etapa ya ganada paga la mitad, para que no convenga quedarse juntando plata.
@@ -103,8 +109,10 @@ export function buyUpgrade(id: string, price: number, maxLevel: number): Garage 
   const data = load(), g = data.garage ?? { wallet: 0, levels: {} };
   const lvl = g.levels[id] ?? 0;
   if (lvl >= maxLevel || g.wallet < price) return null;
-  g.wallet -= price; g.levels = { ...g.levels, [id]: lvl + 1 }; data.garage = g; store(data);
-  return { wallet: g.wallet, levels: { ...g.levels } };
+  g.wallet -= price; g.levels = { ...g.levels, [id]: lvl + 1 };
+  if (g.goal === id) delete g.goal; // meta cumplida
+  data.garage = g; store(data);
+  return { wallet: g.wallet, levels: { ...g.levels }, goal: g.goal };
 }
 
 /*

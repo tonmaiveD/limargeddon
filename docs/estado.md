@@ -58,10 +58,7 @@ Orden acordado con el dueño el 25 de octubre de 2026. Cada bloque es un PR.
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
 1. ~~Claridad del combate~~: hecho (ADR 0032).
-2. **Taller que explique:**
-   - Dos opciones, ofensiva y supervivencia, con su efecto.
-   - Dónde sirve cada objeto de victoria.
-   - Meta de ahorro elegida.
+2. ~~Taller que explique~~: hecho (ADR 0033).
 3. **Clímax del jefe final:** el enrosque de la serpiente con un solo hueco (plan 5b).
 4. **Aprender y volver:**
    - Tutorial completo.
