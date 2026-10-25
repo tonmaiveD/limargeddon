@@ -139,7 +139,12 @@ export interface BossPhase {
   jet?: BossJet;
   throw?: BossThrow;
   swing?: BossSwing;
+  coil?: BossCoil;
 }
+
+// Enrosque de la serpiente (ADR 0034): el cuerpo rodea al Tico dejando un solo hueco. Si al terminar `hold` sigue
+// adentro, aprieta (daño y aturdido); si escapa, la cabeza queda quieta `exposed` segundos.
+export interface BossCoil { first: number; every: number; tele: number; hold: number; release: number; dmg: number; stun: number; exposed: number; minSegs: number }
 
 export interface BossConfig {
   id: string; name: string; title: string; w: number; h: number; startY: number; baseY: number; lane: number;

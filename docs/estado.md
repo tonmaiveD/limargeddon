@@ -59,7 +59,7 @@ Orden acordado con el dueño el 25 de octubre de 2026. Cada bloque es un PR.
 
 1. ~~Claridad del combate~~: hecho (ADR 0032).
 2. ~~Taller que explique~~: hecho (ADR 0033).
-3. **Clímax del jefe final:** el enrosque de la serpiente con un solo hueco (plan 5b).
+3. ~~Clímax del jefe final~~: hecho (ADR 0034).
 4. **Aprender y volver:**
    - Tutorial completo.
    - Objetivos opcionales por etapa y récord personal, sin presión.
