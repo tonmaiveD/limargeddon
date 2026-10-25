@@ -49,6 +49,7 @@ export class StageScene extends Phaser.Scene {
     cfg.player.items = wonItems(unlockedStage(stageNumber));
     this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
     this.G.hintKnown = knownHints(this.data0.stageId, this.G.fireMode); // las ya leídas en este modo no salen (ADR 0039)
+    this.G.hintsOn = getSettings().hints !== false; // el jugador puede apagarlas en el menú
     this.results = null; this.skip = false;
     setDeckMode(this.G.fireMode);
     this.paused = false;

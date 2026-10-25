@@ -37,6 +37,11 @@ export class MenuScene extends Phaser.Scene {
     label();
     name.onclick = () => openName(false, () => { label(); this.showStage(); }); // las medallas son del jugador (auditoría R04)
     document.getElementById('toRanking')!.onclick = () => openRanking();
+    // interruptor de ayudas (ADR 0039): apagadas no sale ninguna; al prenderlas vuelven solo las no leídas
+    const hints = document.getElementById('toHintsOnOff')!;
+    const paintHints = () => { const on = getSettings().hints !== false; hints.textContent = on ? 'Ayudas activadas' : 'Ayudas desactivadas'; hints.setAttribute('aria-pressed', String(on)); };
+    hints.onclick = () => { setSettings({ hints: getSettings().hints === false }); paintHints(); this.showStage(); };
+    paintHints();
     document.getElementById('toReset')!.onclick = () => openReset(() => this.scene.restart());
     if (!getPlayerName()) openName(true, label);
   }
@@ -76,7 +81,7 @@ export class MenuScene extends Phaser.Scene {
     $('replayNote').hidden = TEST_MODE || this.stageId === this.latest();
     // "Ver ayudas otra vez" aparece si esta etapa ya enseñó algo, en cualquiera de los dos modos (auditoría R01)
     const hintsBtn = $('toHints') as HTMLButtonElement, learned = FIRE_MODES.some((m) => knownHints(this.stageId, m).length > 0);
-    hintsBtn.hidden = !learned; hintsBtn.textContent = 'Ver ayudas otra vez';
+    hintsBtn.hidden = !learned || getSettings().hints === false; hintsBtn.textContent = 'Ver ayudas otra vez';
     hintsBtn.onclick = () => { forgetHints(this.stageId); hintsBtn.textContent = 'Las ayudas vuelven a salir'; };
     $('menuPowers').innerHTML = Object.values(cfg.powers)
       .map((P) => `<span><i style="background:${P.col}">${P.L}</i>${P.label}</span>`).join('');

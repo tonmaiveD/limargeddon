@@ -53,6 +53,14 @@ describe('tutorial en contexto', () => {
     expect(H.hint).toBeNull();
   }));
 
+  it('con las ayudas apagadas en el menú no sale ninguna, ni los avisos', () => withSeed(7, () => {
+    const G = startPort('normal', STAGES.miraflores.cfg); G.hintsOn = false; G.p.pw.soat = 999;
+    for (let i = 0; i < 60 * 12; i++) { G.b.act = 99; stepPort(G, DT); expect(G.hint).toBeNull(); }
+    G.b.state = 'teleBrake'; G.b.st = 1; stepPort(G, DT);
+    expect(G.hint).toBeNull();
+    expect(learnedHints(G)).toEqual([]); // apagadas no cuentan como leídas
+  }));
+
   it('una explicación interrumpida vuelve después y solo cuenta como leída con 2,4 s en pantalla (auditoría R02)', () => withSeed(5, () => {
     const G = startPort('normal', STAGES.centro.cfg); G.p.pw.soat = 999;
     const marcha = STAGES.centro.cfg.hints!.findIndex((h) => h.on === 'obs:peatones');

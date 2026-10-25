@@ -17,8 +17,13 @@ La cuarta auditoría (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) confirm�
   - Un aviso de peligro interrumpido o que no alcanzó a salir no aparece fuera de contexto: espera a que el peligro vuelva a ocurrir. Los eventos se detectan al empezar, no mientras duran.
   - Un aviso de peligro no reemplaza a otro que lleva menos de 1,2 s.
   - El modo prueba no guarda ayudas. Salir al menú a mitad de pelea guarda lo leído.
-  - **"Ver ayudas otra vez"** en el menú vuelve a mostrar todas las de esa etapa, en los dos modos, sin tocar billetera, mejoras ni medallas. Aparece solo si la etapa ya enseñó algo.
+  - **"Ver ayudas otra vez"** en el menú vuelve a mostrar todas las de esa etapa, en los dos modos, sin tocar billetera, mejoras ni medallas. Aparece solo si la etapa ya enseñó algo y las ayudas están activadas.
   - Empezar de nuevo también las borra.
+- **Interruptor de ayudas** (pedido del dueño):
+  - "Ayudas activadas / desactivadas" en el menú, junto a Sonido, guardado en el dispositivo y activado por defecto.
+  - Desactivadas no sale ninguna ayuda ni cuenta como leída. Los avisos propios del juego siguen igual, porque son parte de la pista y no del tutorial: el destello del jefe, la flecha del enrosque, el semáforo en rojo.
+  - Al reactivarlas vuelven solo las no leídas.
+  - Se descartó cerrar una ayuda tocándola. Los pulgares están en los controles de abajo y la ayuda va sobre el Tico, así que cerrarla sin leerla cuesta papeletas o vida en el semáforo o el enrosque.
 - **Regreso a etapas ganadas** (cambia la regla de la ADR 0017, que solo permitía elegir con `?prueba`):
   - El menú muestra como números las etapas ya desbloqueadas, y elige por defecto la más avanzada.
   - Al elegir una anterior aparece "Ya la ganaste. Repetirla paga la mitad y no cambia tu avance", con el enlace "Seguir recorrido".
