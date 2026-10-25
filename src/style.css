@@ -122,3 +122,22 @@ button.pick,.seg{min-height:44px}
 /* menú en modo prueba: las etapas como números para que entren las diez */
 .setting#stageSel .seg.num{min-width:44px;padding:8px 10px}
 .overlay>*{flex-shrink:0} /* que nada se encoja ni se monte cuando el menú no entra: mejor desplazarse */
+
+/* taller que explica (ADR 0033) */
+.garage .why{min-height:0;color:var(--ink);max-width:36ch}
+.garage .why b{color:var(--green)}
+.items{width:100%;font-size:11px;text-align:left;color:var(--muted)}
+.items summary{cursor:pointer;color:var(--yellow);font-weight:800;min-height:28px;display:flex;align-items:center;justify-content:center}
+.items ul{margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px;max-height:84px;overflow-y:auto}
+.items li b{color:var(--ink)}
+.items[hidden]{display:none}
+.upg .goal{font:600 10px/1 var(--body);background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:6px 4px;min-height:32px;grid-column:1;justify-self:start}
+.upg .goal[aria-pressed="true"]{color:var(--yellow);text-decoration:none}
+.upg h3 em.def{color:var(--sky)}
+.overlay>.upgrades{flex-shrink:1;min-height:96px} /* la lista del taller sí se achica y se desplaza */
+.upg>button:not(.goal){grid-column:2;grid-row:1 / span 3}
+.upg h3{grid-column:1;grid-row:1}
+.upg .lv{grid-row:2}
+.upg p{grid-row:3}
+.upg .goal{grid-row:4}
+.garage .why{font-size:10px;line-height:1.3}

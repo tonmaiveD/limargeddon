@@ -1,4 +1,4 @@
-import type { ItemDef, StageConfig } from '../core/config';
+import type { ItemDef, PerkEffect, StageConfig } from '../core/config';
 import type { Gfx } from '../core/gfx';
 import type { BossAI, Game } from '../core/state';
 import { PhaseBoss } from '../bosses/phase-boss';
@@ -80,3 +80,20 @@ export const TEST_MODE = typeof location !== 'undefined' && new URLSearchParams(
 
 // Scroll global del asfalto: sigue corriendo entre menú, etapa y resultados, como en el prototipo.
 export const track = { scroll: 0 };
+
+// Dónde sirve un objeto de victoria (ADR 0033): las etapas cuyo contenido dispara su efecto, leído de las configs.
+const USES: Record<PerkEffect, (c: StageConfig) => boolean> = {
+  contactFine: (c) => c.traffic.types.some((t) => t.invulnerable),
+  anyFine: (c) => c.traffic.types.some((t) => t.invulnerable) || (c.obstacles ?? []).some((o) => o.fine || o.kind === 'peaje') || !!c.hazards?.cart,
+  jetHit: (c) => c.boss.phases.some((p) => p.jet),
+  shotHit: (c) => c.boss.phases.some((p) => p.throw) || !!c.hazards?.rockslide,
+  obstacleHit: (c) => (c.obstacles ?? []).some((o) => o.dmg > 0),
+  ramHit: (c) => c.boss.phases.some((p) => [p.attack, ...(p.attacks ?? []).map((a) => a.k)].some((k) => k === 'ram' || k === 'reverse')),
+  swingHit: (c) => c.boss.phases.some((p) => p.swing),
+  wantedHit: (c) => !!c.wanted,
+  birdHit: (c) => !!c.hazards?.birds,
+};
+export function itemUses(effect: PerkEffect): string[] {
+  return STAGE_ORDER.map((id) => STAGES[id].cfg).filter((c) => !c.route && USES[effect](c)).map((c) => c.district)
+    .concat(STAGE_ORDER.map((id) => STAGES[id].cfg).filter((c) => c.route && USES[effect](c)).map((c) => c.district));
+}

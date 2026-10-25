@@ -75,7 +75,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 1,
+        "acelerar": 3
+      }
     },
     {
       "id": "llantas",
@@ -114,7 +119,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 1,
+        "acelerar": 3
+      }
     },
     {
       "id": "turbo",
@@ -143,7 +153,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "ataque",
+      "value": {
+        "toque": 0,
+        "acelerar": 0
+      }
     },
     {
       "id": "conos",
@@ -187,7 +202,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "ataque",
+      "value": {
+        "toque": 0,
+        "acelerar": 4
+      }
     },
     {
       "id": "aceite",
@@ -226,7 +246,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "ataque",
+      "value": {
+        "toque": 4,
+        "acelerar": 3
+      }
     },
     {
       "id": "claxon",
@@ -265,7 +290,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "ataque",
+      "value": {
+        "toque": 0,
+        "acelerar": 4
+      }
     },
     {
       "id": "parachoques",
@@ -309,7 +339,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 0,
+        "acelerar": 1
+      }
     },
     {
       "id": "blindaje",
@@ -353,7 +388,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 4,
+        "acelerar": 3
+      }
     },
     {
       "id": "reparacion",
@@ -382,7 +422,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 3,
+        "acelerar": 8
+      }
     },
     {
       "id": "soat",
@@ -400,7 +445,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 2,
+        "acelerar": 7
+      }
     },
     {
       "id": "sticker",
@@ -419,7 +469,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "aguante",
+      "value": {
+        "toque": 0,
+        "acelerar": 0
+      }
     },
     {
       "id": "socio-combi",
@@ -443,7 +498,12 @@
             }
           ]
         }
-      ]
+      ],
+      "role": "ataque",
+      "value": {
+        "toque": 4,
+        "acelerar": 6
+      }
     }
   ]
 }

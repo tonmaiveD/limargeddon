@@ -9,7 +9,9 @@ import catalog from './upgrades.json';
 export interface UpgradeOp { path: string; op: 'add' | 'mul' | 'set'; value: number | boolean }
 export interface UpgradeLevel { price: number; desc: string; ops: UpgradeOp[] }
 // requires: número de etapa que hay que tener desbloqueada para comprarla (mejoras de lujo)
-export interface Upgrade { id: string; cat: string; name: string; requires?: number; levels: UpgradeLevel[] }
+// role y value (ADR 0033): para qué sirve (atacar o aguantar) y cuánto ayudó en las simulaciones según el modo de disparo
+export type Role = 'ataque' | 'aguante';
+export interface Upgrade { id: string; cat: string; name: string; requires?: number; levels: UpgradeLevel[]; role: Role; value: Record<'toque' | 'acelerar', number> }
 export interface Category { id: string; name: string }
 
 export const CATEGORIES = catalog.categories as Category[];
@@ -58,4 +60,20 @@ export function nextGoal(levels: Levels, wallet: number, unlocked = Infinity): {
     if (L && L.price > wallet && (!best || L.price - wallet < best.missing)) best = { name: u.name, missing: L.price - wallet };
   }
   return best;
+}
+
+/*
+ * Dos recomendaciones explicadas (ADR 0033): la mejora para atacar y la mejora para aguantar que más ayudaron en las
+ * simulaciones en tu modo de disparo, entre las que te alcanzan. A igual valor, la más barata.
+ */
+export function picks(levels: Levels, wallet: number, unlocked = Infinity, mode: 'toque' | 'acelerar' = 'toque'): Partial<Record<Role, string>> {
+  const out: Partial<Record<Role, { id: string; v: number; price: number }>> = {};
+  for (const u of UPGRADES) {
+    if (isLocked(u, unlocked)) continue;
+    const L = nextLevel(u, levels);
+    if (!L || L.price > wallet) continue;
+    const v = u.value[mode], best = out[u.role];
+    if (!best || v > best.v || (v === best.v && L.price < best.price)) out[u.role] = { id: u.id, v, price: L.price };
+  }
+  return { ataque: out.ataque?.id, aguante: out.aguante?.id };
 }
