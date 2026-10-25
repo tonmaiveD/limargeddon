@@ -1,10 +1,10 @@
 # Estado del proyecto
 
-**Al 23 de octubre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
+**Al 25 de octubre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #27 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #30 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -51,24 +51,46 @@
 - Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-Orden acordado con el dueño el 25 de octubre de 2026. Cada bloque es un PR.
+Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026. Cada bloque es un PR.
+
+Hechos:
+- Claridad del combate (ADR 0032).
+- Taller que explique (ADR 0033).
+- Clímax del jefe final (ADR 0034).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
-- Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. Confirman la dificultad (ADR 0027 y 0031) y la del túnel y la marea, que el bot no puede medir.
+- Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. Conviene esperar el bloque A para la Línea Amarilla y el enrosque.
+- Protocolo sugerido por la auditoría:
+  - 6 a 8 personas, alternando el modo de disparo.
+  - Anotar si reconocen la salida del enrosque, si entienden pagar o romper en el peaje y si entienden qué conserva un reintento.
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
-1. ~~Claridad del combate~~: hecho (ADR 0032).
-2. ~~Taller que explique~~: hecho (ADR 0033).
-3. ~~Clímax del jefe final~~: hecho (ADR 0034).
-4. **Aprender y volver:**
+**Orden**
+1. **A · Correcciones que rompen reglas** (auditoría N01 a N04). Va antes que todo, porque son fallos con la versión publicada.
+   - **Socio de la Combi en la ruta:** hoy rompe la Línea Amarilla a los 12 s. Decisión del dueño: ahí la combi aliada despeja el tráfico delante del Tico, y el taller lo explica. Además, una prueba que juegue cada mejora en las diez etapas.
+   - **Intentos de la ruta:** perder el avión gasta intento igual que morir. Al tercer fallo hay derrota, y el contador nunca baja de 0.
+   - **Cabeza expuesta segura:** durante los 3 s no hay claxon ni daño por contacto de la cabeza, solo empuje.
+   - **Anillo que se rompe:** romper un auto durante el enrosque abre un hueco real en el mismo cuadro. Con menos de 3 autos, el anillo se deshace. Dibujo, golpes y choque salen de las mismas posiciones.
+2. **B · Puntaje y resultados honestos** (N05 a N08).
+   - **Campaña con tres políticas de compra:** la más barata, ataque y aguante, separando errores de derrotas. Así el balance representa lo que el taller recomienda.
+   - **Daño efectivo:** el puntaje cuenta solo la vida que de verdad se le quitó al jefe.
+   - **Peaje roto:** decisión del dueño, cada barrera rota cuenta una infracción en la limpieza, sin multa extra. Pagar no penaliza.
+   - **Resultados de la ruta:** muestran intentos, golpes de la marea y peajes pagados en lugar de punto ciego y racha, y "último tramo" en lugar de "fase 3".
+3. **C · Aprender y volver** (bloque 4 anterior, más N09).
    - Tutorial completo.
    - Objetivos opcionales por etapa y récord personal, sin presión.
-5. **Ambiente:**
+   - Cada récord guarda su contexto: modo, dificultad, mejoras, versión de la fórmula y puntos por componente. Así un récord se puede explicar después de rebalancear.
+4. **D · Ambiente:**
    - Música sintetizada por distrito.
    - Animaciones de cierre: la carretilla Don Frío cruzando la meta y el Tico dentro del carguero.
    - Semáforos en ola de la Javier Prado como mecánica.
-6. **Con los datos reales:**
+5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
+   - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.
+   - Explicar en el taller que las mejoras de aguante alargan la pelea.
    - Bot con restricciones de pulgar.
    - Las propuestas aplazadas de las auditorías, solo si los datos las piden.
-7. **Opcional:** ranking compartido entre dispositivos. Necesita servicio externo, validación de puntajes y moderación de nombres.
+   - No endurecer la Línea Amarilla solo porque el bot gana siempre.
+6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
+
+**Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.
