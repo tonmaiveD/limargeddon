@@ -38,3 +38,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0032](0032-claridad-del-combate.md) | Claridad del combate | Aceptada |
 | [0033](0033-taller-que-explica.md) | Taller que explica | Aceptada |
 | [0034](0034-enrosque-de-la-serpiente.md) | Enrosque de la serpiente | Aceptada |
+| [0035](0035-correcciones-tercera-auditoria-bloque-a.md) | Correcciones de la tercera auditoría, bloque A | Aceptada |

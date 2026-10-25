@@ -5,6 +5,7 @@ import { evitaCuerpo } from './harness/evita';
 import { STAGES } from '../src/stages';
 import type { StageConfig } from '../src/core/config';
 import type { Game } from '../src/core/state';
+import { SnakeBoss } from '../src/bosses/snake-boss';
 
 /* Enrosque de la serpiente (ADR 0034): anillo alrededor del Tico con un solo hueco, en la fase final. */
 
@@ -94,5 +95,50 @@ describe('Enrosque de la serpiente', () => {
     expect(H.coil.half).toBeGreaterThan(full);
     const J = game(); J.chains[0].segs.length = K.minSegs - 1; coil(J);
     expect(J.coil.st).toBe('off');
+  }));
+
+  it('con la cabeza expuesta no hay claxon ni daño por contacto, solo empuje (auditoría N03)', () => withSeed(7, () => {
+    const G = game(); coil(G);
+    for (let i = 0; i < 60 * (K.tele + K.hold) && G.coil.exposed <= 0; i++) { G.keys.left = G.keys.right = G.keys.up = false; evitaCuerpo(G, G.keys); G.b.act = 99; stepPort(G, DT); }
+    expect(G.coil.exposed).toBeGreaterThan(2.5);
+    const hp = G.p.hp, b = G.b;
+    G.b.hornT = 0.01; G.p.hitCd = 0; // claxon pendiente y Tico pegado a la cabeza
+    for (let i = 0; i < 60 * 2.5; i++) {
+      b.y = G.p.y; G.p.x = b.x - b.w / 2 - G.p.w / 2 + 3; G.p.hitCd = 0; // la cabeza pegada al Tico
+      G.keys.left = G.keys.right = G.keys.up = false; G.b.act = 99; stepPort(G, DT);
+    }
+    expect(G.p.hp).toBe(hp);
+    expect(G.p.stun).toBeLessThanOrEqual(0);
+    expect(G.coil.exposed).toBeGreaterThan(0);
+  }));
+
+  it('romper un auto del anillo abre hueco en el mismo cuadro (auditoría N04)', () => withSeed(8, () => {
+    const G = game(); coil(G); run(G, K.tele);
+    const c = G.coil, main = G.chains[0], last = main.segs[main.segs.length - 1], a = c.slots[c.slots.length - 1];
+    // se rompe el último auto de la fila (no suelta cola) y el Tico sale por su casillero
+    last.hp = 1; G.shots.push({ k: 'cone', x: last.x, y: last.y, vx: 0, vy: 0, r: 6 });
+    stepPort(G, DT);
+    expect(main.segs.length).toBe(cv.boss.body!.count - 1);
+    expect(c.slots.length).toBe(main.segs.length);
+    expect(c.st).toBe('hold');
+    G.p.x = c.cx + Math.cos(a) * (c.r + 30); G.p.y = c.cy + Math.sin(a) * (c.r + 30);
+    const px = G.p.x, py = G.p.y;
+    stepPort(G, DT);
+    expect(Math.hypot(G.p.x - px, G.p.y - py)).toBeLessThan(15); // nada lo devolvió adentro
+    expect(G.coil.exposed).toBeGreaterThan(0);
+  }));
+
+  it('con menos autos que el mínimo el anillo se deshace y no queda barrera (auditoría N04)', () => withSeed(9, () => {
+    const G = game(); coil(G); run(G, K.tele);
+    const main = G.chains[0], mid = main.segs[1];
+    mid.hp = 1; G.shots.push({ k: 'cone', x: mid.x, y: mid.y, vx: 0, vy: 0, r: 6 });
+    stepPort(G, DT);
+    expect(main.segs.length).toBeLessThan(K.minSegs);
+    expect(G.coil.st).toBe('release');
+    run(G, K.release + 0.1);
+    expect(G.coil.st).toBe('off');
+    expect(G.chains.flatMap((ch) => [...ch.segs, ...(ch.lead ? [ch.lead] : [])]).every((s) => !s.ang)).toBe(true);
+    expect(G.b.hp).toBeGreaterThan(0);
+    void SnakeBoss;
   }));
 });

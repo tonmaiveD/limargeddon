@@ -209,7 +209,9 @@ export const PhaseBoss: BossAI = {
     const P = ph(G);
     if (P.valetEvery && b.state !== 'enter') { b.valetT -= dt; if (b.valetT <= 0) { spawnValet(G); b.valetT = P.valetEvery * G.d.freq; } }
     if (P.summon && b.state !== 'enter') { b.summonT -= dt; if (b.summonT <= 0) { summon(G, P.summon); b.summonT = P.summon.every * G.d.freq; } }
-    if (P.hornEvery) {
+    // cabeza expuesta tras escapar del enrosque (ADR 0034 y 0035): ni claxon ni daño por contacto, solo empuje
+    const exposed = G.coil.exposed > 0;
+    if (P.hornEvery && !exposed) {
       b.hornT -= dt;
       if (b.hornT <= 0) {
         const R = P.hornRadius ?? 150;
@@ -227,7 +229,7 @@ export const PhaseBoss: BossAI = {
         p.hitCd = pc.bossHitCd; const fromRight = dx > 0;
         dmgBoss(G, G.cfg.weapons.ram.dmg * (p.pw.turbo > 0 ? pc.turboMult : 1), fromRight);
         const charge = b.state === 'ram' || b.state === 'rev';
-        if (!charge || !usePerk(G, 'ramHit')) hurt(G, charge ? bc.chargeContactDmg : bc.contactDmg, charge ? 'EMBESTIDA' : 'JEFE');
+        if (!exposed && (!charge || !usePerk(G, 'ramHit'))) hurt(G, charge ? bc.chargeContactDmg : bc.contactDmg, charge ? 'EMBESTIDA' : 'JEFE');
         burst(G, (p.x + b.x) / 2, (p.y + b.y) / 2, C.yellow, 14);
       }
     }
