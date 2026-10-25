@@ -8,7 +8,7 @@ import { DEFAULT_NAME, NAME_MAX, cleanName, getPlayerName, ranking, resetProgres
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const pts = (n: number) => n.toLocaleString('es-PE');
 
-// Pide el nombre. Si `required`, no hay botón para volver (primera vez). Vacío queda como TAXISTA.
+// Pide el nombre. Si `required`, no hay botón para volver (primera vez). Vacío queda como JUGADOR.
 export function openName(required: boolean, done: (name: string) => void): void {
   const dlg = $<HTMLFormElement>('nameDlg'), input = $<HTMLInputElement>('nameInput'), cancel = $('nameCancel');
   input.value = getPlayerName() ?? ''; input.placeholder = DEFAULT_NAME; input.maxLength = NAME_MAX;

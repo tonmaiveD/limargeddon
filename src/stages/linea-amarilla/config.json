@@ -444,7 +444,8 @@
           "pista"
         ]
       }
-    ]
+    ],
+    "solid": true
   },
   "swarms": [
     {
