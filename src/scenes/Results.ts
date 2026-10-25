@@ -25,14 +25,17 @@ export class ResultsScene extends Phaser.Scene {
     $('endEyebrow').textContent = s.win ? `${name} completa` : `${name} · fallida`;
     $('endTitle').textContent = cfg.route ? (s.win ? '¡Subiste al carguero!' : 'Te quedaste en tierra')
       : s.win ? `${bossName} cayó` : `Te ganó ${bossName.replace(/^(La|El) /, (m) => m.toLowerCase())}`;
-    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}${score ? `<dt>Puntaje${score.test ? ' (modo prueba)' : ''}</dt><dd style="color:var(--yellow)">${score.points.toLocaleString('es-PE')}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : (cfg.route ? `<dt>Recorrido</dt><dd>${100 - s.bossPct}%</dd>` : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`) + (s.lastHit ? `<dt>Último golpe</dt><dd style="color:var(--pink)">${s.lastHit}</dd>` : '')}<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>
-      ${s.fireMode !== 'mantener' ? `<dt>Mejor racha</dt><dd style="color:var(--green)">${s.bestCombo}</dd>` : ''}<dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>
+    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}${score ? `<dt>Puntaje${score.test ? ' (modo prueba)' : ''}</dt><dd style="color:var(--yellow)">${score.points.toLocaleString('es-PE')}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : (cfg.route ? `<dt>Recorrido</dt><dd>${100 - s.bossPct}%</dd>` : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`) + (s.lastHit ? `<dt>Último golpe</dt><dd style="color:var(--pink)">${s.lastHit}</dd>` : '')}${cfg.route
+        // en la ruta no hay jefe: en vez de punto ciego y racha, intentos y marea (auditoría N08)
+        ? `<dt>Intentos que sobraron</dt><dd>${s.attemptsLeft} de ${cfg.route.attempts}</dd><dt>Toques de la marea</dt><dd style="color:var(--pink)">${s.tideHits}</dd>`
+        : `<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>${s.fireMode !== 'mantener' ? `<dt>Mejor racha</dt><dd style="color:var(--green)">${s.bestCombo}</dd>` : ''}`}
+      <dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>${s.tolls ? `<dt>Peajes</dt><dd style="color:var(--pink)">-S/ ${s.tolls}</dd>` : ''}
       <dt>Cobrado${replay ? ' (etapa repetida: 50%)' : ''}</dt><dd style="color:var(--yellow)">${money(earned)}</dd>
       <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
     $('endBadges').innerHTML = s.win ? `${R.winLine ? `<div class="badge">${R.winLine}</div>` : ''}
       ${score?.record ? `<div class="badge">¡Récord personal en esta etapa! · ${score.points.toLocaleString('es-PE')} puntos</div>` : ''}
       ${cfg.route ? '' : `<div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>`}
-      <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en la fase 3 (+S/ ${R.clean})</div>
+      <div class="badge ${s.clean ? '' : 'off'}">Sin rayones · cero daño en ${cfg.route ? 'el último tramo' : `la fase ${cfg.boss.phases.length}`} (+S/ ${R.clean})</div>
       <div class="badge ${s.honest ? '' : 'off'}">Vecino ejemplar · cero papeletas</div>
       ${cfg.hazards?.cart ? `<div class="badge ${s.cartHits ? 'off' : ''}">Don Frío intacto · nunca tocaste la carretilla (+S/ ${cfg.hazards.cart.bonus})</div>` : ''}
       ${R.item ? `<div class="badge">${R.item.name} · ${R.item.desc}</div>` : ''}`

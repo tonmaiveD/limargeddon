@@ -48,7 +48,7 @@
   - Prueba en el navegador en viewport móvil (393×852 o 430×780).
   - ADR si se agregó una pieza al motor.
   - Textos del juego sin guiones largos, dos puntos ni punto y coma.
-- Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
+- Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
 Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026. Cada bloque es un PR.
@@ -58,6 +58,7 @@ Hechos:
 - Taller que explique (ADR 0033).
 - Clímax del jefe final (ADR 0034).
 - A · Correcciones que rompen reglas (ADR 0035).
+- B · Puntaje y resultados honestos (ADR 0036).
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -68,11 +69,7 @@ Hechos:
 
 **Orden**
 1. ~~A · Correcciones que rompen reglas~~: hecho (ADR 0035).
-2. **B · Puntaje y resultados honestos** (N05 a N08).
-   - **Campaña con tres políticas de compra:** la más barata, ataque y aguante, separando errores de derrotas. Así el balance representa lo que el taller recomienda.
-   - **Daño efectivo:** el puntaje cuenta solo la vida que de verdad se le quitó al jefe.
-   - **Peaje roto:** decisión del dueño, cada barrera rota cuenta una infracción en la limpieza, sin multa extra. Pagar no penaliza.
-   - **Resultados de la ruta:** muestran intentos, golpes de la marea y peajes pagados en lugar de punto ciego y racha, y "último tramo" en lugar de "fase 3".
+2. ~~B · Puntaje y resultados honestos~~: hecho (ADR 0036).
 3. **C · Aprender y volver** (bloque 4 anterior, más N09).
    - Tutorial completo.
    - Objetivos opcionales por etapa y récord personal, sin presión.

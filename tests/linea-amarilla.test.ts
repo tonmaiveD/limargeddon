@@ -51,10 +51,11 @@ describe('Línea Amarilla del Terror', () => {
         }
       }
       const hp = G.p.hp; stepPort(G, DT);
-      return { tolls: G.tolls, stars: G.stars, hurt: G.p.hp < hp };
+      return { tolls: G.tolls, stars: G.stars, hurt: G.p.hp < hp, faltas: G.stats.infractions, multas: G.fines };
     };
-    expect(pay(false)).toEqual({ tolls: la.obstacles!.find((o) => o.k === 'peaje')!.toll, stars: 0, hurt: false });
-    expect(pay(true)).toEqual({ tolls: 0, stars: 1, hurt: true });
+    // pagar no es falta; romper la barrera es una falta para la limpieza, sin multa en soles (ADR 0036)
+    expect(pay(false)).toEqual({ tolls: la.obstacles!.find((o) => o.k === 'peaje')!.toll, stars: 0, hurt: false, faltas: 0, multas: 0 });
+    expect(pay(true)).toEqual({ tolls: 0, stars: 1, hurt: true, faltas: 1, multas: 0 });
   }));
 
   it('en el túnel el claxon pegado a la pared te aturde', () => withSeed(4, () => {

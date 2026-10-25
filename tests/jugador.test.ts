@@ -37,7 +37,7 @@ describe('nombre del jugador', () => {
 
 describe('puntaje', () => {
   it('una pelea perfecta y rápida en Normal vale 10.000', () => {
-    const G = won('centro', (G) => { G.t = 60; G.stats.total = 100; G.stats.right = 100; G.combo.best = 9; });
+    const G = won('centro', (G) => { G.t = 60; G.stats.effTotal = 100; G.stats.effRight = 100; G.combo.best = 9; });
     expect(scoreFight(G)).toBe(10000);
   });
   it('la falta cuenta aunque un objeto la perdone, y la reparación no borra el daño recibido', () => withSeed(2, () => {
@@ -51,7 +51,7 @@ describe('puntaje', () => {
     expect(k.goal).toBeCloseTo(0.7);
   }));
   it('la dificultad pesa, para que no convenga farmear en Fácil', () => {
-    const perfect = (G: ReturnType<typeof startPort>) => { G.t = 60; G.stats.total = 1; G.stats.right = 1; G.combo.best = 8; };
+    const perfect = (G: ReturnType<typeof startPort>) => { G.t = 60; G.stats.effTotal = 1; G.stats.effRight = 1; G.combo.best = 8; };
     const f = withSeed(3, () => { const G = startPort('facil', STAGES.centro.cfg); G.result = { win: true }; perfect(G); return scoreFight(G); });
     const d = withSeed(3, () => { const G = startPort('dificil', STAGES.centro.cfg); G.result = { win: true }; perfect(G); return scoreFight(G); });
     expect([f, d]).toEqual([7000, 12500]);

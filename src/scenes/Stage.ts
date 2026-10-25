@@ -92,7 +92,7 @@ export class StageScene extends Phaser.Scene {
           const summary = summarize(G);
           const { earned, replay, wallet } = settleFight(
             { stage: this.data0.stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
-              build: __BUILD__, test: TEST_MODE || undefined, upgrades: getGarage().levels, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines },
+              build: __BUILD__, test: TEST_MODE || undefined, upgrades: getGarage().levels, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined },
             G.cfg.number, summary.pay, stageNumber);
           // puntaje (ADR 0029): solo las victorias, y el modo prueba no entra al ranking
           const points = scoreFight(G);

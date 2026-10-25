@@ -14,7 +14,7 @@ export interface FightRecord {
   stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number;
   // contexto para comparar peleas (opcionales: los registros viejos no los tienen)
   build?: string; test?: boolean; upgrades?: Record<string, number>; bossPct?: number;
-  gross?: number; fines?: number; earned?: number; replay?: boolean;
+  gross?: number; fines?: number; earned?: number; replay?: boolean; tolls?: number;
 }
 export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos

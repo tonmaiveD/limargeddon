@@ -132,6 +132,7 @@ function updateObstacles(G: Game, dt: number): void {
         ob.hit = true; burst(G, p.x, p.y - p.h / 2, '#ff3355', 12); shake(G, 0.35); Sfx.play('hit');
         if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg, 'BARRERA');
         addStar(G);
+        G.stats.infractions++; // romper la barrera es una falta para la limpieza del puntaje, sin multa extra (ADR 0036)
       } else if (play && !ob.hit && o.toll && overlap(p, ob)) {
         // carril de pago: pasas, pero cobran
         ob.hit = true; G.tolls += o.toll; floatText(G, p.x, p.y - 46, 'PEAJE -S/' + o.toll, C.sky); Sfx.play('pickup');
@@ -346,18 +347,21 @@ export interface Summary {
   blind: boolean; clean: boolean; honest: boolean; bestCombo: number; fireMode: Game['fireMode'];
   // vida que le quedaba al jefe (0 al ganar) y cobro bruto antes de multas, para el registro
   bossPct: number; gross: number; cartHits: number; lastHit: string;
+  // etapa de ruta: intentos que sobraron, toques de la marea y peajes pagados (se descuentan del cobro)
+  tolls: number; attemptsLeft: number; tideHits: number;
 }
 
 export function summarize(G: Game): Summary {
   const win = !!G.result?.win, s = G.stats, R = G.cfg.rewards;
-  const pct = s.total ? Math.round((s.right / s.total) * 100) : 0;
+  const pct = s.effTotal ? Math.round((s.effRight / s.effTotal) * 100) : 0;
   const clean = win && !s.dmgP3, blind = win && pct >= R.blindPct, honest = G.fines === 0;
   // carretilla protegida: si nunca se tocó, paga su bono al ganar
   const cartBonus = win && G.cfg.hazards?.cart && G.cart.hits === 0 ? G.cfg.hazards.cart.bonus : 0;
   const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus + cartBonus : G.bonus, pay = Math.max(0, gross - G.fines - G.tolls);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
   return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
-    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits, lastHit: G.lastHit };
+    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits, lastHit: G.lastHit,
+    tolls: G.tolls, attemptsLeft: G.route.attempts, tideHits: G.route.tideHits };
 }
 
 // Garúa: espera, entra una oleada que dura un rato y se despeja. La intensidad sube y baja suave para el dibujo.
