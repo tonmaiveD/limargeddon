@@ -151,3 +151,5 @@ button.pick,.seg{min-height:44px}
 .score-detail{width:100%;font-size:12px;text-align:left}
 .score-detail summary{cursor:pointer;color:var(--yellow);font-weight:800;min-height:28px;display:flex;align-items:center;justify-content:center}
 .score-detail .stats{margin-top:4px}
+.replay{min-height:0;margin:0}
+.replay .link{display:inline;min-height:0;padding:0 0 0 4px}

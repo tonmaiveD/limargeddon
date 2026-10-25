@@ -42,3 +42,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0036](0036-puntaje-y-resultados-honestos.md) | Puntaje y resultados honestos | Aceptada |
 | [0037](0037-aprender-y-volver.md) | Aprender y volver: tutorial en contexto, medallas y récord con contexto | Aceptada |
 | [0038](0038-ambiente.md) | Ambiente: música por distrito, cierres y semáforos en ola | Aceptada |
+| [0039](0039-bloque-f-cuarta-auditoria.md) | Bloque F: ayudas que se alcanzan a leer y regreso a etapas ganadas | Aceptada |
