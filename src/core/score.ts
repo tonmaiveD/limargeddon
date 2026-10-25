@@ -28,7 +28,7 @@ export function scoreParts(G: Game): ScoreParts {
   };
   return {
     time: clamp((2 * tref - G.t) / tref, 0, 1),
-    right: s.total ? clamp(s.right / s.total, 0, 1) : 0,
+    right: s.effTotal ? clamp(s.effRight / s.effTotal, 0, 1) : 0, // daño efectivo (auditoría N07)
     streak: Math.min(G.combo.best, 8) / 8,
     clean: Math.max(0, 1 - s.infractions / 3),
     goal: G.cfg.hazards?.cart ? (G.cart.hits === 0 ? 1 : 0) : clamp(1 - s.dmgTaken / G.p.max, 0, 1),

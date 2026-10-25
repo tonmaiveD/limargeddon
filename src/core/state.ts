@@ -90,7 +90,7 @@ export interface Game {
   obstacles: Obstacle[]; obsT: number[];
   allyT: number; privilegeT: number; // Socio de la Combi y aviso del sticker (mejoras de lujo)
   // infractions: faltas antes de perdones (puntaje); dmgTaken: daño recibido (la reparación no lo borra)
-  stats: { right: number; total: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number; rightHits: number };
+  stats: { right: number; total: number; effRight: number; effTotal: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number; rightHits: number };
   lastDmg: Float | null; lastHit: string; // último número de daño al jefe (para agrupar) y qué golpeó al Tico por última vez
   result: null | { win: boolean };
 }
@@ -123,7 +123,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
     allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,
     obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
-    stats: { right: 0, total: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0, rightHits: 0 }, lastDmg: null, lastHit: '',
+    stats: { right: 0, total: 0, effRight: 0, effTotal: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0, rightHits: 0 }, lastDmg: null, lastHit: '',
     result: null,
   };
 }
@@ -144,8 +144,10 @@ export function dmgBoss(G: Game, amount: number, fromRight: boolean, size?: numb
   if (G.cfg.route) return 0; // en una etapa de ruta la barra es el recorrido: nada la daña
   const b = G.b, bc = G.cfg.boss;
   let m = fromRight ? bc.weakSideMult : 1; if (b.slip > 0) m *= bc.slipMult;
-  const v = Math.round(amount * m); b.hp = Math.max(0, b.hp - v); b.hitFlash = 0.12;
-  G.stats.total += v; if (fromRight) { G.stats.right += v; G.stats.rightHits++; }
+  const v = Math.round(amount * m), eff = Math.min(v, b.hp); b.hp = Math.max(0, b.hp - v); b.hitFlash = 0.12;
+  G.stats.total += v; if (fromRight) { G.stats.right += v; G.stats.rightHits++; } // como el prototipo (paridad)
+  // el puntaje y el porcentaje por la derecha cuentan solo la vida que de verdad se le quitó (auditoría N07)
+  G.stats.effTotal += eff; if (fromRight) G.stats.effRight += eff;
   // golpes seguidos al mismo lado dentro de 120 ms se suman en un solo número, para no llenar la pantalla
   const fx = b.x + rnd(-14, 14); // se sortea siempre, para no alterar la secuencia aleatoria (paridad)
   const last = G.lastDmg;
