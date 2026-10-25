@@ -98,7 +98,7 @@
       {
         "id": 2, "from": 0.66, "name": "FASE 2 · EL ESTACIONAMIENTO", "col": "#ff8a1f", "bar": "#ff8a1f", "returnAct": 2,
         "swapChance": 0.45, "swapAct": 2.2,
-        "attack": "reverse", "tele": 0.8, "teleOff": 0.05, "dur": 1.1, "speed": 300, "park": 1.6, "maxY": 490,
+        "attack": "reverse", "tele": 0.8, "teleOff": 0.35, "dur": 1.1, "speed": 300, "park": 1.6, "maxY": 490,
         "valetEvery": 12
       },
       {

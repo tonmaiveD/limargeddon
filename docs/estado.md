@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #26 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #27 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -57,13 +57,7 @@ Orden acordado con el dueño el 25 de octubre de 2026. Cada bloque es un PR.
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. Confirman la dificultad (ADR 0027 y 0031) y la del túnel y la marea, que el bot no puede medir.
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
-1. **Claridad del combate:**
-   - Agrupar los números de daño (hoy hasta 20 a la vez).
-   - Señal del punto ciego.
-   - Mostrar qué te pegó.
-   - Aviso de la reversa del Q8 en Difícil.
-   - Blancos táctiles de 44 px.
-   - Compactar el menú en modo prueba.
+1. ~~Claridad del combate~~: hecho (ADR 0032).
 2. **Taller que explique:**
    - Dos opciones, ofensiva y supervivencia, con su efecto.
    - Dónde sirve cada objeto de victoria.

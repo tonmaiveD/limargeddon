@@ -194,6 +194,17 @@ function drawThrow(g: Gfx, G: Game): void {
   }
 }
 
+// Señal del punto ciego (ADR 0032): hasta que el jugador acierte 3 golpes por la derecha, una flecha verde lo marca.
+// Va en la capa de efectos para seguir la pista curva.
+function drawBlindSpot(g: Gfx, G: Game): void {
+  const b = G.b;
+  if (G.cfg.route || b.state === 'enter' || G.stats.rightHits >= 3 || G.mode !== 'play') return;
+  const a = 0.55 + Math.sin(G.t * 6) * 0.35, x = b.x + b.w / 2 + 8, y = b.y;
+  g.globalAlpha = a; g.fillStyle = C.green;
+  g.beginPath(); g.moveTo(x, y); g.lineTo(x + 10, y - 7); g.lineTo(x + 10, y + 7); g.closePath(); g.fill();
+  g.font = FONT(7); g.textAlign = 'left'; g.fillText('PUNTO CIEGO', x + 13, y + 3); g.globalAlpha = 1;
+}
+
 // Marea de la etapa secreta: todos los personajes anteriores apretados detrás del Tico, empujando hacia arriba.
 const MAREA = ['#f4f6fb', '#1d1b22', '#56603f', '#f2c230', '#c9ccd3', '#2a7de1', '#d93b3b', '#3a7bff', '#ffd400', '#1f4fbf', '#8a2f3f'];
 function drawTide(g: Gfx, G: Game): void {
@@ -417,7 +428,7 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
+  drawBlindSpot(L.fx, G); drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
 }
 
 // Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.

@@ -118,7 +118,7 @@ const STATES: StateTable<Game> = {
     if (overlap(p, z)) {
       const side = Math.sign(p.x - b.x || 1);
       p.x += side * J.push * dt; p.vx = side * J.push * 0.5;
-      if (!b.jetHit && p.pw.soat <= 0) { b.jetHit = true; if (!usePerk(G, 'jetHit')) { hurt(G, J.dmg); floatText(G, p.x, p.y - 40, '¡CHORRO!', C.sky); } }
+      if (!b.jetHit && p.pw.soat <= 0) { b.jetHit = true; if (!usePerk(G, 'jetHit')) hurt(G, J.dmg, 'CHORRO'); }
     }
     for (const c of G.traffic) if (!c.invulnerable && overlap(c, z)) c.x += Math.sign(c.x - b.x || 1) * J.push * 0.6 * dt;
     if (b.st <= 0) b.state = 'return';
@@ -131,7 +131,7 @@ const STATES: StateTable<Game> = {
     const z = swingZone(G);
     if (z && p.air <= 0 && !b.jetHit && overlap(p, z)) {
       b.jetHit = true; const side = Math.sign(p.x - b.x) || 1; p.vx = side * S.push;
-      if (p.pw.soat <= 0 && !usePerk(G, 'swingHit')) { hurt(G, S.dmg); floatText(G, p.x, p.y - 40, '¡COLETAZO!', C.orange); }
+      if (p.pw.soat <= 0 && !usePerk(G, 'swingHit')) hurt(G, S.dmg, 'COLETAZO');
     }
     if (b.st <= 0) { b.swing = 0; b.state = 'return'; }
   },
@@ -227,7 +227,7 @@ export const PhaseBoss: BossAI = {
         p.hitCd = pc.bossHitCd; const fromRight = dx > 0;
         dmgBoss(G, G.cfg.weapons.ram.dmg * (p.pw.turbo > 0 ? pc.turboMult : 1), fromRight);
         const charge = b.state === 'ram' || b.state === 'rev';
-        if (!charge || !usePerk(G, 'ramHit')) hurt(G, charge ? bc.chargeContactDmg : bc.contactDmg);
+        if (!charge || !usePerk(G, 'ramHit')) hurt(G, charge ? bc.chargeContactDmg : bc.contactDmg, charge ? 'EMBESTIDA' : 'JEFE');
         burst(G, (p.x + b.x) / 2, (p.y + b.y) / 2, C.yellow, 14);
       }
     }

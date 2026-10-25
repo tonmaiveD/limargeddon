@@ -62,8 +62,9 @@ function coneHit(G: Game, fromRight: boolean, x: number, y: number): void {
   const mult = 1 + combo.step * Math.min(n - 1, combo.maxSteps);
   dmgBoss(G, base * mult, true, n >= 2 ? 14 : undefined);
   if (n >= 2) {
-    // la racha cuenta impactos; el daño extra tiene techo (maxSteps), por eso se muestran por separado
-    floatText(G, x, y - 46, `RACHA ${n} · DAÑO +${Math.round((mult - 1) * 100)}%`, C.green, n >= 5 ? 13 : 11);
+    // el contador fijo del HUD lleva la racha; sobre el jefe solo se avisa al arrancar y al llegar al techo de daño
+    if (n === 2) floatText(G, x, y - 46, '¡PUNTO CIEGO!', C.green, 11);
+    else if (n === combo.maxSteps + 1) floatText(G, x, y - 46, `RACHA MÁXIMA · DAÑO +${Math.round((mult - 1) * 100)}%`, C.green, 13);
     G.hitstop = Math.max(G.hitstop, combo.hitstop);
     Sfx.play('combo', Math.min(n, 8));
   }

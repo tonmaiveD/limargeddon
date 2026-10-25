@@ -101,7 +101,7 @@ export const SnakeBoss: BossAI = {
       if (p.air > 0 || !overlap(p, s)) continue;
       const dx = p.x - s.x, dy = p.y - s.y, ox = (p.w + s.w) / 2 - Math.abs(dx), oy = (p.h + s.h) / 2 - Math.abs(dy);
       if (ox < oy) { p.x += Math.sign(dx || 1) * ox; p.vx = Math.sign(dx || 1) * pc.trafficPush; } else { p.y += Math.sign(dy || 1) * oy; p.vy = Math.sign(dy || 1) * pc.trafficPush; }
-      if (p.hitCd <= 0) { p.hitCd = pc.trafficHitCd; hurt(G, B.contactDmg); burst(G, (p.x + s.x) / 2, (p.y + s.y) / 2, C.orange, 8); }
+      if (p.hitCd <= 0) { p.hitCd = pc.trafficHitCd; hurt(G, B.contactDmg, 'DOBLE FILA'); burst(G, (p.x + s.x) / 2, (p.y + s.y) / 2, C.orange, 8); }
     }
     for (const ch of G.chains) for (const s of ch.segs) s.x = clamp(s.x, G.cfg.road.left + s.w / 2, G.cfg.road.right - s.w / 2);
   },

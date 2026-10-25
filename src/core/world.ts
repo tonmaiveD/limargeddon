@@ -1,7 +1,7 @@
 import { H } from './constants';
 import { Sfx } from './audio/sfx';
 import { C, overlap, pick, rnd, step, clamp } from './util';
-import { addStar, tramoOk, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
+import { addStar, hitName, tramoOk, announce, burst, fine, floatText, hurt, dmgBoss, laneOf, laneX, say, shake, usePerk, type Car, type Game, type Obstacle } from './state';
 import type { TrafficType } from './config';
 import { updatePlayer } from './vehicle';
 import { updateHazards } from './hazards';
@@ -129,8 +129,8 @@ function updateObstacles(G: Game, dt: number): void {
       // peaje: cada carril tiene su barrera; pasar por una cerrada la rompe, hace daño y suma una estrella
       if (play && !ob.hit && overlap(p, ob) && gateClosed(G, ob, laneOf(G.cfg, p.x))) {
         ob.hit = true; burst(G, p.x, p.y - p.h / 2, '#ff3355', 12); shake(G, 0.35); Sfx.play('hit');
-        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg);
-        floatText(G, p.x, p.y - 46, o.hitText ?? '¡BARRERA!', C.yellow); addStar(G);
+        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg, 'BARRERA');
+        addStar(G);
       } else if (play && !ob.hit && o.toll && overlap(p, ob)) {
         // carril de pago: pasas, pero cobran
         ob.hit = true; G.tolls += o.toll; floatText(G, p.x, p.y - 46, 'PEAJE -S/' + o.toll, C.sky); Sfx.play('pickup');
@@ -144,15 +144,16 @@ function updateObstacles(G: Game, dt: number): void {
         if (!ob.hit && p.hitCd <= 0) {
           ob.hit = true; p.hitCd = G.cfg.player.trafficHitCd;
           if (p.pw.turbo > 0) { floatText(G, ob.x, ob.y - 10, '¡FUERA!', C.orange); burst(G, ob.x, ob.y, o.col, 12); ob.y = 9999; }
-          else { if (o.dmg && !usePerk(G, 'obstacleHit')) hurt(G, o.dmg); if (o.fine) fine(G, p.x, p.y, o.fine, 'PAPELETA'); burst(G, p.x, p.y - p.h / 2, o.col, 8); }
+          else { if (o.dmg && !usePerk(G, 'obstacleHit')) hurt(G, o.dmg, o.label ?? o.k.toUpperCase()); if (o.fine) fine(G, p.x, p.y, o.fine, 'PAPELETA'); burst(G, p.x, p.y - p.h / 2, o.col, 8); }
         }
       }
     } else if (play && !ob.hit && overlap(p, ob) && (!o.accelOnly || G.keys.up)) {
       ob.hit = true;
       if (p.pw.turbo > 0) { floatText(G, p.x, p.y - 46, '¡VUELA!', C.orange); burst(G, p.x, p.y, C.orange, 8); }
       else {
-        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg);
-        floatText(G, p.x, p.y - 46, o.hitText ?? '¡HUECO!', C.yellow); shake(G, 0.35); Sfx.play('bump');
+        if (!usePerk(G, 'obstacleHit')) hurt(G, o.dmg, (o.hitText ?? '¡HUECO!').replace(/[¡!]/g, ''));
+        else floatText(G, p.x, p.y - 46, o.hitText ?? '¡HUECO!', C.yellow);
+        shake(G, 0.35); Sfx.play('bump');
       }
     }
   }
@@ -195,7 +196,7 @@ export function updateWorld(G: Game, dt: number): void {
     if (!m.hitB && b.state !== 'enter' && Math.abs(m.y - b.y) < b.h / 2) { m.hitB = true; b.bumpT = 0.35; }
     if (!m.hitP && Math.abs(m.y - p.y) < p.h / 2 && play && p.air <= 0) {
       m.hitP = true; Sfx.play('bump');
-      if (k.up && p.pw.turbo <= 0) { hurt(G, cfg.bumps.dmg); floatText(G, p.x, p.y - 46, '¡ROMPEMUELLES!', C.yellow); shake(G, 0.3); }
+      if (k.up && p.pw.turbo <= 0) { hurt(G, cfg.bumps.dmg, 'ROMPEMUELLES'); shake(G, 0.3); }
       else if (p.pw.turbo > 0) { floatText(G, p.x, p.y - 46, '¡VUELA!', C.orange); burst(G, p.x, p.y, C.orange, 8); }
       else shake(G, 0.08);
     }
@@ -241,7 +242,7 @@ export function updateWorld(G: Game, dt: number): void {
         p.hitCd = cfg.player.trafficHitCd;
         if (c.invulnerable) { fine(G, p.x, p.y, cfg.fines.amount, cfg.fines.contact, true); c.flash = 0.3; }
         else if (p.pw.turbo > 0) { c.hp = 0; Sfx.play('hit'); }
-        else { hurt(G, c.contactDmg ?? 8); c.hp -= c.selfDmg ?? 10; }
+        else { hurt(G, c.contactDmg ?? 8, hitName(c.k, 'AUTO')); c.hp -= c.selfDmg ?? 10; }
         burst(G, (p.x + c.x) / 2, (p.y + c.y) / 2, C.orange, 8);
       }
     }
@@ -254,7 +255,7 @@ export function updateWorld(G: Game, dt: number): void {
     f.x += f.vx * dt; f.y += f.vy * dt;
     if (play && Math.hypot(f.x - p.x, f.y - p.y) < f.r + p.w / 2) {
       f.dead = true; burst(G, f.x, f.y, f.col, 6, 120);
-      if (p.pw.soat > 0 || !usePerk(G, 'shotHit')) { hurt(G, f.dmg); if (f.stun && p.pw.soat <= 0) { p.stun = Math.max(p.stun, f.stun); floatText(G, p.x, p.y - 46, '¡PINCHAZO!', C.yellow); } }
+      if (p.pw.soat > 0 || !usePerk(G, 'shotHit')) { hurt(G, f.dmg, hitName(f.look, 'MONEDA')); if (f.stun && p.pw.soat <= 0) { p.stun = Math.max(p.stun, f.stun); floatText(G, p.x, p.y - 46, '¡PINCHAZO!', C.yellow); } }
     }
   }
   G.foes = G.foes.filter((f) => !f.dead && f.y < H + 20 && f.y > -40 && f.x > -40 && f.x < W + 40);
@@ -331,7 +332,7 @@ export interface Summary {
   win: boolean; time: string; seconds: number; rightPct: number; powers: number; fines: number; pay: number;
   blind: boolean; clean: boolean; honest: boolean; bestCombo: number; fireMode: Game['fireMode'];
   // vida que le quedaba al jefe (0 al ganar) y cobro bruto antes de multas, para el registro
-  bossPct: number; gross: number; cartHits: number;
+  bossPct: number; gross: number; cartHits: number; lastHit: string;
 }
 
 export function summarize(G: Game): Summary {
@@ -343,7 +344,7 @@ export function summarize(G: Game): Summary {
   const gross = win ? R.win + (clean ? R.clean : 0) + G.bonus + cartBonus : G.bonus, pay = Math.max(0, gross - G.fines - G.tolls);
   const mm = Math.floor(G.t / 60), ss = String(Math.floor(G.t % 60)).padStart(2, '0');
   return { win, time: `${mm}:${ss}`, seconds: G.t, rightPct: pct, powers: s.powers, fines: G.fines, pay, blind, clean, honest, bestCombo: G.combo.best, fireMode: G.fireMode,
-    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits };
+    bossPct: Math.ceil((G.b.hp / G.b.max) * 100), gross, cartHits: G.cart.hits, lastHit: G.lastHit };
 }
 
 // Garúa: espera, entra una oleada que dura un rato y se despeja. La intensidad sube y baja suave para el dibujo.
