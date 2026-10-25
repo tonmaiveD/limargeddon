@@ -189,8 +189,8 @@
   "traffic": {
     "first": 1.4,
     "every": [
-      1.4,
-      2.2
+      1.61,
+      2.53
     ],
     "lastPhaseMult": 1.3,
     "yieldToBoss": true,

@@ -35,3 +35,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0029](0029-jugador-puntaje-ranking-y-reinicio.md) | Nombre del jugador, puntaje, ranking local y empezar de nuevo | Aceptada |
 | [0030](0030-etapa-secreta-linea-amarilla.md) | Etapa secreta, la Línea Amarilla del Terror | Aceptada |
 | [0031](0031-fisica-solida-y-ajustes-del-dueno.md) | Física sólida, sticker de los Búfalos Mojados y nombre JUGADOR | Aceptada |
+| [0032](0032-claridad-del-combate.md) | Claridad del combate | Aceptada |

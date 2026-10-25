@@ -54,7 +54,7 @@ function updateTide(G: Game, dt: number): void {
   r.tideCd -= dt;
   if (r.tideY < p.y + p.h / 2 && p.air <= 0) {
     p.y = Math.min(p.y, r.tideY - p.h / 2 + 4);
-    if (r.tideCd <= 0) { r.tideCd = Td.hitCd; r.tideHits++; hurt(G, Td.dmg); floatText(G, p.x, p.y - 46, '¡LA MAREA!', C.pink, 12); }
+    if (r.tideCd <= 0) { r.tideCd = Td.hitCd; r.tideHits++; hurt(G, Td.dmg, 'LA MAREA'); }
   }
   for (const c of G.traffic) if (c.y > r.tideY + 20) c.y = H + 200; // la marea se traga a quien queda atrás
 }

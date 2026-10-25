@@ -28,7 +28,7 @@ export interface Boss {
 export interface Car {
   k: string; x: number; y: number; w: number; h: number; vy: number; hp: number; max: number; col: string;
   spin: number; seed: number; flash?: number;
-  zz?: number; brakeT?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
+  zz?: number; brakeT?: number; laneTo?: number; vyBase?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
   look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }
@@ -40,7 +40,8 @@ export interface Foe { x: number; y: number; vx: number; vy: number; r: number; 
 export interface Pickup { k: PowerKey; x: number; y: number; r: number; rot: number; dead?: boolean }
 export interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; size: number }
 export interface Ring { x: number; y: number; r: number; max: number; col: string; life: number }
-export interface Float { x: number; y: number; text: string; col: string; life: number; size?: number }
+// sum y right: números de daño agrupados al mismo blanco (ADR 0032)
+export interface Float { x: number; y: number; text: string; col: string; life: number; size?: number; sum?: number; right?: boolean }
 
 // Contrato que cumple la IA de cada jefe (src/bosses/*).
 export interface BossAI {
@@ -87,7 +88,8 @@ export interface Game {
   obstacles: Obstacle[]; obsT: number[];
   allyT: number; privilegeT: number; // Socio de la Combi y aviso del sticker (mejoras de lujo)
   // infractions: faltas antes de perdones (puntaje); dmgTaken: daño recibido (la reparación no lo borra)
-  stats: { right: number; total: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number };
+  stats: { right: number; total: number; dmgP3: boolean; powers: number; infractions: number; dmgTaken: number; rightHits: number };
+  lastDmg: Float | null; lastHit: string; // último número de daño al jefe (para agrupar) y qué golpeó al Tico por última vez
   result: null | { win: boolean };
 }
 
@@ -118,7 +120,7 @@ export function createGame(cfg: StageConfig, dk: DiffKey, keys: Keys, ai: BossAI
     swarmT: (cfg.swarms ?? []).map((s) => (s.diffs.includes(dk) ? s.first : Infinity)),
     allyT: cfg.player.allyEvery ? 12 : Infinity, privilegeT: 0,
     obstacles: [], obsT: (cfg.obstacles ?? []).map((o) => (!o.diffs || o.diffs.includes(dk) ? o.first : Infinity)),
-    stats: { right: 0, total: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0 },
+    stats: { right: 0, total: 0, dmgP3: false, powers: 0, infractions: 0, dmgTaken: 0, rightHits: 0 }, lastDmg: null, lastHit: '',
     result: null,
   };
 }
@@ -140,18 +142,24 @@ export function dmgBoss(G: Game, amount: number, fromRight: boolean, size?: numb
   const b = G.b, bc = G.cfg.boss;
   let m = fromRight ? bc.weakSideMult : 1; if (b.slip > 0) m *= bc.slipMult;
   const v = Math.round(amount * m); b.hp = Math.max(0, b.hp - v); b.hitFlash = 0.12;
-  G.stats.total += v; if (fromRight) G.stats.right += v;
-  floatText(G, b.x + rnd(-14, 14), b.y - 30, '-' + v, fromRight ? C.green : C.ink, size);
+  G.stats.total += v; if (fromRight) { G.stats.right += v; G.stats.rightHits++; }
+  // golpes seguidos al mismo lado dentro de 120 ms se suman en un solo número, para no llenar la pantalla
+  const fx = b.x + rnd(-14, 14); // se sortea siempre, para no alterar la secuencia aleatoria (paridad)
+  const last = G.lastDmg;
+  if (last && last.life > 0.78 && last.right === fromRight) { last.sum! += v; last.text = '-' + last.sum; last.size = Math.max(last.size ?? 10, size ?? 10); }
+  else { const f = { x: fx, y: b.y - 30, text: '-' + v, col: fromRight ? C.green : C.ink, life: 0.9, size, sum: v, right: fromRight }; G.floats.push(f); G.lastDmg = f; }
   return v;
 }
-export function hurt(G: Game, d: number): void {
+// src: qué golpeó al Tico (se muestra junto al daño y en resultados si fue el último golpe)
+export function hurt(G: Game, d: number, src = ''): void {
   const p = G.p;
   if (p.pw.soat > 0) { floatText(G, p.x, p.y - 30, 'SOAT', C.green); Sfx.play('block'); return; }
   if (G.d.dmgMult) d = Math.max(1, Math.round(d * G.d.dmgMult));
   if (G.cfg.player.armor) d = Math.max(1, Math.round(d * (1 - G.cfg.player.armor)));
   G.stats.dmgTaken += Math.min(d, p.hp);
   p.hp = Math.max(0, p.hp - d); p.flash = 0.2; if (G.b.phase === G.cfg.boss.phases.length) G.stats.dmgP3 = true;
-  floatText(G, p.x, p.y - 30, '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
+  if (src) G.lastHit = src;
+  floatText(G, p.x, p.y - 30, src ? `-${d} ${src}` : '-' + d, C.pink); shake(G, 0.25); Sfx.play('hit');
 }
 // Gasta la carga de un objeto de victoria con ese efecto, si queda alguna. Devuelve true si protegió.
 export function usePerk(G: Game, effect: PerkEffect): boolean {
@@ -187,3 +195,12 @@ export const playerMaxY = (G: Game) => H - G.cfg.player.bottomMargin;
 // Etapa de ruta: el tramo en curso (undefined si la etapa no es de ruta) y si algo declarado para ciertos tramos está activo ahora.
 export const tramo = (G: Game) => G.cfg.route?.tramos[G.route.i];
 export const tramoOk = (G: Game, list?: string[]) => !list || !G.cfg.route || list.includes(G.cfg.route.tramos[G.route.i]?.id);
+
+// Nombre que se muestra cuando algo golpea al Tico.
+const NAMES: Record<string, string> = {
+  combi: 'COMBI', taxi: 'TAXI', app: 'AUTO DE APP', delivery: 'DELIVERY', ciclista: 'CICLISTA', mototaxi: 'MOTOTAXI', triciclo: 'TRICICLO',
+  interprovincial: 'BUS', camion: 'CAMIÓN', camioneta: 'CAMIONETA', carcocha: 'CARCOCHA', persecucion: 'PATRULLERO', suv: 'CAMIONETA',
+  sedan: 'AUTO', auto: 'AUTO', valet: 'VALET', amiga: 'ESCOLTA', sereno: 'SERENO', patrullero: 'PATRULLERO',
+  moneda: 'MONEDA', rollo: 'ROLLO DE TELA', contenedor: 'CONTENEDOR', rompellantas: 'ROMPELLANTAS', piedra: 'PIEDRA',
+};
+export const hitName = (k: string | undefined, fallback: string) => (k && NAMES[k]) || fallback;

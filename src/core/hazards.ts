@@ -83,7 +83,7 @@ function updateCart(G: Game, dt: number): void {
   c.x += c.dir * K.speed * dt; c.y += 18 * dt;
   const box = { x: c.x, y: c.y, ...CART };
   if (!c.hit && p.air <= 0 && overlap(p, box)) {
-    c.hit = true; c.hits++; hurt(G, K.dmg); fine(G, c.x, c.y, K.fine, '¡AL HELADERO NO!'); burst(G, c.x, c.y, C.yellow, 10);
+    c.hit = true; c.hits++; hurt(G, K.dmg, 'CARRETILLA'); fine(G, c.x, c.y, K.fine, '¡AL HELADERO NO!'); burst(G, c.x, c.y, C.yellow, 10);
   }
   for (const s of G.shots) if (!s.dead && Math.abs(s.x - c.x) < CART.w / 2 + s.r && Math.abs(s.y - c.y) < CART.h / 2) {
     s.dead = true; if (!c.hit) { c.hit = true; c.hits++; fine(G, c.x, c.y, K.fine, '¡AL HELADERO NO!'); }

@@ -14,13 +14,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidd
 #app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding-block:8px;box-sizing:border-box}
 #stage{position:relative;max-width:100%;flex:none}
 #stage canvas{display:block;width:100% !important;height:100% !important;margin:0 !important;border-radius:6px;box-shadow:0 0 0 2px var(--pink),0 0 28px rgba(255,46,136,.35);background:#15111d}
-#pauseBtn{position:absolute;top:48px;right:6px;z-index:2;width:36px;height:36px;font:400 13px/1 var(--display);background:rgba(14,10,22,.7);color:var(--yellow);border:0;border-radius:8px;cursor:pointer;touch-action:manipulation}
+#pauseBtn{position:absolute;top:48px;right:6px;z-index:2;width:44px;height:44px;font:400 13px/1 var(--display);background:rgba(14,10,22,.7);color:var(--yellow);border:0;border-radius:8px;cursor:pointer;touch-action:manipulation}
 #pauseBtn[hidden]{display:none}
 button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#stage canvas{box-shadow:0 0 0 2px var(--pink)}}
 
 /* Overlays de menú y resultados (capa DOM sobre el canvas) */
-.overlay{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;
+.overlay{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:12px;text-align:center;
   background:rgba(14,10,22,.9);padding:18px;border-radius:6px;box-sizing:border-box;overflow-y:auto}
 .overlay[hidden]{display:none}
 .eyebrow{font:600 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin:0}
@@ -115,3 +115,10 @@ button.pick[hidden]{display:none}
 .ranking .empty{display:block;background:none;color:var(--muted);text-align:center}
 .secret-hint{margin:0;font:600 11px/1.3 var(--body);color:var(--yellow);border-left:3px solid var(--yellow);padding:2px 8px;opacity:.85}
 .secret-hint[hidden]{display:none}
+
+/* blancos táctiles de al menos 44 px (ADR 0032) */
+button.pick,.seg{min-height:44px}
+.link{min-height:44px;padding:4px 8px}
+/* menú en modo prueba: las etapas como números para que entren las diez */
+.setting#stageSel .seg.num{min-width:44px;padding:8px 10px}
+.overlay>*{flex-shrink:0} /* que nada se encoja ni se monte cuando el menú no entra: mejor desplazarse */

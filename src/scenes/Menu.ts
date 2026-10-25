@@ -48,7 +48,9 @@ export class MenuScene extends Phaser.Scene {
     STAGE_ORDER.forEach((id) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'seg'; b.setAttribute('role', 'radio'); b.dataset.stage = id;
-      b.textContent = `${STAGES[id].cfg.number} · ${STAGES[id].cfg.district}`;
+      // solo el número, para que entren las diez etapas; el nombre completo se ve abajo y en el lector de pantalla
+      b.className = 'seg num'; b.textContent = String(STAGES[id].cfg.number);
+      b.setAttribute('aria-label', `${STAGES[id].cfg.number} · ${STAGES[id].cfg.district}`); b.title = STAGES[id].cfg.district;
       b.onclick = () => { this.stageId = id; setSettings({ stageId: id }); this.showStage(); };
       box.appendChild(b);
     });
