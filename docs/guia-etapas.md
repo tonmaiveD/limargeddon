@@ -46,6 +46,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Pista curva** (`road.curve`: `amp`, `len`): solo visual.
 - **Peligros** (`hazards`): `rockslide` (derrumbes), `birds` (gaviotas que manchan; el claxon las espanta) y `cart` (carretilla protegida con bono). Ver ADR 0026.
 - **Jefe serpiente:** registrar la etapa con `ai: SnakeBoss` y declarar `boss.body` (`count`, `spacing`, `hp`, `w`, `h`, `contactDmg`, `cols`, `bodyDmgShare`, `lean`).
+- **Etapa de ruta** (`route`, IA `RouteAI`): sin jefe; tramos con `len`, `road`, `dark`, `tide`, `plane`, `minY`, `trafficEvery` y `banner`, y `tramos` en tráfico, obstáculos y enjambres. Peajes de pago con `payLanes` y `toll`. Ver la Línea Amarilla y el ADR 0030.
 - **Dificultades:** vida del jefe, velocidad, frecuencia de ataques y `dmgMult`, el multiplicador del daño que recibe el Tico.
 - **Recompensas:** pago, bono sin daño, `item` y `defeatTip` (consejo al perder).
   - `item`: objeto de victoria `{ id, name, desc, effect, icon, col }`. `effect` es "contactFine", "anyFine", "jetHit", "shotHit", "obstacleHit", "ramHit", "swingHit" o "wantedHit" o "birdHit" (ADR 0020 a 0026). `winLine`: remate que se muestra al ganar.. La `desc` va en minúscula, porque se muestra después de "nombre ·".

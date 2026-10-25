@@ -90,7 +90,7 @@ Tamaños relativos, medidos contra lo ya hecho. Como referencia, el Hito 2 (port
 | Vía Expresa | L | Saltos y rampas (motor), bus articulado | Hecho (ADR 0024) |
 | Panamericana | L | Clima, nivel de búsqueda (motor), escuadrón | Hecho (ADR 0025) |
 | Costa Verde (final) | L | Pista curva (pieza de motor), neblina, desprendimientos del acantilado, aves que tapan la vista, doble fila en Agua Dulce, jefe serpiente | Hecho (ADR 0026) |
-| Línea Amarilla (secreta) | XL | Tres tramos, peajes, túnel, escena del avión, desbloqueo | Pendiente |
+| Línea Amarilla (secreta) | XL | Tramos, peajes, túnel, puente provisional, marea, carguero, desbloqueo | Hecho (ADR 0030) |
 
 ## 7. Orden
 

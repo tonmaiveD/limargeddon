@@ -3,7 +3,7 @@ import type { DiffKey, FireMode, StageConfig } from '../src/core/config';
 import { PROTOTYPE_CFG, startPort, stepPort } from '../tests/harness/port';
 import { seedRandom } from '../tests/harness/rng';
 import { bot } from '../tests/harness/bot';
-import { evitaCuerpo } from '../tests/harness/evita';
+import { evitaCuerpo, rutaBot } from '../tests/harness/evita';
 import { STAGES } from '../src/stages';
 import { applyUpgrades } from '../src/garage/upgrades';
 
@@ -15,7 +15,7 @@ function casual(G: any, k: any) { bot(G, k); const tx = G.b.x; k.left = tx < G.p
 // bot "medio": como el experto pero claxon y aceite solo a veces (reacción tardía)
 function medio(G: any, k: any) { bot(G, k); if (Math.floor(G.t * 2) % 3) { k.oil = false; k.horn = false; } }
 
-const conCuerpo = (fn: (G: any, k: any) => void) => (G: any, k: any) => { fn(G, k); evitaCuerpo(G, k); };
+const conCuerpo = (fn: (G: any, k: any) => void) => (G: any, k: any) => { fn(G, k); evitaCuerpo(G, k); rutaBot(G, k); };
 const BOTS = [['experto', conCuerpo(bot)], ['medio', conCuerpo(medio)], ['casual', conCuerpo(casual)]] as const;
 const SEEDS = 30;
 
@@ -42,7 +42,7 @@ function run(cfg: StageConfig, fn: (G: any, k: any) => void, dk: DiffKey, mode?:
 
 it('duraciones', () => {
   const rows: string[] = [];
-  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg, pa = STAGES.panamericana.cfg, cv = STAGES['costa-verde'].cfg;
+  const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg, pa = STAGES.panamericana.cfg, cv = STAGES['costa-verde'].cfg, la = STAGES['linea-amarilla'].cfg;
   const only = process.env.ETAPA; // npm run balance con ETAPA=miraflores (o san-isidro) para correr solo una
   const variants: [string, StageConfig, FireMode | undefined][] = ([
     ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
@@ -68,7 +68,9 @@ it('duraciones', () => {
     ['cv-toque', cv, 'toque'], ['cv-acelerar', cv, 'acelerar'],
     // con las mejoras típicas al llegar a la Costa Verde (~S/ 9.000 gastados)
     ['cv-mej-toque', applyUpgrades(cv, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 2 }), 'toque'],
-  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've', panamericana: 'pa', 'costa-verde': 'cv' } as Record<string, string>)[only] ?? only));
+    ['la-toque', la, 'toque'], ['la-acelerar', la, 'acelerar'],
+    ['la-mej-toque', applyUpgrades(la, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 2, turbo: 2, reparacion: 1 }), 'toque'],
+  ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've', panamericana: 'pa', 'costa-verde': 'cv', 'linea-amarilla': 'la' } as Record<string, string>)[only] ?? only));
   for (const [label, cfg, mode] of variants) {
     for (const [name, fn] of BOTS) for (const dk of ['facil', 'normal', 'dificil'] as const) {
       rows.push(`${label.padEnd(12)} ${name.padEnd(8)} ${dk.padEnd(8)} ${run(cfg, fn, dk, mode)}`);

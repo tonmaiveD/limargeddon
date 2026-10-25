@@ -2,7 +2,7 @@ import { H, W, view } from './constants';
 import { drawCar } from './damage-render';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
-import type { Car, Game, Pickup } from './state';
+import { tramo, type Car, type Game, type Pickup } from './state';
 import type { VehicleLook } from './config';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { gateClosed } from './world';
@@ -102,6 +102,7 @@ function drawObstacles(g: Gfx, G: Game): void {
         const lx = left + l * laneWidth, closed = gateClosed(G, ob, l);
         if (closed) { for (let x = lx + 6, i = 0; x < lx + laneWidth - 6; x += 8, i++) { g.fillStyle = i % 2 ? '#f4f6fb' : '#ff3355'; g.fillRect(x, ob.y - 2, 8, 4); } }
         else { g.fillStyle = '#ff3355'; g.fillRect(lx + 6, ob.y - 2, 4, 4); g.fillStyle = '#f4f6fb'; g.fillRect(lx + 6, ob.y - 10, 3, 8); }
+        if (o.payLanes && !closed) { g.fillStyle = C.yellow; g.font = FONT(6); g.textAlign = 'center'; g.fillText('PAGO S/' + (o.toll ?? 0), lx + laneWidth / 2, ob.y + 14); }
       }
       g.fillStyle = o.col;
       for (let l = 0; l <= lanes; l++) { const bx = left + l * laneWidth; g.fillRect(bx - 5, ob.y - ob.h / 2 - 4, 10, ob.h + 8); }
@@ -191,6 +192,33 @@ function drawThrow(g: Gfx, G: Game): void {
     const a = Math.PI / 2 + (T.count > 1 ? (i / (T.count - 1) - 0.5) * T.spread : 0), cx = Math.cos(a), cy = Math.sin(a);
     for (let s = 16; y0 + cy * s < H; s += 22) g.fillRect(x0 + cx * s - 2, y0 + cy * s - 2, 4, 4);
   }
+}
+
+// Marea de la etapa secreta: todos los personajes anteriores apretados detrás del Tico, empujando hacia arriba.
+const MAREA = ['#f4f6fb', '#1d1b22', '#56603f', '#f2c230', '#c9ccd3', '#2a7de1', '#d93b3b', '#3a7bff', '#ffd400', '#1f4fbf', '#8a2f3f'];
+function drawTide(g: Gfx, G: Game): void {
+  const y0 = G.route.tideY;
+  if (!tramo(G)?.tide || y0 >= H + 40) return;
+  g.fillStyle = 'rgba(14,10,22,.85)'; g.fillRect(-view.extra, y0 + 10, W + 2 * view.extra, H - y0);
+  for (let row = 0; row < 6; row++) for (let i = 0; i < 9; i++) {
+    const x = G.cfg.road.left - 30 + i * 44 + ((row * 23) % 44) + Math.sin(G.t * 6 + i + row) * 3, y = y0 + 8 + row * 26 + Math.sin(G.t * 9 + i * 2) * 3;
+    if (y > H + 20) continue;
+    g.fillStyle = MAREA[(i * 3 + row * 5) % MAREA.length]; g.roundRect(x - 11, y - 14, 22, 30, 4); g.fill();
+    g.fillStyle = '#10131c'; g.fillRect(x - 8, y - 9, 16, 5);
+  }
+  g.fillStyle = C.pink; g.font = FONT(9); g.textAlign = 'center'; g.fillText('¡TODOS TE PERSIGUEN!', W / 2, y0 + 2);
+}
+
+// Túnel: todo oscuro menos el cono de los faros del Tico.
+function drawDark(g: Gfx, G: Game): void {
+  if (!tramo(G)?.dark) return;
+  const p = G.p, top = Math.max(44, p.y - 330), nearY = p.y - p.h / 2, near = 14, far = 92, L = -view.extra - 10, R = W + view.extra + 10;
+  g.fillStyle = 'rgba(6,4,10,.9)';
+  g.fillRect(L, 0, R - L, top);                                              // arriba del alcance de los faros
+  g.fillRect(L, p.y + p.h / 2 + 6, R - L, H - p.y);                         // detrás del Tico
+  g.beginPath(); g.moveTo(L, top); g.lineTo(p.x - far, top); g.lineTo(p.x - near, nearY); g.lineTo(p.x - near, p.y + p.h / 2 + 6); g.lineTo(L, p.y + p.h / 2 + 6); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(R, top); g.lineTo(p.x + far, top); g.lineTo(p.x + near, nearY); g.lineTo(p.x + near, p.y + p.h / 2 + 6); g.lineTo(R, p.y + p.h / 2 + 6); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(255,240,180,.06)'; g.beginPath(); g.moveTo(p.x - near, nearY); g.lineTo(p.x - far, top); g.lineTo(p.x + far, top); g.lineTo(p.x + near, nearY); g.closePath(); g.fill();
 }
 
 // Garúa: una capa gris que baja desde arriba hasta `depth` del alto, más espesa arriba, con hilos de llovizna.
@@ -384,12 +412,12 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
     g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
     g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
   }
-  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawPlayer(g, G);
+  drawBoss(g, G); G.allies.forEach((a) => drawCombi(g, G, a)); drawTide(g, G); drawPlayer(g, G);
   for (const r of G.rings) { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; }
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
+  drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G); drawHUD(L.ui, G);
 }
 
 // Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.

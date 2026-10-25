@@ -31,6 +31,25 @@ export interface VehicleLook {
 // brake: frenazos en seco al azar (chance por segundo, duración en s), como los autos de aplicación
 export interface VehicleMove { zigzag?: { amp: number; freq: number }; brake?: { chance: number; dur: number } }
 
+// Etapa de ruta (ADR 0030). `len` es el largo del tramo en segundos a velocidad normal (el turbo lo acorta).
+export interface RouteTramo {
+  id: string; name: string; col: string; len: number;
+  road?: { left: number; right: number; lanes: number }; // la pista se angosta o se ensancha al entrar
+  dark?: boolean;   // túnel: solo se ve lo que iluminan los faros; el claxon hace eco
+  minY?: number;    // cuánto puede subir el Tico (para alcanzar la rampa del avión)
+  tide?: boolean;   // la marea de personajes persigue desde atrás
+  plane?: boolean;  // tramo final: el avión carguero con la rampa abierta
+  banner?: string;  // aviso al entrar
+  trafficEvery?: [number, number]; // densidad de tráfico del tramo (por defecto, la de la etapa)
+}
+export interface RouteDef {
+  attempts: number; tramos: RouteTramo[];
+  // marea: avanza si no aceleras, retrocede si aceleras; quita `dmg` cada `hitCd` s mientras te toca
+  tide?: { advance: number; recede: number; dmg: number; hitCd: number; minY: number };
+  // avión: baja hasta arriveY, rueda `hold` s meciéndose `sway` px y despega; subirse a la rampa gana la etapa
+  plane?: { w: number; h: number; rampW: number; rampH: number; arriveY: number; hold: number; sway: number; speed: number; label: string };
+}
+
 // Objetos de victoria (ADR 0020): se ganan al pasar una etapa y desde entonces protegen una vez por pelea.
 // contactFine: perdona el primer roce con un intocable. anyFine: perdona la primera papeleta. jetHit: el primer chorro no hace daño.
 // shotHit: el primer proyectil del jefe no hace daño. obstacleHit: el primer obstáculo no hace daño.
@@ -42,6 +61,7 @@ export interface ItemDef { id: string; name: string; desc: string; effect: PerkE
 export interface TrafficType {
   k: string; weight: number; w: number; h: number; vy: [number, number]; hp: number; cols: string[];
   invulnerable?: boolean; contactDmg: number; selfDmg?: number;
+  tramos?: string[]; // etapa de ruta: solo aparece en estos tramos
   // lo que paga sacarlo de la pista; si falta, vale traffic.killBonus (ciclistas y Delivery pagan 0)
   killBonus?: number;
   look?: VehicleLook; move?: VehicleMove;
@@ -50,6 +70,7 @@ export interface TrafficType {
 // Enjambre: grupo de vehículos de un mismo tipo que llega junto, en formación, solo en ciertas dificultades.
 export interface SwarmDef {
   type: string;                      // `k` de un tipo de traffic.types
+  tramos?: string[];                 // etapa de ruta: solo en estos tramos
   diffs: DiffKey[];
   first: number; every: [number, number];
   count: [number, number];
@@ -78,6 +99,8 @@ export interface ObstacleDef {
   hitText?: string;                  // texto al recibir el daño de un hueco (por defecto, ¡HUECO!)
   jump?: number;                     // segundos en el aire al saltar una rampa
   gatePeriod?: number;               // peaje: segundos de un ciclo de barrera (mitad abajo, mitad arriba)
+  payLanes?: number; toll?: number;  // peaje de pago: carriles abiertos fijos que cobran `toll`; los demás cerrados
+  tramos?: string[];                 // etapa de ruta: solo en estos tramos
 }
 
 export type BossAttack = 'brake' | 'reverse' | 'ram' | 'jet' | 'throw' | 'swing';
@@ -131,6 +154,7 @@ export interface BossConfig {
 
 export interface StageConfig {
   id: string; number: number; district: string; roadName: string; eyebrow: string; tip: string;
+  secret?: boolean; // etapa secreta: se desbloquea al terminar el recorrido y el menú la anticipa como pista
   // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
   hints?: { at: number; text: string }[];
   difficulties: Record<DiffKey, Difficulty>;
@@ -183,6 +207,8 @@ export interface StageConfig {
   // Cada estrella trae un `chaser` (tipo de traffic.types) que persigue `chaseLife` s; desde `blockAt` estrellas,
   // un obstáculo `block` (k de obstacles, con first muy alto para que no salga solo) cada `blockEvery` s.
   wanted?: { max: number; decay: number; chaser: string; chaseLife: number; blockAt: number; blockEvery: number; block: string };
+  // etapa de ruta (ADR 0030): sin jefe que pelear; se avanza por tramos y se gana llegando a la meta (el avión)
+  route?: RouteDef;
   // peligros de la Costa Verde (ADR 0026)
   hazards?: {
     // derrumbe: aviso de `warn` s y luego piedras que caen `dur` s en 1 o 2 carriles del lado del acantilado

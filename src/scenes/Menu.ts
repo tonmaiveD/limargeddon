@@ -59,6 +59,9 @@ export class MenuScene extends Phaser.Scene {
     const { cfg } = STAGES[this.stageId];
     const $ = (id: string) => document.getElementById(id)!;
     $('menuEyebrow').textContent = cfg.eyebrow;
+    // pista de la etapa secreta: aparece a mitad del recorrido y desaparece cuando ya se puede jugar
+    const secret = STAGE_ORDER.map((id) => STAGES[id].cfg).find((c) => c.secret), unlocked = unlockedStage(stageNumber);
+    $('secretHint').hidden = !secret || unlocked < 5 || unlocked >= secret.number;
     $('menuBoss').textContent = cfg.boss.title;
     $('menuTip').textContent = cfg.tip;
     $('menuPowers').innerHTML = Object.values(cfg.powers)

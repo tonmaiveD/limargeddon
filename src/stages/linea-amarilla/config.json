@@ -1,0 +1,819 @@
+{
+  "id": "linea-amarilla",
+  "number": 10,
+  "district": "Línea Amarilla",
+  "roadName": "VÍA DE EVITAMIENTO",
+  "eyebrow": "Etapa secreta · Línea Amarilla del Terror",
+  "tip": "Del peaje al aeropuerto sin parar. Paga o rompe las barreras, cruza el túnel con los faros y el puente de dos carriles, y acelera a fondo que todos te persiguen. Súbete a la rampa del carguero antes de que despegue.",
+  "difficulties": {
+    "facil": {
+      "label": "Fácil",
+      "hp": 1,
+      "spd": 260,
+      "freq": 1,
+      "tele": true,
+      "dmgMult": 1.5
+    },
+    "normal": {
+      "label": "Normal",
+      "hp": 1,
+      "spd": 260,
+      "freq": 1,
+      "tele": true,
+      "dmgMult": 2.8
+    },
+    "dificil": {
+      "label": "Difícil",
+      "hp": 1,
+      "spd": 260,
+      "freq": 1,
+      "tele": false,
+      "dmgMult": 3.6
+    }
+  },
+  "road": {
+    "left": 50,
+    "right": 310,
+    "lanes": 4,
+    "laneWidth": 65,
+    "speed": 330,
+    "turboSpeed": 470,
+    "idleScroll": 90
+  },
+  "player": {
+    "lane": 1,
+    "y": 530,
+    "w": 28,
+    "h": 48,
+    "hp": 100,
+    "accelX": 240,
+    "accelY": 210,
+    "response": 9,
+    "minY": 250,
+    "bottomMargin": 36,
+    "turboMult": 1.5,
+    "throttle": "acelerador",
+    "cruiseReturn": 170,
+    "bossPush": 220,
+    "bossHitCd": 0.5,
+    "trafficPush": 180,
+    "trafficHitCd": 0.6
+  },
+  "weapons": {
+    "cone": {
+      "cd": 0.55,
+      "vy": -560,
+      "r": 6,
+      "dmg": 12,
+      "trafficDmg": 12,
+      "mode": "toque",
+      "ammo": 3,
+      "reload": 0.7,
+      "tapGap": 0.08,
+      "combo": {
+        "step": 0.1,
+        "maxSteps": 3,
+        "hitstop": 0.04
+      }
+    },
+    "oil": {
+      "cd": 4,
+      "vy": -430,
+      "r": 9,
+      "dmg": 8,
+      "slip": 2,
+      "trafficSpin": 1.5
+    },
+    "horn": {
+      "cd": 6,
+      "ring": 200,
+      "reach": 210,
+      "dmg": 20,
+      "phoneOff": 1.5,
+      "trafficRadius": 200,
+      "trafficPush": 25
+    },
+    "cancha": {
+      "cd": 0.14,
+      "vy": -640,
+      "spread": 50,
+      "jitter": 20,
+      "r": 3,
+      "dmg": 3,
+      "trafficDmg": 4
+    },
+    "picaron": {
+      "vy": -560,
+      "vx": [
+        -130,
+        0,
+        130
+      ],
+      "ay": 620,
+      "r": 9,
+      "dmg": 15,
+      "life": 2.6
+    },
+    "ram": {
+      "dmg": 18
+    }
+  },
+  "powers": {
+    "turbo": {
+      "name": "TURBO CHICHA",
+      "label": "Turbo Chicha",
+      "col": "#ff8a1f",
+      "L": "T",
+      "dur": 5
+    },
+    "cancha": {
+      "name": "CANCHITA GATLING",
+      "label": "Canchita Gatling",
+      "col": "#ffe14d",
+      "L": "C",
+      "dur": 6
+    },
+    "soat": {
+      "name": "ESCUDO SOAT",
+      "label": "Escudo SOAT",
+      "col": "#3dff9a",
+      "L": "S",
+      "dur": 8
+    },
+    "picaron": {
+      "name": "PICARONES BUMERÁN",
+      "label": "Picarones Bumerán",
+      "col": "#e0954a",
+      "L": "P",
+      "dur": 0
+    }
+  },
+  "pickups": {
+    "first": 4,
+    "every": [
+      7,
+      10
+    ],
+    "fall": 110,
+    "rare": [],
+    "rareReroll": 0,
+    "rerollTo": [
+      "turbo",
+      "cancha",
+      "soat",
+      "picaron"
+    ]
+  },
+  "traffic": {
+    "first": 1.4,
+    "every": [
+      1.8,
+      2.6
+    ],
+    "lastPhaseMult": 1.3,
+    "yieldToBoss": true,
+    "killBonus": 20,
+    "types": [
+      {
+        "k": "combi",
+        "weight": 0.3,
+        "w": 30,
+        "h": 60,
+        "vy": [
+          120,
+          160
+        ],
+        "hp": 44,
+        "cols": [
+          "#f2c230",
+          "#f4f1e6"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#2a7de1",
+          "band": "#ffe14d",
+          "label": "CALLAO",
+          "labelCol": "#2a7de1",
+          "labelY": 0.5,
+          "labelSize": 5
+        },
+        "tramos": [
+          "peajes",
+          "tunel",
+          "puente"
+        ]
+      },
+      {
+        "k": "taxi",
+        "weight": 0.3,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          130,
+          170
+        ],
+        "hp": 36,
+        "cols": [
+          "#f2c230",
+          "#c9ccd3",
+          "#8a2f3f",
+          "#e0e0e0"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "tramos": [
+          "peajes",
+          "tunel",
+          "puente",
+          "pista"
+        ]
+      },
+      {
+        "k": "camion",
+        "weight": 0.2,
+        "w": 34,
+        "h": 70,
+        "vy": [
+          100,
+          130
+        ],
+        "hp": 60,
+        "cols": [
+          "#c9ccd3",
+          "#8a5a3a"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 8,
+        "look": {
+          "roof": "#4a4452"
+        },
+        "tramos": [
+          "peajes",
+          "puente"
+        ]
+      },
+      {
+        "k": "interprovincial",
+        "weight": 0.15,
+        "w": 34,
+        "h": 84,
+        "vy": [
+          90,
+          120
+        ],
+        "hp": 70,
+        "cols": [
+          "#3a7bff",
+          "#f4f1e6",
+          "#d93b3b"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 8,
+        "look": {
+          "roof": "#1d1b22",
+          "band": "#ffe14d",
+          "label": "INTERPROVINCIAL",
+          "labelCol": "#ffe14d",
+          "labelSize": 4.5,
+          "labelY": 0.5
+        },
+        "move": {
+          "zigzag": {
+            "amp": 26,
+            "freq": 0.9
+          }
+        },
+        "tramos": [
+          "peajes"
+        ]
+      },
+      {
+        "k": "mototaxi",
+        "killBonus": 0,
+        "weight": 0.25,
+        "w": 22,
+        "h": 34,
+        "vy": [
+          150,
+          190
+        ],
+        "hp": 20,
+        "cols": [
+          "#d93b3b",
+          "#2a7de1",
+          "#1f9e5a",
+          "#f2c230"
+        ],
+        "contactDmg": 4,
+        "selfDmg": 10,
+        "look": {
+          "kind": "mototaxi",
+          "roof": "rgba(0,0,0,.3)",
+          "label": "MOTOTAXI",
+          "labelCol": "#ffe14d",
+          "labelSize": 4
+        },
+        "move": {
+          "zigzag": {
+            "amp": 14,
+            "freq": 1.6
+          }
+        },
+        "tramos": [
+          "tunel"
+        ]
+      },
+      {
+        "k": "app",
+        "weight": 0.3,
+        "w": 28,
+        "h": 50,
+        "vy": [
+          140,
+          180
+        ],
+        "hp": 36,
+        "cols": [
+          "#1d1b22",
+          "#e0e0e0",
+          "#6c7a8c"
+        ],
+        "contactDmg": 6,
+        "selfDmg": 10,
+        "look": {
+          "label": "APP",
+          "labelCol": "#3dff9a",
+          "labelSize": 6,
+          "labelY": 0.58
+        },
+        "move": {
+          "brake": {
+            "chance": 0.25,
+            "dur": 0.8
+          }
+        },
+        "tramos": [
+          "tunel",
+          "puente"
+        ]
+      },
+      {
+        "k": "delivery",
+        "killBonus": 0,
+        "weight": 0.15,
+        "w": 12,
+        "h": 24,
+        "vy": [
+          200,
+          240
+        ],
+        "hp": 12,
+        "cols": [
+          "#2fd0c0"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 12,
+        "look": {
+          "kind": "moto",
+          "box": "#ffd23f"
+        },
+        "move": {
+          "zigzag": {
+            "amp": 50,
+            "freq": 3
+          }
+        },
+        "tramos": [
+          "tunel",
+          "puente"
+        ]
+      },
+      {
+        "k": "persecucion",
+        "killBonus": 0,
+        "weight": 0,
+        "w": 30,
+        "h": 52,
+        "vy": [
+          110,
+          140
+        ],
+        "hp": 40,
+        "cols": [
+          "#f4f6fb"
+        ],
+        "contactDmg": 3,
+        "selfDmg": 10,
+        "look": {
+          "roof": "#2f6b3f",
+          "panel": "#2f6b3f",
+          "siren": true,
+          "label": "POLICÍA",
+          "labelCol": "#f4f6fb"
+        },
+        "tramos": [
+          "peajes",
+          "tunel",
+          "puente",
+          "pista"
+        ]
+      },
+      {
+        "k": "seguridad",
+        "weight": 0.3,
+        "w": 30,
+        "h": 50,
+        "vy": [
+          150,
+          190
+        ],
+        "hp": 999,
+        "cols": [
+          "#ffe14d"
+        ],
+        "invulnerable": true,
+        "contactDmg": 0,
+        "look": {
+          "panel": "#15111d",
+          "siren": true,
+          "label": "SEGURIDAD",
+          "labelCol": "#ffe14d"
+        },
+        "tramos": [
+          "pista"
+        ]
+      }
+    ]
+  },
+  "swarms": [
+    {
+      "type": "delivery",
+      "tramos": [
+        "tunel"
+      ],
+      "diffs": [
+        "facil",
+        "normal",
+        "dificil"
+      ],
+      "first": 3,
+      "every": [
+        9,
+        13
+      ],
+      "count": [
+        3,
+        4
+      ],
+      "formation": "v",
+      "gap": 34,
+      "label": "¡ENJAMBRE EN EL TÚNEL!"
+    },
+    {
+      "type": "mototaxi",
+      "tramos": [
+        "tunel"
+      ],
+      "diffs": [
+        "normal",
+        "dificil"
+      ],
+      "first": 8,
+      "every": [
+        10,
+        14
+      ],
+      "count": [
+        2,
+        3
+      ],
+      "formation": "columna",
+      "gap": 50,
+      "label": "¡MOTOTAXIS EN EL TÚNEL!"
+    },
+    {
+      "type": "combi",
+      "tramos": [
+        "tunel"
+      ],
+      "diffs": [
+        "dificil"
+      ],
+      "first": 12,
+      "every": [
+        12,
+        16
+      ],
+      "count": [
+        2,
+        3
+      ],
+      "formation": "diagonal",
+      "gap": 66,
+      "label": "¡GUERRA DE COMBIS!"
+    }
+  ],
+  "obstacles": [
+    {
+      "k": "peaje",
+      "tramos": [
+        "peajes"
+      ],
+      "kind": "peaje",
+      "style": "peaje",
+      "first": 3,
+      "every": [
+        6,
+        9
+      ],
+      "lanes": 4,
+      "h": 14,
+      "col": "#c9ccd3",
+      "col2": "#15111d",
+      "label": "PEAJE",
+      "labelCol": "#ffe14d",
+      "dmg": 6,
+      "payLanes": 2,
+      "toll": 20
+    },
+    {
+      "k": "crater",
+      "tramos": [
+        "tunel",
+        "puente"
+      ],
+      "kind": "hueco",
+      "style": "crater",
+      "first": 4,
+      "every": [
+        6,
+        10
+      ],
+      "lanes": 1,
+      "h": 22,
+      "col": "#2a2632",
+      "col2": "#15111d",
+      "dmg": 4
+    },
+    {
+      "k": "equipaje",
+      "tramos": [
+        "pista"
+      ],
+      "kind": "bloque",
+      "style": "caja",
+      "first": 1.5,
+      "every": [
+        2.2,
+        3.4
+      ],
+      "lanes": 1,
+      "w": 26,
+      "h": 18,
+      "col": "#3a7bff",
+      "col2": "#f4f6fb",
+      "label": "EQUIPAJE",
+      "labelCol": "#fff",
+      "dmg": 4,
+      "drift": {
+        "amp": 60,
+        "freq": 1.4
+      }
+    },
+    {
+      "k": "bloqueo",
+      "kind": "bloque",
+      "style": "barrera",
+      "first": 99999,
+      "every": [
+        99999,
+        99999
+      ],
+      "lanes": 2,
+      "h": 14,
+      "col": "#3a7bff",
+      "col2": "#f4f6fb",
+      "label": "BLOQUEO",
+      "labelCol": "#15111d",
+      "dmg": 4
+    }
+  ],
+  "fines": {
+    "amount": 50,
+    "contact": "PAPELETA",
+    "shot": "AGRESIÓN"
+  },
+  "bumps": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ],
+    "dmg": 0
+  },
+  "crossings": {
+    "first": 99999,
+    "every": [
+      99999,
+      99999
+    ]
+  },
+  "streets": [
+    "VÍA DE EVITAMIENTO",
+    "AV. MORALES DUÁREZ",
+    "RÍO RÍMAC",
+    "AV. ELMER FAUCETT",
+    "AEROPUERTO"
+  ],
+  "rewards": {
+    "win": 2000,
+    "clean": 1000,
+    "blindPct": 80,
+    "scoreTref": 150,
+    "winLine": "El Tico sube al carguero y Lima se aleja por la ventanilla. Deuda saldada... por ahora.",
+    "defeatTip": "Acelera a fondo desde el puente, que la marea avanza cuando sueltas. En la pista ponte detrás del carguero y sube a la rampa antes de que despegue."
+  },
+  "boss": {
+    "id": "linea-amarilla",
+    "name": "LÍNEA AMARILLA DEL TERROR",
+    "title": "La Línea Amarilla",
+    "w": 40,
+    "h": 60,
+    "startY": -600,
+    "baseY": -600,
+    "lane": 1,
+    "firstAction": 99,
+    "cruiseSpeed": 0,
+    "weakSideMult": 1,
+    "slipMult": 1,
+    "laneSwapAimChance": 0,
+    "phoneOffAct": 1,
+    "contactDmg": 0,
+    "chargeContactDmg": 0,
+    "phases": [
+      {
+        "id": 1,
+        "from": 1,
+        "name": "TRAMO 1 · VÍA DE EVITAMIENTO",
+        "col": "#ffe14d",
+        "bar": "#ffe14d",
+        "returnAct": 2,
+        "swapChance": 0,
+        "swapAct": 2,
+        "attack": "brake",
+        "tele": 1,
+        "dur": 0.5,
+        "speed": 300
+      },
+      {
+        "id": 2,
+        "from": 0.6,
+        "name": "TRAMO 2 · TÚNEL BAJO EL RÍMAC",
+        "col": "#7fd4ff",
+        "bar": "#7fd4ff",
+        "returnAct": 2,
+        "swapChance": 0,
+        "swapAct": 2,
+        "attack": "brake",
+        "tele": 1,
+        "dur": 0.5,
+        "speed": 300
+      },
+      {
+        "id": 3,
+        "from": 0.271,
+        "name": "TRAMO 3 · PUENTE PROVISIONAL",
+        "col": "#ff8a1f",
+        "bar": "#ff8a1f",
+        "returnAct": 2,
+        "swapChance": 0,
+        "swapAct": 2,
+        "attack": "brake",
+        "tele": 1,
+        "dur": 0.5,
+        "speed": 300
+      },
+      {
+        "id": 4,
+        "from": 0.012,
+        "name": "TRAMO 4 · PISTA DEL AEROPUERTO",
+        "col": "#ff2e88",
+        "bar": "#ff2e88",
+        "returnAct": 2,
+        "swapChance": 0,
+        "swapAct": 2,
+        "attack": "brake",
+        "tele": 1,
+        "dur": 0.5,
+        "speed": 300
+      }
+    ],
+    "lines": {
+      "1": [
+        "¡Que no se escape a la Línea Amarilla!"
+      ],
+      "2": [
+        "¡Al túnel!"
+      ],
+      "3": [
+        "¡Al puente!"
+      ],
+      "4": [
+        "¡Al aeropuerto!"
+      ]
+    },
+    "quips": {
+      "horn": "",
+      "oil": "",
+      "combi": "",
+      "metro": "",
+      "valet": ""
+    }
+  },
+  "secret": true,
+  "wanted": {
+    "max": 5,
+    "decay": 6,
+    "chaser": "persecucion",
+    "chaseLife": 8,
+    "blockAt": 4,
+    "blockEvery": 8,
+    "block": "bloqueo"
+  },
+  "weather": {},
+  "route": {
+    "attempts": 3,
+    "tramos": [
+      {
+        "id": "peajes",
+        "name": "TRAMO 1 · VÍA DE EVITAMIENTO",
+        "col": "#ffe14d",
+        "len": 34,
+        "banner": "Peaje tras peaje, y todos cobran."
+      },
+      {
+        "id": "tunel",
+        "name": "TRAMO 2 · TÚNEL BAJO EL RÍMAC",
+        "col": "#7fd4ff",
+        "len": 28,
+        "road": {
+          "left": 82,
+          "right": 277,
+          "lanes": 3
+        },
+        "dark": true,
+        "banner": "Faros prendidos, que aquí no se ve nada."
+      },
+      {
+        "id": "puente",
+        "name": "TRAMO 3 · PUENTE PROVISIONAL",
+        "col": "#ff8a1f",
+        "len": 22,
+        "road": {
+          "left": 115,
+          "right": 245,
+          "lanes": 2
+        },
+        "tide": true,
+        "trafficEvery": [
+          0.85,
+          1.25
+        ],
+        "banner": "Dos carriles para todo un aeropuerto. El definitivo, pronto."
+      },
+      {
+        "id": "pista",
+        "name": "TRAMO 4 · PISTA DEL AEROPUERTO",
+        "col": "#ff2e88",
+        "len": 1,
+        "tide": true,
+        "plane": true,
+        "minY": 220,
+        "trafficEvery": [
+          2.4,
+          3.2
+        ],
+        "banner": "¡Ahí está el carguero, con la rampa abierta!"
+      }
+    ],
+    "tide": {
+      "advance": 100,
+      "recede": 90,
+      "dmg": 4,
+      "hitCd": 0.8,
+      "minY": 300
+    },
+    "plane": {
+      "w": 70,
+      "h": 230,
+      "rampW": 44,
+      "rampH": 30,
+      "arriveY": 105,
+      "hold": 5,
+      "sway": 50,
+      "speed": 120,
+      "label": "GALAXIA CARGO"
+    }
+  }
+}

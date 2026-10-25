@@ -113,3 +113,5 @@ button.pick[hidden]{display:none}
 .ranking li.me{box-shadow:inset 3px 0 0 var(--yellow)}
 .ranking li span:last-child{color:var(--yellow);font-weight:800}
 .ranking .empty{display:block;background:none;color:var(--muted);text-align:center}
+.secret-hint{margin:0;font:600 11px/1.3 var(--body);color:var(--yellow);border-left:3px solid var(--yellow);padding:2px 8px;opacity:.85}
+.secret-hint[hidden]{display:none}

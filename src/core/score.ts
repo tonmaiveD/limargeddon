@@ -10,13 +10,22 @@ import { clamp } from './util';
  *   1000 racha (techo en 8)
  *   1000 limpieza: cada falta resta un tercio, cuente o no después un perdón
  *    500 objetivo: carretilla intacta donde la hay; si no, la vida que no se perdió
+ * En una etapa de ruta (no hay jefe) el punto ciego se reemplaza por los intentos que sobraron y la racha por
+ * esquivar la marea (cada toque resta un quinto).
  * Por dificultad se multiplica: Fácil ×0.7, Normal ×1, Difícil ×1.25 (así no conviene farmear en Fácil).
  */
 export const DIFF_SCORE: Record<string, number> = { facil: 0.7, normal: 1, dificil: 1.25 };
 export interface ScoreParts { time: number; right: number; streak: number; clean: number; goal: number }
 
 export function scoreParts(G: Game): ScoreParts {
-  const s = G.stats, tref = G.cfg.rewards.scoreTref ?? 120;
+  const s = G.stats, tref = G.cfg.rewards.scoreTref ?? 120, R = G.cfg.route;
+  if (R) return {
+    time: clamp((2 * tref - G.t) / tref, 0, 1),
+    right: clamp((G.route.attempts - 1) / Math.max(1, R.attempts - 1), 0, 1),
+    streak: clamp(1 - G.route.tideHits / 5, 0, 1),
+    clean: Math.max(0, 1 - s.infractions / 3),
+    goal: clamp(1 - s.dmgTaken / G.p.max, 0, 1),
+  };
   return {
     time: clamp((2 * tref - G.t) / tref, 0, 1),
     right: s.total ? clamp(s.right / s.total, 0, 1) : 0,

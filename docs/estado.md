@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #24 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #25 fusionados.
 - Modo prueba: `?prueba` en la dirección muestra el selector de etapas.
 
 ## Lo que tiene el juego
@@ -18,6 +18,7 @@
   7. Vía Expresa, con El Expreso Articulado (ADR 0024).
   8. Panamericana Norte, con El Comandante (ADR 0025).
   9. Costa Verde (final), con La Doble Fila de Agua Dulce y la carretilla Don Frío (ADR 0026).
+  10. **Secreta:** Línea Amarilla del Terror, ruta por tramos hasta el carguero, con el puente provisional y la marea (ADR 0030).
 - **Controles** (ADR 0008, 0011, 0013): acelerador sin freno (soltar es esquivar). El pulgar izquierdo gira y el derecho tiene aceite, claxon, acelerar y conos. Dos modos de disparo elegibles en el menú: "por toque" (reserva de 3 conos y combo de punto ciego) y "acelerar es atacar".
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
@@ -53,8 +54,8 @@
 Ordenado como se acordó: primero datos reales y balance, después la etapa secreta, y en paralelo el pulido.
 
 1. **Partidas reales:** que el tester juegue 3 o 4 peleas por modo con la versión actual y comparta "Copiar registro". Con eso se confirma la pasada de dificultad (ADR 0027) y se decide si la vida del jefe baja solo en el modo por toque.
-2. **Línea Amarilla del Terror** (secreta): se desbloquea al ganar la Costa Verde. Tiene peajes, túnel, pista del aeropuerto y la escena del avión. Hay que decidir mecánicas con el dueño antes de construir.
-3. **Pista de la secreta:** cuando exista, reemplazar "¡Completaste todas las etapas disponibles!" y mostrar en el menú el candado con la línea amarilla.
+2. **Línea Amarilla, pulido:** animación del Tico dentro del avión y confirmar con personas la dificultad del túnel y la marea, que el bot no puede medir.
+3. **Pruebas en el teléfono de la etapa secreta.**
 4. **Música sintetizada por distrito** (cumbia chicha, criolla, salsa), como pide el concepto. Hoy solo hay efectos.
 5. **Animación del cierre:** la carretilla Don Frío cruzando la meta (hoy es texto).
 6. **Semáforos en ola** de la Javier Prado como mecánica (hoy son paisaje).
