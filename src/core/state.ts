@@ -28,7 +28,7 @@ export interface Boss {
 export interface Car {
   k: string; x: number; y: number; w: number; h: number; vy: number; hp: number; max: number; col: string;
   spin: number; seed: number; flash?: number;
-  zz?: number; brakeT?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
+  zz?: number; brakeT?: number; laneTo?: number; vyBase?: number; tx?: number; enter?: number; life?: number; phase?: number; invulnerable?: boolean; contactDmg?: number; selfDmg?: number; killBonus?: number;
   look?: VehicleLook; move?: VehicleMove;
 }
 export interface Shot { k: 'cone' | 'oil' | 'kernel' | 'picaron'; x: number; y: number; vx: number; vy: number; r: number; ay?: number; hit?: boolean; t?: number; ret?: boolean; dead?: boolean; hitBoss?: boolean }

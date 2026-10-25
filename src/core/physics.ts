@@ -58,10 +58,31 @@ export function resolveTraffic(G: Game): void {
   const list = G.traffic.filter((c) => !entering(c)).sort((a, b) => b.y - a.y);
   for (let i = 0; i < list.length; i++) for (let j = 0; j < i; j++) {
     const lower = list[j], upper = list[i];
-    if (Math.abs(upper.x - lower.x) < (upper.w + lower.w) / 2 && Math.abs(upper.y - lower.y) < (upper.h + lower.h) / 2) {
-      upper.y = lower.y - (upper.h + lower.h) / 2 - 1;
+    if (Math.abs(upper.x - lower.x) >= (upper.w + lower.w) / 2) continue;
+    const gap = lower.y - upper.y - (upper.h + lower.h) / 2;
+    if (gap < 14) {
+      // alcanzó al de adelante: adelanta por un carril libre; si no hay, baja a su velocidad (no se apilan)
+      if (upper.laneTo === undefined && !upper.move?.zigzag && upper.life === undefined && !overtake(G, upper)) upper.vy = Math.min(upper.vy, lower.vy);
     }
+    if (gap < 0) upper.y = lower.y - (upper.h + lower.h) / 2 - 1;
   }
+}
+
+// Busca un carril vecino libre a la altura del auto (con margen adelante y atrás) y lo manda hacia allá.
+function overtake(G: Game, c: Car): boolean {
+  const lane = laneOf(G.cfg, c.x), defs = G.cfg.obstacles ?? [], B = blockers(G);
+  for (const k of [lane - 1, lane + 1]) {
+    if (k < 0 || k >= G.cfg.road.lanes) continue;
+    const box = { x: laneX(G.cfg, k), y: c.y, w: c.w, h: c.h * 2.4 };
+    // ocupado también si otro auto ya se está yendo a ese carril (si no, todos eligen el mismo y rebotan)
+    if (G.traffic.some((o) => o !== c && (overlap(box, o) || (o.laneTo !== undefined && overlap(box, { x: o.laneTo, y: o.y, w: o.w, h: o.h }))))) continue;
+    if (G.obstacles.some((ob) => (defs[ob.i].kind === 'bloque' || defs[ob.i].kind === 'peaje') && overlap(box, ob))) continue;
+    // nadie se cruza encima del Tico: mira con margen antes de cambiar de carril
+    if (overlap({ x: box.x, y: box.y, w: box.w, h: box.h + 60 }, G.p)) continue;
+    if (B.some((b) => overlap(box, b)) || (G.b.state !== 'enter' && !G.cfg.route && overlap(box, G.b))) continue;
+    c.laneTo = box.x; return true;
+  }
+  return false;
 }
 
 // ¿Hay lugar para algo nuevo en esa caja? (vehículos, bloques, peajes y fuselaje; los huecos y las rampas son piso)

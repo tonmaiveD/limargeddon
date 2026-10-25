@@ -50,7 +50,7 @@
     "rare": ["combi", "metro"], "rareReroll": 0.35, "rerollTo": ["turbo", "cancha", "soat", "picaron"]
   },
   "traffic": {
-    "first": 1.4, "every": [1.5, 2.4], "lastPhaseMult": 1.3,
+    "first": 1.4, "every": [1.72, 2.76], "lastPhaseMult": 1.3,
     "yieldToBoss": true, "solid": true,
     "killBonus": 20,
     "types": [

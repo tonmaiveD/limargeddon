@@ -28,6 +28,21 @@ Las dos auditorías coincidieron en que el combate comunica mal:
   - Las pantallas superpuestas usan centrado seguro y no encogen a sus hijos: si el menú no cabe, se desplaza en vez de montar un texto sobre otro.
 - **Menú en modo prueba:** las etapas aparecen como números (1 a 10), con el nombre completo en el título accesible.
 
+- **Tráfico que adelanta** (corrige un efecto de la física sólida del ADR 0031, visto por el dueño en una partida):
+  - Un auto que alcanza a otro más lento cambia de carril si el de al lado está libre. Cuenta como ocupado el carril al que ya se dirige otro auto, para que no elijan todos el mismo y reboten, y nunca se cruza encima del Tico.
+  - Si no hay carril libre, baja a la velocidad del de adelante en vez de ser empujado, y recupera su velocidad al terminar de adelantar.
+  - Un auto que quedó entre dos carriles vuelve al centro de uno.
+  - Al aparecer, deja un espacio con el de abajo.
+  - Con el sticker de lujo, abrir paso es un cambio de carril.
+  - Antes, detrás de un patrullero lento se armaba una columna de 7 u 8 autos que no se deshacía.
+- **Densidad de tráfico:** aparece un 15% menos seguido en las nueve etapas de combate. Sin columnas, los autos se reparten por todos los carriles y la campaña se había endurecido (Costa Verde por toque al 45%).
+- **Campaña** (30 por modo, gana al primer intento):
+
+  | Modo | Miraflores | San Isidro | Centro | Javier Prado | Gamarra | Callao | Vía Expresa | Panamericana | Costa Verde |
+  |---|---|---|---|---|---|---|---|---|---|
+  | Por toque | 97% | 90% | 90% | 67% | 70% | 80% | 87% | 77% | 77% |
+  | Acelerando | 100% | 87% | 80% | 80% | 90% | 63% | 77% | 73% | 67% |
+
 ## Consecuencias
 - La simulación no cambia, salvo el aviso de la reversa en Difícil de San Isidro.
 - Pendiente de este bloque, de las auditorías: ninguno. Lo siguiente en el orden es el taller que explique (bloque 2).

@@ -23,7 +23,8 @@ export function spawnCar(G: Game): void {
   // física sólida: si el carril sorteado está ocupado arriba, prueba los demás; si no hay lugar, no aparece
   let l = lane;
   if (solid(G)) {
-    const lanes = G.cfg.road.lanes, ok = (k: number) => freeSpot(G, { x: laneX(G.cfg, k), y: -60, w: t.w, h: t.h });
+    // con espacio de sobra: un auto nuevo no aparece pegado al de abajo
+    const lanes = G.cfg.road.lanes, ok = (k: number) => freeSpot(G, { x: laneX(G.cfg, k), y: -60, w: t.w, h: t.h }, 34);
     l = -1; for (let k = 0; k < lanes; k++) if (ok((lane + k) % lanes)) { l = (lane + k) % lanes; break; }
     if (l < 0) return;
   }
@@ -36,7 +37,7 @@ export function makeCar(t: TrafficType, x: number, y: number): Car {
   const col = t.cols.length > 1 ? pick(t.cols) : t.cols[0];
   const zz = t.move?.zigzag ? Math.random() * 6 : undefined;
   return {
-    k: t.k, x, y, w: t.w, h: t.h, vy, hp: t.hp, max: t.hp, col,
+    k: t.k, x, y, w: t.w, h: t.h, vy, vyBase: vy, hp: t.hp, max: t.hp, col,
     spin: 0, seed: Math.random() * 100, invulnerable: t.invulnerable, contactDmg: t.contactDmg, selfDmg: t.selfDmg, killBonus: t.killBonus, zz,
     look: t.look, move: t.move,
   };
@@ -214,6 +215,11 @@ export function updateWorld(G: Game, dt: number): void {
       else c.y -= 240 * dt;
     } else {
       c.y += (c.vy + extra) * dt;
+      // física sólida: cambia de carril suave (para adelantar) y, si quedó entre dos carriles, vuelve al centro de uno
+      if (solid(G) && !c.move?.zigzag) {
+        if (c.laneTo === undefined && Math.abs(c.x - laneX(cfg, laneOf(cfg, c.x))) > 3) c.laneTo = laneX(cfg, laneOf(cfg, c.x));
+        if (c.laneTo !== undefined) { c.x += step(c.laneTo - c.x, 120 * dt); if (Math.abs(c.laneTo - c.x) < 1) { c.x = c.laneTo; c.laneTo = undefined; if (c.vyBase !== undefined) c.vy = c.vyBase; } } // ya adelantó: vuelve a su velocidad
+      }
       const zig = c.move?.zigzag; if (zig) { c.zz! += dt * zig.freq; c.x += Math.sin(c.zz!) * zig.amp * dt; }
       // frenazo en seco: se detiene en la pista (baja en pantalla a la velocidad de la vía) con luces de freno
       const br = c.move?.brake;
@@ -224,7 +230,11 @@ export function updateWorld(G: Game, dt: number): void {
     }
     if (c.spin > 0) { c.spin -= dt; c.x += Math.sin(G.t * 20) * 70 * dt; }
     // con el sticker, serenazgo y policía se corren de carril cuando el Tico viene detrás
-    if (cfg.player.privilege && c.invulnerable && c.y < p.y && p.y - c.y < 160 && Math.abs(c.x - p.x) < (c.w + p.w) / 2 + 8) c.x += Math.sign(c.x - p.x || 1) * 130 * dt;
+    if (cfg.player.privilege && c.invulnerable && c.y < p.y && p.y - c.y < 160 && Math.abs(c.x - p.x) < (c.w + p.w) / 2 + 8) {
+      const side = Math.sign(c.x - p.x || 1);
+      if (solid(G)) { const l = clamp(laneOf(cfg, c.x) + side, 0, cfg.road.lanes - 1); if (l !== laneOf(cfg, c.x)) c.laneTo = laneX(cfg, l); else c.laneTo = laneX(cfg, clamp(laneOf(cfg, c.x) - side, 0, cfg.road.lanes - 1)); }
+      else c.x += side * 130 * dt;
+    }
     const inValet = c.enter !== undefined && c.enter > 0;
     // los bloques (obras, conos, barreras) también desvían al tráfico; si un auto queda apretado entre un bloque
     // y el jefe, se resuelve en pocas pasadas y el jefe va al final (lo más visible es que no le pase por debajo)
