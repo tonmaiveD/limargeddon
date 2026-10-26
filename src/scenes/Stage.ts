@@ -13,7 +13,7 @@ import { SCORE_VERSION, scoreFight, scorePoints } from '../core/score';
 import { earnedMedals } from '../core/medals';
 import { startEnding, updateEnding } from '../core/ending';
 import { learnedHints } from '../core/hints';
-import { FrameMeter } from '../core/frames';
+import { FrameMeter, frameMs } from '../core/frames';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -100,7 +100,7 @@ export class StageScene extends Phaser.Scene {
   update(_t: number, delta: number): void {
     const G = this.G, dt = Math.min(0.05, delta / 1000);
     if (this.paused) return;
-    if (G.mode === 'play') this.meter.add(delta);
+    if (G.mode === 'play') this.meter.add(frameMs(this.game.loop)); // intervalo crudo, no el suavizado (ADR 0046)
     if (G.hitstop > 0) {
       // congelamiento de impacto: la simulación espera unos ms y el cuadro se sigue dibujando
       G.hitstop = Math.max(0, G.hitstop - delta / 1000);

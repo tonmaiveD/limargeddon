@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #41 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #42 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -28,8 +28,8 @@
 - **Gráficos nivel B** (ADR 0041 a 0044): tráfico, Tico, jefes, combi aliada, paisaje de los diez distritos, obstáculos, bonus y proyectiles son imágenes horneadas con sombreado; el daño de los vehículos sigue siendo procedural por etapas. La pista suma vereda con cordón, huellas, grietas y manchas.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
-- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro. Desde la ADR 0045 guarda también la fluidez (percentiles del tiempo entre cuadros) y el equipo.
-- **Vista de colisiones** (ADR 0045): con `?colisiones` en la dirección se ven las zonas de choque sobre el dibujo.
+- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro. Desde la ADR 0045 guarda también la fluidez (percentiles del tiempo entre cuadros sin suavizar y bloqueos largos, ADR 0046) y el equipo.
+- **Vista de colisiones** (ADR 0045): con `?colisiones` en la dirección se ven las zonas de choque sobre el dibujo, con la forma de cada regla (ADR 0046).
 
 ## Motor (resumen)
 - Cada etapa es datos (`src/stages/<distrito>/config.json`) más su paisaje (`scenery.ts`) y el dibujo de su jefe (`src/bosses/<jefe>-render.ts`). La IA es `PhaseBoss` para todos (ADR 0015).
@@ -68,6 +68,7 @@ Hechos:
 - F · Ayudas que se alcanzan a leer y regreso a etapas ganadas (ADR 0039, cuarta auditoría).
 - Gráficos nivel B (ADR 0040 a 0044).
 - Paso previo de la especificación de mejora gráfica (ADR 0045): salida del enrosque, correas del carguero, fluidez en el registro y vista de colisiones.
+- G · Instrumentos de diagnóstico fieles (ADR 0046): fluidez medida sin suavizar, con bloqueos largos, y vista de colisiones con la forma de cada regla.
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -82,11 +83,7 @@ Hechos:
 3. ~~C · Aprender y volver~~: hecho (ADR 0037).
 4. ~~D · Ambiente~~: hecho (ADR 0038).
 4b. ~~F · Cuarta auditoría (R01 a R04)~~: hecho (ADR 0039), antes del bloque E por decisión del dueño.
-4c. **G · Instrumentos de diagnóstico** (sexta auditoría, `docs/auditorias/2026-10-26-sexta-auditoria.md`). Va antes de las mediciones en teléfono, porque sin él el registro puede ocultar tirones:
-   - S01: el medidor de fluidez recibe el intervalo suavizado de Phaser. Hay que medir `game.loop.rawDelta` y conservar el delta de simulación. Agregar como regresión las secuencias con picos de 40, 120 y 300 ms.
-   - Usar un solo umbral de 33,3 ms, con su unidad explícita, en la especificación y en el contador.
-   - S02: la vista de colisiones muestra el Tico siempre como caja y gira los contornos en la curva. Debe mostrar la caja de contacto, el círculo de daño (radio `p.w/2`) y el de recogida (radio `p.h/2`), proyectados punto a punto y según el estado activo (barreras, salto). Mientras tanto, rotularla como aproximada.
-   - No cambia vida, daño, aviso, recompensas ni puntaje.
+4c. ~~G · Instrumentos de diagnóstico~~: hecho (ADR 0046, sexta auditoría S01 y S02).
 5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.
