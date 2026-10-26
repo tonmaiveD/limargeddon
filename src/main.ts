@@ -5,6 +5,7 @@ import { installInput } from './core/input';
 import { ui } from './core/render';
 import { BootScene } from './scenes/Boot';
 import { MenuScene } from './scenes/Menu';
+import { GraficosScene } from './scenes/Graficos';
 import { StageScene } from './scenes/Stage';
 import { ResultsScene } from './scenes/Results';
 import { GarageScene } from './scenes/Garage';
@@ -24,7 +25,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
   input: { keyboard: false },
   disableContextMenu: true,
-  scene: [BootScene, MenuScene, StageScene, ResultsScene, GarageScene],
+  scene: [BootScene, MenuScene, StageScene, ResultsScene, GarageScene, GraficosScene],
 });
 
 game.events.once(Phaser.Core.Events.READY, () => fitStage(game));

@@ -3,7 +3,8 @@ import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
 import { W } from '../core/constants';
 import { Sfx } from '../core/audio/sfx';
-import { drawCar } from '../core/damage-render';
+import { bakeCar } from '../core/art/bake';
+import { ART_SCALE, ticoArt } from '../core/art/vehicles';
 import { FONT } from '../core/gfx';
 import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
 import { buyUpgrade, getGarage, getSettings, setGoal, unlockedStage, type Garage } from '../core/save';
@@ -120,16 +121,11 @@ export class GarageScene extends Phaser.Scene {
     g.fillStyle = '#2a2238'; for (let x = -100; x < W + 100; x += 40) g.fillRect(x, 0, 2, 230);
     g.fillStyle = C.yellow; for (let x = -100; x < W + 100; x += 24) g.fillRect(x, 222, 12, 4);
     g.fillStyle = C.pink; g.font = FONT(14); g.textAlign = 'center'; g.fillText('TALLER DE LA VICTORIA', W / 2, 26);
-    // el Tico en grande, girando apenas, con las piezas compradas
-    const look = this.look, s = 2.6, wob = Math.sin(this.t * 1.5) * 0.06;
-    drawCar(g, this.t, { x: W / 2, y: 128, w: 28 * s, h: 48 * s }, {
-      body: '#f2c230', roof: '#e0ae1a', ang: wob, seed: 7, extra: (g, w, h) => {
-        if (look?.bumper) { g.fillStyle = '#4a4452'; g.fillRect(-w / 2 - 3, -h / 2 - 8, w + 6, 10); }
-        if (look?.plates) { g.fillStyle = '#6c7a8c'; g.fillRect(-w / 2 - 5, -h / 4, 5, h / 2); g.fillRect(w / 2, -h / 4, 5, h / 2); }
-        g.fillStyle = '#111'; g.fillRect(-20, -h / 2 + h * 0.42, 40, 14);
-        g.fillStyle = C.yellow; g.font = FONT(12); g.textAlign = 'center'; g.fillText('TAXI', 0, -h / 2 + h * 0.42 + 12);
-      },
-    });
+    // el Tico en grande, girando apenas, con las piezas compradas (imagen horneada a su tamaño, ADR 0042)
+    const look = this.look, s = 2.6, wob = Math.sin(this.t * 1.5) * 0.06, art = ticoArt(look);
+    const key = `tico-taller-${!!look?.bumper}-${!!look?.plates}`;
+    if (!this.textures.exists(key)) this.textures.addCanvas(key, bakeCar(art, 0, 7, s * ART_SCALE));
+    this.L.cars.image(key, W / 2, 128, 1 / ART_SCALE, wob);
     endLayers(this.L);
   }
 }
