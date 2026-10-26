@@ -6,6 +6,7 @@ import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { drawHazards, drawSplat } from './hazards';
 import { drawEndingUI, drawEndingWorld } from './ending';
 import { drawLights } from './lights';
+import { HITBOXES, drawHitboxes } from './hitboxes';
 import { ART_SCALE, drawVehicle, lights, texture, ticoArt } from './art/vehicles';
 import { bossCar } from './art/bosses';
 import { drawFoe, drawObstacle, drawPickupB, drawShot } from './art/props';
@@ -17,7 +18,7 @@ import { C, clamp } from './util';
 
 // Capas de dibujo, de abajo hacia arriba (ADR 0042 y 0044): paisaje horneado; asfalto; bonus; tráfico (imágenes) y sus luces; jefe, proyectiles
 // y peligros (el jefe en imagen, ADR 0043); lo que va sobre el jefe; el Tico (imagen) y sus luces; efectos; interfaz.
-export interface Layers { back: Gfx; world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; bossFx: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
+export interface Layers { back: Gfx; world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; bossFx: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx; uiTop: Gfx }
 
 // Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
 export const ui = { touch: false };
@@ -229,7 +230,9 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, i
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
-  drawBlindSpot(L.fx, G); drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G);
+  drawBlindSpot(L.fx, G); drawDark(L.fx, G);
+  if (HITBOXES) drawHitboxes(L.fx, G); // vista de diagnóstico, sobre la oscuridad y bajo el HUD
+  drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G);
   // dentro del carguero no hay pista: el HUD se oculta (sus textos quedarían sobre el interior del avión)
   if (G.ending && G.cfg.ending?.kind === 'carguero') drawEndingUI(L.ui, G, (g, box) => drawTico(g, g, G, box));
   else { drawHUD(L.ui, G); drawEndingUI(L.ui, G, (g, box) => drawTico(g, g, G, box)); }
@@ -248,13 +251,15 @@ function drawHint(g: Gfx, G: Game): void {
 export function createLayers(scene: Phaser.Scene): Layers {
   const back = new Gfx(scene, -1), world = new Gfx(scene, 0);
   world.under = back; // los costados horneados van debajo de la pista (ADR 0044)
+  const ui = new Gfx(scene, 30), uiTop = new Gfx(scene, 30.5);
+  ui.over = uiTop; // sobre las imágenes del HUD y bajo sus textos (ADR 0045)
   return {
     back, world, low: new Gfx(scene, 8), cars: new Gfx(scene, 10), carsFx: new Gfx(scene, 11), ents: new Gfx(scene, 12),
-    bossFx: new Gfx(scene, 12.5), me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30),
+    bossFx: new Gfx(scene, 12.5), me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui, uiTop,
   };
 }
-const ALL = (L: Layers) => [L.back, L.world, L.low, L.cars, L.carsFx, L.ents, L.bossFx, L.me, L.meFx, L.fx, L.ui];
+const ALL = (L: Layers) => [L.back, L.world, L.low, L.cars, L.carsFx, L.ents, L.bossFx, L.me, L.meFx, L.fx, L.ui, L.uiTop];
 export const beginLayers = (L: Layers) => { for (const g of ALL(L)) g.begin(); };
 // la curva se aplica a todo menos al HUD
-export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { for (const g of ALL(L)) if (g !== L.ui) g.warp = w; };
+export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { for (const g of ALL(L)) if (g !== L.ui && g !== L.uiTop) g.warp = w; };
 export const endLayers = (L: Layers) => { for (const g of ALL(L)) g.end(); };

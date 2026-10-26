@@ -48,3 +48,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0042](0042-trafico-nivel-b.md) | Tráfico y Tico en nivel B | Aceptada |
 | [0043](0043-jefes-nivel-b.md) | Jefes y combi aliada en nivel B | Aceptada |
 | [0044](0044-paisaje-obstaculos-proyectiles-nivel-b.md) | Paisaje, obstáculos y proyectiles en nivel B | Aceptada |
+| [0045](0045-paso-previo-graficos.md) | Paso previo a la mejora gráfica: salida del enrosque, correas, fluidez y colisiones | Aceptada |

@@ -1,10 +1,10 @@
 # Estado del proyecto
 
-**Al 25 de octubre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
+**Al 26 de octubre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #30 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #40 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -28,7 +28,8 @@
 - **Gráficos nivel B** (ADR 0041 a 0044): tráfico, Tico, jefes, combi aliada, paisaje de los diez distritos, obstáculos, bonus y proyectiles son imágenes horneadas con sombreado; el daño de los vehículos sigue siendo procedural por etapas. La pista suma vereda con cordón, huellas, grietas y manchas.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
-- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.
+- **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro. Desde la ADR 0045 guarda también la fluidez (percentiles del tiempo entre cuadros) y el equipo.
+- **Vista de colisiones** (ADR 0045): con `?colisiones` en la dirección se ven las zonas de choque sobre el dibujo.
 
 ## Motor (resumen)
 - Cada etapa es datos (`src/stages/<distrito>/config.json`) más su paisaje (`scenery.ts`) y el dibujo de su jefe (`src/bosses/<jefe>-render.ts`). La IA es `PhaseBoss` para todos (ADR 0015).
@@ -65,6 +66,8 @@ Hechos:
 - C · Aprender y volver (ADR 0037).
 - D · Ambiente (ADR 0038).
 - F · Ayudas que se alcanzan a leer y regreso a etapas ganadas (ADR 0039, cuarta auditoría).
+- Gráficos nivel B (ADR 0040 a 0044).
+- Paso previo de la especificación de mejora gráfica (ADR 0045): salida del enrosque, correas del carguero, fluidez en el registro y vista de colisiones.
 
 **En paralelo y desde ya (dueño y tester, sin código)**
 - Partidas reales con "Copiar registro": Gamarra, Costa Verde y la Línea Amarilla, en el teléfono. El bloque A ya corrigió la Línea Amarilla y el enrosque.
@@ -86,6 +89,7 @@ Hechos:
    - Bot con restricciones de pulgar.
    - Las propuestas aplazadas de las auditorías, solo si los datos las piden.
    - No endurecer la Línea Amarilla solo porque el bot gana siempre.
+5b. **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre de 2026): falta decidir quién produce el arte.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 
 **Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.

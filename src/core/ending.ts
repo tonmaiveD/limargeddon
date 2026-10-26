@@ -92,6 +92,8 @@ function drawCargoBay(g: Gfx, G: Game, drawTico: (g: Gfx, box: { x: number; y: n
   // el Tico amarrado en la bodega, con una luz roja que parpadea
   g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(W / 2 - 18, 300, 40, 64);
   drawTico(g, { x: W / 2, y: 330, w: 32, h: 56 });
-  g.fillStyle = '#6c717c'; g.fillRect(W / 2 - 26, 316, 52, 3); g.fillRect(W / 2 - 26, 344, 52, 3); // correas
+  // las correas cruzan el Tico, que es una imagen, así que van en la capa de encima (ADR 0045)
+  const o = g.over ?? g;
+  o.fillStyle = '#6c717c'; o.fillRect(W / 2 - 26, 316, 52, 3); o.fillRect(W / 2 - 26, 344, 52, 3);
   if (Math.floor(t * 2) % 2) { g.fillStyle = '#ff3355'; g.beginPath(); g.arc(W / 2, 110, 5, 0, 7); g.fill(); }
 }

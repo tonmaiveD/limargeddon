@@ -9,8 +9,13 @@ function drawSeg(g: Gfx, img: Gfx, G: Game, s: Seg, k: number): void {
     { ang: s.ang, hazard: Math.floor(G.t * 3 + k) % 2 === 0, flash: s.flash, dmg: 1 - Math.max(0, s.hp) / s.max });
 }
 
-// Enrosque: mientras se forma, un círculo punteado anticipa el anillo; la salida late en verde con una flecha hacia afuera.
-function drawCoil(g: Gfx, G: Game): void {
+/*
+ * Enrosque: mientras se forma, un círculo punteado anticipa el anillo; la salida late en verde con una flecha hacia
+ * afuera. Los puntos siguen la curva uno por uno, como los autos del anillo, y la flecha y el letrero se anclan a la
+ * proyección del hueco (ADR 0045), no al centro del anillo, para que marquen la salida real en la Costa Verde.
+ */
+export const EXIT_R = 6, LABEL_R = 34;
+export function drawCoil(g: Gfx, G: Game): void {
   const c = G.coil;
   if (c.st !== 'tele' && c.st !== 'hold') return;
   const pulse = 0.55 + 0.45 * Math.sin(G.t * 14);
@@ -18,17 +23,20 @@ function drawCoil(g: Gfx, G: Game): void {
     g.fillStyle = 'rgba(255,46,136,.7)';
     for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; if (Math.abs(Math.atan2(Math.sin(a - c.gap), Math.cos(a - c.gap))) > c.half) g.fillRect(c.cx + Math.cos(a) * c.r - 2, c.cy + Math.sin(a) * c.r - 2, 4, 4); }
   }
-  const ax = Math.cos(c.gap), ay = Math.sin(c.gap), x = c.cx + ax * (c.r + 6), y = c.cy + ay * (c.r + 6);
-  g.save(); g.translate(x, y); g.rotate(c.gap);
-  g.fillStyle = `rgba(61,255,154,${pulse})`;
-  g.beginPath(); g.moveTo(16, 0); g.lineTo(0, -11); g.lineTo(0, -5); g.lineTo(-12, -5); g.lineTo(-12, 5); g.lineTo(0, 5); g.lineTo(0, 11); g.closePath(); g.fill();
-  g.restore();
-  g.fillStyle = '#3dff9a'; g.font = FONT(8); g.textAlign = 'center';
-  g.fillText('SALIDA', c.cx + ax * (c.r + 34), c.cy + ay * (c.r + 34) + 3);
+  const ax = Math.cos(c.gap), ay = Math.sin(c.gap);
+  g.pin(c.cx + ax * (c.r + EXIT_R), c.cy + ay * (c.r + EXIT_R), c.gap, () => {
+    g.fillStyle = `rgba(61,255,154,${pulse})`;
+    g.beginPath(); g.moveTo(16, 0); g.lineTo(0, -11); g.lineTo(0, -5); g.lineTo(-12, -5); g.lineTo(-12, 5); g.lineTo(0, 5); g.lineTo(0, 11); g.closePath(); g.fill();
+  });
+  // el letrero va derecho para que se lea, centrado en su punto proyectado
+  g.pin(c.cx + ax * (c.r + LABEL_R), c.cy + ay * (c.r + LABEL_R), 0, () => {
+    g.fillStyle = '#3dff9a'; g.font = FONT(8); g.textAlign = 'center';
+    g.fillText('SALIDA', 0, 3);
+  });
 }
 
 export function drawDobleFila(g: Gfx, G: Game, img: Gfx): void {
-  g.rigid(G.coil.cx, G.coil.cy, () => drawCoil(g, G));
+  drawCoil(g, G);
   let k = 0;
   // cada auto de la fila es rígido sobre la pista curva: se corre y gira entero, no se deforma (ADR 0040)
   const seg = (s: Seg) => { const n = k++; img.rigid(s.x, s.y, () => g.rigid(s.x, s.y, () => drawSeg(g, img, G, s, n))); };
