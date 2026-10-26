@@ -85,6 +85,22 @@ export class Gfx {
     const m = this.m, cs = Math.cos(r), sn = Math.sin(r), a = m[0], b = m[1], c = m[2], d = m[3];
     m[0] = a * cs + c * sn; m[1] = b * cs + d * sn; m[2] = c * cs - a * sn; m[3] = d * cs - b * sn;
   }
+  /*
+   * Objeto rígido sobre la pista curva (ADR 0040): se corre entero según la curva a la altura de su centro y gira con
+   * la pendiente, en vez de deformarse punto a punto. El asfalto y las líneas siguen la curva punto a punto. Sin curva,
+   * dibuja igual que siempre.
+   */
+  rigid(x: number, y: number, draw: () => void): void {
+    const w = this.warp;
+    if (!w) { draw(); return; }
+    const m = this.m, py = m[1] * x + m[3] * y + m[5];
+    const slope = (w(py + 4) - w(py - 4)) / 8; // cuánto se corre la pista por píxel de altura
+    this.save(); this.warp = null;
+    m[4] += w(py); // corrimiento en pantalla
+    this.translate(x, y); this.rotate(-Math.atan(slope)); this.translate(-x, -y);
+    try { draw(); } finally { this.restore(); this.warp = w; }
+  }
+
   private tx(x: number, y: number): Pt {
     const m = this.m, py = m[1] * x + m[3] * y + m[5];
     return { x: m[0] * x + m[2] * y + m[4] + (this.warp ? this.warp(py) : 0), y: py };

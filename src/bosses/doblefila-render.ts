@@ -29,12 +29,19 @@ function drawCoil(g: Gfx, G: Game): void {
 }
 
 export function drawDobleFila(g: Gfx, G: Game): void {
-  drawCoil(g, G);
+  g.rigid(G.coil.cx, G.coil.cy, () => drawCoil(g, G));
   let k = 0;
+  // cada auto de la fila es rígido sobre la pista curva: se corre y gira entero, no se deforma (ADR 0040)
+  const seg = (s: Seg) => { const n = k++; g.rigid(s.x, s.y, () => drawSeg(g, G, s, n)); };
   for (const ch of G.chains) {
-    for (let i = ch.segs.length - 1; i >= 0; i--) drawSeg(g, G, ch.segs[i], k++);
-    if (ch.lead) drawSeg(g, G, ch.lead, k++);
+    for (let i = ch.segs.length - 1; i >= 0; i--) seg(ch.segs[i]);
+    if (ch.lead) seg(ch.lead);
   }
+  const b = G.b;
+  g.rigid(b.x, b.y, () => drawHead(g, G));
+}
+
+function drawHead(g: Gfx, G: Game): void {
   const b = G.b;
   drawCar(g, G.t, b, {
     body: '#c9ccd3', roof: '#6c717c', ang: b.ang, brake: b.flash === 'brake', rev: b.flash === 'rev', hazard: b.flash === 'hazard' || Math.floor(G.t * 3) % 2 === 0,

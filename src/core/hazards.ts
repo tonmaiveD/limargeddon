@@ -109,16 +109,16 @@ export function drawHazards(g: Gfx, G: Game): void {
     }
   }
   const f = G.flock, B = G.cfg.hazards?.birds;
-  if (B && f.on) {
+  if (B && f.on) g.rigid(f.x, f.y, () => { // la bandada y su sombra, rígidas sobre la curva (ADR 0040)
     if (!f.scared) { g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(f.x, f.y + 30, B.w / 2, 10, 0, 0, 7); g.fill(); } // sombra
     g.strokeStyle = '#f4f6fb'; g.lineWidth = 1.6;
     for (let i = 0; i < 7; i++) { // gaviotas en V
       const bx = f.x + (i - 3) * 9, by = f.y - Math.abs(i - 3) * 6, flap = Math.sin(G.t * 16 + i) * 3;
       g.beginPath(); g.moveTo(bx - 5, by + flap); g.lineTo(bx, by + 2); g.lineTo(bx + 5, by + flap); g.stroke();
     }
-  }
+  });
   const c = G.cart, K = G.cfg.hazards?.cart;
-  if (K && c.on) drawCarretilla(g, c.x, c.y, c.dir);
+  if (K && c.on) g.rigid(c.x, c.y, () => drawCarretilla(g, c.x, c.y, c.dir));
 }
 
 // Carretilla de helados: amarilla, con franjas roja y azul, el toldo y el heladero empujando.

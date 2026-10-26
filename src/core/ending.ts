@@ -54,7 +54,7 @@ export function drawEndingWorld(g: Gfx, G: Game): void {
   g.fillStyle = '#ffd400'; g.fillRect(left - 8, y - 52, right - left + 16, 14);
   g.fillStyle = '#15111d'; g.font = FONT(8); g.textAlign = 'center'; g.fillText('META · AGUA DULCE', W / 2, y - 42);
   const c = cartPos(G);
-  g.save(); g.translate(c.x, c.y); g.rotate(-Math.PI / 2); drawCarretilla(g, 0, 0, 1); g.restore();
+  g.rigid(c.x, c.y, () => { g.save(); g.translate(c.x, c.y); g.rotate(-Math.PI / 2); drawCarretilla(g, 0, 0, 1); g.restore(); });
 }
 
 // Lo que va encima de todo (capa de interfaz): el interior del carguero, el texto final y el aviso para saltar.
