@@ -44,3 +44,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0038](0038-ambiente.md) | Ambiente: música por distrito, cierres y semáforos en ola | Aceptada |
 | [0039](0039-bloque-f-cuarta-auditoria.md) | Bloque F: ayudas que se alcanzan a leer y regreso a etapas ganadas | Aceptada |
 | [0040](0040-curva-rigida-por-objeto.md) | Curva rígida por objeto en la Costa Verde | Aceptada |
+| [0041](0041-prueba-graficos-nivel-b.md) | Prueba de gráficos nivel B: vehículos horneados con sombreado | En evaluación |

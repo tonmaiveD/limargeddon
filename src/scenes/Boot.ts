@@ -10,6 +10,8 @@ export class BootScene extends Phaser.Scene {
       ? Promise.all([fonts.load('16px Bungee'), fonts.load('800 16px Archivo'), fonts.load('600 16px Archivo')]).catch(() => [])
       : Promise.resolve([]);
     const timeout = new Promise((r) => setTimeout(r, 2500));
-    Promise.race([ready, timeout]).then(() => this.scene.start('Menu'));
+    // ?graficos abre la prueba de gráficos (ADR 0041) en lugar del menú
+    const art = typeof location !== 'undefined' && new URLSearchParams(location.search).has('graficos');
+    Promise.race([ready, timeout]).then(() => this.scene.start(art ? 'Graficos' : 'Menu'));
   }
 }
