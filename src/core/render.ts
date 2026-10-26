@@ -6,7 +6,7 @@ import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { drawHazards, drawSplat } from './hazards';
 import { drawEndingUI, drawEndingWorld } from './ending';
 import { drawLights } from './lights';
-import { HITBOXES, drawHitboxes } from './hitboxes';
+import { HITBOXES, drawHitboxLegend, drawHitboxes } from './hitboxes';
 import { ART_SCALE, drawVehicle, lights, texture, ticoArt } from './art/vehicles';
 import { bossCar } from './art/bosses';
 import { drawFoe, drawObstacle, drawPickupB, drawShot } from './art/props';
@@ -231,7 +231,7 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, i
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
   drawBlindSpot(L.fx, G); drawDark(L.fx, G);
-  if (HITBOXES) drawHitboxes(L.fx, G); // vista de diagnóstico, sobre la oscuridad y bajo el HUD
+  if (HITBOXES) { drawHitboxes(L.fx, G); drawHitboxLegend(L.ui); } // vista de diagnóstico, sobre la oscuridad y bajo el HUD
   drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G);
   // dentro del carguero no hay pista: el HUD se oculta (sus textos quedarían sobre el interior del avión)
   if (G.ending && G.cfg.ending?.kind === 'carguero') drawEndingUI(L.ui, G, (g, box) => drawTico(g, g, G, box));

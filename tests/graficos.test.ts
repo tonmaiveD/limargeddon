@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('phaser', () => ({ default: {} }));
 import { Gfx } from '../src/core/gfx';
 import { roadWarp } from '../src/core/road';
-import { FrameMeter, stats } from '../src/core/frames';
+import { FrameMeter, JANK_MS, STALL_MS, frameMs, stats } from '../src/core/frames';
 import { drawCoil, EXIT_R } from '../src/bosses/doblefila-render';
 import { drawEndingUI } from '../src/core/ending';
 import { drawHitboxes } from '../src/core/hitboxes';
@@ -96,10 +96,34 @@ describe('Medición de fluidez para el registro', () => {
     for (let i = 0; i < 4; i++) m.add(25);
     m.add(40);
     m.resume(); m.add(900); // la vuelta de una pausa no cuenta
-    m.add(5000); // ni un salto de más de un segundo (pestaña oculta)
+    m.add(6000); // ni un salto de más de cinco segundos (equipo suspendido)
     const s = m.summary();
     expect(s.warm).toMatchObject({ n: 150, p50: 20, over20: 0 });
     expect(s.play).toMatchObject({ n: 100, p50: 16, p95: 16, p99: 25, max: 40, over20: 5, over33: 1 });
+    expect(s.stalls).toEqual([]);
+  });
+
+  // sexta auditoría, S01: con el intervalo suavizado de Phaser estos picos desaparecían
+  it.each([40, 120, 300])('conserva picos de %i ms en máximo, p99 y conteo', (spike) => {
+    const m = new FrameMeter();
+    m.add(16.67);
+    for (let i = 0; i < 180; i++) m.add(16.67); // calentamiento
+    for (let i = 1; i <= 600; i++) m.add(i % 60 === 0 ? spike : 16.67);
+    const s = m.summary().play!;
+    expect(s.max).toBe(spike);
+    expect(s.p99).toBe(spike);
+    expect(s.over33).toBe(10);
+    expect(s.over20).toBe(10);
+    expect(m.summary().stalls).toEqual(spike >= STALL_MS ? Array(10).fill(spike) : []);
+  });
+
+  it('mide el intervalo crudo del bucle y no el suavizado', () => {
+    expect(frameMs({ rawDelta: 300, delta: 16.7 } as { rawDelta: number })).toBe(300);
+  });
+
+  it('el umbral de cuadro perdido es el del criterio de aceptación', () => {
+    expect(JANK_MS).toBe(33.3);
+    expect(stats([33.3, 33.4])!.over33).toBe(1);
   });
 
   it('los percentiles salen del orden de los intervalos', () => {
@@ -110,14 +134,61 @@ describe('Medición de fluidez para el registro', () => {
 });
 
 describe('Vista de colisiones', () => {
-  it('dibuja el contorno de cada zona de choque donde la simulación la usa', () => {
-    const G = startPort('normal', structuredClone(cv) as StageConfig), f = fakeScene(), g = new Gfx(f.scene, 20);
-    G.traffic = [{ ...G.p, x: 120, y: 200, w: 30, h: 52 } as unknown as Game['traffic'][number]];
-    G.foes = [{ x: 200, y: 300, vx: 0, vy: 0, r: 9, dmg: 10, col: '#fff' }];
-    drawHitboxes(g, G);
-    expect(f.lines.some((l) => l.pts.length === 4 && l.pts[0].x === G.p.x - G.p.w / 2 && l.pts[0].y === G.p.y - G.p.h / 2)).toBe(true);
-    expect(f.lines.some((l) => l.pts.length === 4 && l.pts[0].x === 105 && l.pts[0].y === 174)).toBe(true);
-    const foe = f.lines.find((l) => l.pts.length > 8)!;
-    expect(Math.max(...foe.pts.map((q) => dist(q, { x: 200, y: 300 })))).toBeCloseTo(9, 5);
+  const ME = 0x3dff9a, HURT = 0xff2e88, GOOD = 0xffe14d;
+  function view(G: Game, warp: ((y: number) => number) | null = null) {
+    const f = fakeScene(), g = new Gfx(f.scene, 20);
+    g.warp = warp; drawHitboxes(g, G);
+    return f.lines;
+  }
+  function bare(): Game {
+    const G = startPort('normal', structuredClone(cv) as StageConfig);
+    G.traffic = []; G.obstacles = []; G.foes = []; G.pickups = []; G.shots = []; G.chains = [];
+    G.p.x = 180; G.p.y = 500;
+    return G;
+  }
+  const radius = (pts: Pt[], c: Pt) => Math.max(...pts.map((q) => dist(q, c)));
+
+  it('proyecta la caja del Tico punto a punto, con error menor de 1 px en toda la curva', () => {
+    let worst = 0;
+    for (let scroll = 0; scroll < 6000; scroll += 20) {
+      const G = bare(), p = G.p, warp = roadWarp(cv, scroll)!;
+      const boxLine = view(G, warp).find((l) => l.color === ME)!;
+      for (const q of boxLine.pts) {
+        const x = q.x - warp(q.y), y = q.y; // de vuelta al espacio lógico
+        const dx = Math.abs(x - p.x) - p.w / 2, dy = Math.abs(y - p.y) - p.h / 2;
+        worst = Math.max(worst, Math.abs(Math.max(dx, dy))); // distancia al borde de la caja
+      }
+    }
+    expect(worst).toBeLessThan(1);
+  });
+
+  it('el proyectil y los bonus se ven tocar al Tico solo cuando la regla los cuenta', () => {
+    const G = bare(), p = G.p;
+    G.foes = [{ x: p.x, y: p.y + 30, vx: 0, vy: 0, r: 9, dmg: 10, col: '#fff' }]; // 30 contra 9 + 14: no golpea
+    G.pickups = [{ k: 'turbo', x: p.x + 30, y: p.y, r: 9, rot: 0 } as Game['pickups'][number]]; // 30 contra 9 + 24: recoge
+    const lines = view(G);
+    // círculos de ese color centrados en c (el centro de un círculo es el promedio de sus puntos)
+    const mid = (pts: Pt[]) => ({ x: pts.reduce((a, q) => a + q.x, 0) / pts.length, y: pts.reduce((a, q) => a + q.y, 0) / pts.length });
+    const at = (c: Pt, col: number) => lines.filter((l) => l.color === col && dist(mid(l.pts), c) < 0.5).map((l) => radius(l.pts, c));
+    const meHurt = Math.max(...at(p, HURT)), foe = Math.min(...at(G.foes[0], HURT));
+    const meGood = Math.max(...at(p, GOOD)), pick = Math.min(...at(G.pickups[0], GOOD));
+    expect(meHurt).toBeCloseTo(p.w / 2, 3); expect(foe).toBeCloseTo(9, 3);
+    expect(meGood).toBeCloseTo(p.h / 2, 3); expect(pick).toBeCloseTo(9, 3);
+    expect(meHurt + foe < 30).toBe(!(Math.hypot(0, 30) < 9 + p.w / 2)); // no se tocan y no golpea
+    expect(meGood + pick > 30).toBe(Math.hypot(30, 0) < p.h / 2 + 9); // se tocan y recoge
+  });
+
+  it('en el aire la caja de contacto se ve tenue y los círculos no', () => {
+    const G = bare(); G.p.air = 0.5;
+    const lines = view(G);
+    expect(lines.find((l) => l.color === ME)!.alpha).toBeLessThan(0.5);
+    expect(lines.filter((l) => l.color === HURT).every((l) => (l.alpha ?? 1) > 0.5)).toBe(true);
+  });
+
+  it('en el enrosque muestra un sector por auto del anillo', () => {
+    const G = bare();
+    Object.assign(G.coil, { st: 'hold', cx: 180, cy: 470, r: 54, gap: 0, half: 0.4, slots: [1, 2, 3, 4, 5] });
+    const sectors = view(G).filter((l) => l.color === HURT && l.pts.length > 20 && radius(l.pts, { x: 180, y: 470 }) > 54);
+    expect(sectors.length).toBe(5);
   });
 });

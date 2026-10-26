@@ -5,16 +5,16 @@ import type Phaser from 'phaser';
  * capa, cada imagen y cada texto, así una prueba puede medir dónde y en qué orden queda cada cosa en pantalla.
  */
 export interface Pt { x: number; y: number }
-export interface Shape { depth: number; pts: Pt[]; color: number }
+export interface Shape { depth: number; pts: Pt[]; color: number; alpha?: number }
 export interface Placed { depth: number; key: string; x: number; y: number; visible: boolean }
 
 export function fakeScene() {
   const shapes: Shape[] = [], lines: Shape[] = [], images: Placed[] = [], texts: (Placed & { text: string })[] = [];
   const graphics = () => {
-    let depth = 0, color = 0;
+    let depth = 0, color = 0, lineColor = 0, lineAlpha = 1;
     const g = {
-      setDepth(d: number) { depth = d; return g; }, clear() { return g; }, lineStyle() { return g; },
-      strokePoints(pts: Pt[]) { lines.push({ depth, color, pts: pts.map((q) => ({ ...q })) }); return g; },
+      setDepth(d: number) { depth = d; return g; }, clear() { return g; }, lineStyle(_w: number, c: number, a = 1) { lineColor = c; lineAlpha = a; return g; },
+      strokePoints(pts: Pt[]) { lines.push({ depth, color: lineColor, alpha: lineAlpha, pts: pts.map((q) => ({ ...q })) }); return g; },
       fillStyle(c: number) { color = c; return g; },
       fillRect(x: number, y: number, w: number, h: number) { shapes.push({ depth, color, pts: [{ x, y }, { x: x + w, y }, { x: x + w, y: y + h }, { x, y: y + h }] }); return g; },
       fillPoints(pts: Pt[]) { shapes.push({ depth, color, pts: pts.map((q) => ({ ...q })) }); return g; },
