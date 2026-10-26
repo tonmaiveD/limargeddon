@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #40 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #41 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -55,7 +55,7 @@
 - Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026, y con la cuarta (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) el mismo día. Cada bloque es un PR.
+Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026, y con la cuarta (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) el mismo día. La sexta (`docs/auditorias/2026-10-26-sexta-auditoria.md`, 26 de octubre) agrega el bloque G. Cada bloque es un PR.
 
 Hechos:
 - Claridad del combate (ADR 0032).
@@ -82,6 +82,11 @@ Hechos:
 3. ~~C · Aprender y volver~~: hecho (ADR 0037).
 4. ~~D · Ambiente~~: hecho (ADR 0038).
 4b. ~~F · Cuarta auditoría (R01 a R04)~~: hecho (ADR 0039), antes del bloque E por decisión del dueño.
+4c. **G · Instrumentos de diagnóstico** (sexta auditoría, `docs/auditorias/2026-10-26-sexta-auditoria.md`). Va antes de las mediciones en teléfono, porque sin él el registro puede ocultar tirones:
+   - S01: el medidor de fluidez recibe el intervalo suavizado de Phaser. Hay que medir `game.loop.rawDelta` y conservar el delta de simulación. Agregar como regresión las secuencias con picos de 40, 120 y 300 ms.
+   - Usar un solo umbral de 33,3 ms, con su unidad explícita, en la especificación y en el contador.
+   - S02: la vista de colisiones muestra el Tico siempre como caja y gira los contornos en la curva. Debe mostrar la caja de contacto, el círculo de daño (radio `p.w/2`) y el de recogida (radio `p.h/2`), proyectados punto a punto y según el estado activo (barreras, salto). Mientras tanto, rotularla como aproximada.
+   - No cambia vida, daño, aviso, recompensas ni puntaje.
 5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.
@@ -89,7 +94,7 @@ Hechos:
    - Bot con restricciones de pulgar.
    - Las propuestas aplazadas de las auditorías, solo si los datos las piden.
    - No endurecer la Línea Amarilla solo porque el bot gana siempre.
-5b. **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre de 2026): falta decidir quién produce el arte.
+5b. **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre de 2026): falta decidir quién produce el arte. Según la sexta auditoría, el piloto debe mostrar una mejora visible sobre el nivel B actual, no sobre la versión anterior. El esfuerzo de 25 a 45 jornadas se vuelve a estimar al cerrar el piloto.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 
 **Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.
