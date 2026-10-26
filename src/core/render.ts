@@ -1,113 +1,32 @@
 import { H, W, view } from './constants';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
-import { tramo, type Game, type Pickup } from './state';
+import { tramo, type Game } from './state';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
-import { gateClosed } from './world';
 import { drawHazards, drawSplat } from './hazards';
 import { drawEndingUI, drawEndingWorld } from './ending';
 import { drawLights } from './lights';
 import { ART_SCALE, drawVehicle, lights, texture, ticoArt } from './art/vehicles';
 import { bossCar } from './art/bosses';
+import { drawFoe, drawObstacle, drawPickupB, drawShot } from './art/props';
 import { cobrador } from '../bosses/combi-render';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
-// Capas de dibujo, de abajo hacia arriba (ADR 0042): asfalto; bonus; tráfico (imágenes) y sus luces; jefe, proyectiles
+// Capas de dibujo, de abajo hacia arriba (ADR 0042 y 0044): paisaje horneado; asfalto; bonus; tráfico (imágenes) y sus luces; jefe, proyectiles
 // y peligros (el jefe en imagen, ADR 0043); lo que va sobre el jefe; el Tico (imagen) y sus luces; efectos; interfaz.
-export interface Layers { world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; bossFx: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
+export interface Layers { back: Gfx; world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; bossFx: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
 
 // Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
 export const ui = { touch: false };
 
 // Detalles declarativos sobre la carrocería (ver VehicleLook en config.ts).
-// Obstáculos declarados en el JSON (ver ObstacleDef). Van en la capa del asfalto, debajo de los vehículos.
+// Obstáculos declarados en el JSON (ver ObstacleDef), en la capa del asfalto, rígidos sobre la curva (ADR 0040).
+// Nivel B (ADR 0044): cada uno es un sprite horneado; el peaje y los peatones tienen partes en vivo (art/props.ts).
 function drawObstacles(g: Gfx, G: Game): void {
-  const defs = G.cfg.obstacles ?? [];
-  for (const ob of G.obstacles) g.rigid(ob.x, ob.y, () => { // cada obstáculo rígido sobre la curva (ADR 0040)
-    const o = defs[ob.i], x0 = ob.x - ob.w / 2, y0 = ob.y - ob.h / 2;
-    if (o.style === 'peaje') {
-      // peaje abandonado: casetas entre carriles y una barrera por carril que sube y baja sola
-      const { left, laneWidth, lanes } = G.cfg.road;
-      for (let l = 0; l < lanes; l++) {
-        const lx = left + l * laneWidth, closed = gateClosed(G, ob, l);
-        if (closed) { for (let x = lx + 6, i = 0; x < lx + laneWidth - 6; x += 8, i++) { g.fillStyle = i % 2 ? '#f4f6fb' : '#ff3355'; g.fillRect(x, ob.y - 2, 8, 4); } }
-        else { g.fillStyle = '#ff3355'; g.fillRect(lx + 6, ob.y - 2, 4, 4); g.fillStyle = '#f4f6fb'; g.fillRect(lx + 6, ob.y - 10, 3, 8); }
-        if (o.payLanes && !closed) { g.fillStyle = C.yellow; g.font = FONT(6); g.textAlign = 'center'; g.fillText('PAGO S/' + (o.toll ?? 0), lx + laneWidth / 2, ob.y + 14); }
-      }
-      g.fillStyle = o.col;
-      for (let l = 0; l <= lanes; l++) { const bx = left + l * laneWidth; g.fillRect(bx - 5, ob.y - ob.h / 2 - 4, 10, ob.h + 8); }
-      g.fillStyle = o.col2 ?? '#15111d'; for (let l = 0; l <= lanes; l++) g.fillRect(left + l * laneWidth - 3, ob.y - 3, 6, 4);
-      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(7); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y - ob.h / 2 - 8); }
-      return;
-    }
-    if (o.style === 'rampa') {
-      // rampa de tierra con franjas: el lado oscuro es la subida
-      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x0 + 2, y0 + 3, ob.w, ob.h);
-      g.fillStyle = o.col; g.fillRect(x0, y0, ob.w, ob.h);
-      g.fillStyle = o.col2 ?? '#15111d'; for (let i = 0; i < 4; i++) g.fillRect(x0, y0 + ob.h - (i + 1) * (ob.h / 5), ob.w, 2);
-      g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x0, y0, ob.w, 2);
-      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(6); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y + 3); }
-      return;
-    }
-    if (o.style === 'cables') {
-      // cables colgando de poste a poste: pasar por debajo acelerando te engancha
-      g.fillStyle = '#15111d'; g.fillRect(x0 - 3, ob.y - 8, 4, 16); g.fillRect(x0 + ob.w - 1, ob.y - 8, 4, 16);
-      g.strokeStyle = o.col; g.lineWidth = 1.4;
-      for (let i = 0; i < 4; i++) {
-        const sag = 4 + i * 2.5, yy = ob.y - 5 + i * 3;
-        g.beginPath(); g.moveTo(x0, yy);
-        for (let k = 1; k <= 8; k++) { const u = k / 8; g.lineTo(x0 + ob.w * u, yy + sag * 4 * u * (1 - u)); }
-        g.stroke();
-      }
-      if (o.label) { g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(6); g.textAlign = 'center'; g.fillText(o.label, ob.x, ob.y - 9); }
-      return;
-    }
-    if (o.style === 'crater') {
-      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(ob.x, ob.y + 2, ob.w / 2, ob.h / 2, 0, 0, 7); g.fill();
-      g.fillStyle = o.col; g.beginPath(); g.ellipse(ob.x, ob.y, ob.w / 2 - 3, ob.h / 2 - 3, 0, 0, 7); g.fill();
-      g.strokeStyle = o.col2 ?? '#4a4452'; g.lineWidth = 1.2; g.beginPath();
-      for (let i = 0; i < 4; i++) { const a = i * 1.7 + ob.x; g.moveTo(ob.x + Math.cos(a) * ob.w * 0.3, ob.y + Math.sin(a) * ob.h * 0.3); g.lineTo(ob.x + Math.cos(a) * ob.w * 0.55, ob.y + Math.sin(a) * ob.h * 0.55); }
-      g.stroke();
-    } else if (o.style === 'conos') {
-      const n = Math.max(2, Math.floor(ob.w / 18)), stepX = ob.w / n;
-      g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(x0 + stepX / 2, ob.y - 1, ob.w - stepX, 2); // cinta
-      for (let i = 0; i < n; i++) {
-        const cx = x0 + stepX * (i + 0.5);
-        g.fillStyle = o.col; g.beginPath(); g.moveTo(cx, ob.y - 8); g.lineTo(cx + 6, ob.y + 6); g.lineTo(cx - 6, ob.y + 6); g.closePath(); g.fill();
-        g.fillStyle = o.col2 ?? '#fff'; g.fillRect(cx - 3, ob.y - 1, 6, 2);
-      }
-    } else if (o.style === 'peatones') {
-      // turistas cruzando para la foto del atardecer: muñequitos con cámara
-      const n = Math.max(2, Math.floor(ob.w / 14)), stepX = ob.w / n;
-      for (let i = 0; i < n; i++) {
-        const px = x0 + stepX * (i + 0.5) + Math.sin(G.t * 6 + i) * 1.5, cols = [o.col, o.col2 ?? '#7fd4ff', '#ffe14d'];
-        g.fillStyle = cols[i % 3]; g.fillRect(px - 3, ob.y - 3, 6, 8);
-        g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(px, ob.y - 6, 3, 0, 7); g.fill();
-        if (i % 2 === 0) { g.fillStyle = '#111'; g.fillRect(px + 2, ob.y - 4, 4, 3); } // cámara
-      }
-    } else if (o.style === 'scooter') {
-      // scooter eléctrico tirado en la pista
-      g.save(); g.translate(ob.x, ob.y); g.rotate(0.6);
-      g.fillStyle = o.col; g.fillRect(-12, -2, 24, 4); g.fillRect(9, -8, 3, 10);
-      g.fillStyle = '#111'; g.beginPath(); g.arc(-11, 3, 3, 0, 7); g.fill(); g.beginPath(); g.arc(11, 3, 3, 0, 7); g.fill();
-      g.restore();
-    } else if (o.style === 'barrera') {
-      g.fillStyle = o.col; g.fillRect(x0, y0, ob.w, ob.h);
-      g.fillStyle = o.col2 ?? '#111';
-      for (let x = x0; x < x0 + ob.w; x += 12) g.fillRect(x, y0, 6, ob.h);
-    } else {
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.roundRect(x0 + 3, y0 + 4, ob.w, ob.h, 4); g.fill();
-      g.fillStyle = o.col; g.roundRect(x0, y0, ob.w, ob.h, 4); g.fill();
-      g.fillStyle = o.col2 ?? 'rgba(0,0,0,.25)'; g.fillRect(x0 + 4, y0 + 4, ob.w - 8, 6);
-    }
-    if (o.label) {
-      g.fillStyle = o.labelCol ?? '#fff'; g.font = FONT(o.style === 'conos' ? 6 : 7); g.textAlign = 'center';
-      g.fillText(o.label, ob.x, o.style === 'conos' ? ob.y - 11 : ob.y + 4);
-    }
-  });
+  for (const ob of G.obstacles) g.rigid(ob.x, ob.y, () => drawObstacle(g, G, ob));
 }
 
 // Aviso del lanzamiento (ataque 'throw'): líneas punteadas parpadeantes por donde van a pasar los proyectiles.
@@ -224,14 +143,6 @@ function drawPlayer(L: Layers, G: Game): void {
   if (p.stun > 0) { g.fillStyle = C.yellow; g.font = FONT(9); g.textAlign = 'center'; g.fillText('★ ★ ★', p.x, p.y - p.h / 2 - 8); }
 }
 
-function drawPickup(g: Gfx, G: Game, u: Pickup): void {
-  const P = G.cfg.powers[u.k];
-  g.save(); g.translate(u.x, u.y);
-  g.fillStyle = P.col; g.globalAlpha = 0.25 + Math.sin(G.t * 6) * 0.1; g.beginPath(); g.arc(0, 0, 18, 0, 7); g.fill(); g.globalAlpha = 1;
-  g.rotate(Math.PI / 4 + Math.sin(u.rot) * 0.2); g.fillStyle = P.col; g.fillRect(-10, -10, 20, 20);
-  g.rotate(-Math.PI / 4 - Math.sin(u.rot) * 0.2); g.fillStyle = '#0e0a16'; g.font = FONT(12); g.textAlign = 'center'; g.fillText(P.L, 0, 5);
-  g.restore();
-}
 
 function drawHUD(g: Gfx, G: Game): void {
   const b = G.b, p = G.p, cfg = G.cfg, phases = cfg.boss.phases, cur = phases.find((x) => x.id === b.phase) ?? phases[0];
@@ -302,58 +213,16 @@ function drawBubble(g: Gfx, G: Game): void {
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, img: Gfx) => void): void {
   const g = L.ents, f = L.fx, lo = L.low;
   drawLights(L.world, G); drawObstacles(L.world, G);
-  G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickup(lo, G, u)));
+  G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickupB(lo, G, u)));
   // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
   G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));
-  for (const s of G.shots) g.rigid(s.x, s.y, () => {
-    if (s.k === 'cone') { g.fillStyle = C.orange; g.beginPath(); g.moveTo(s.x, s.y - 7); g.lineTo(s.x + 5, s.y + 5); g.lineTo(s.x - 5, s.y + 5); g.fill(); g.fillStyle = '#fff'; g.fillRect(s.x - 3, s.y, 6, 2); }
-    else if (s.k === 'kernel') { g.fillStyle = '#fff3c2'; g.beginPath(); g.arc(s.x, s.y, 2.6, 0, 7); g.fill(); g.fillStyle = '#e6b64a'; g.fillRect(s.x - 1, s.y, 2, 2); }
-    else if (s.k === 'picaron') {
-      g.save(); g.translate(s.x, s.y); g.rotate(G.t * 14);
-      g.strokeStyle = '#c87a35'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 7, 0, 7); g.closePath(); g.stroke();
-      g.strokeStyle = 'rgba(120,60,20,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 7, 0, 3); g.stroke(); g.restore();
-    } else { g.fillStyle = '#3b2f17'; g.beginPath(); g.ellipse(s.x, s.y, 8, 6, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(61,255,154,.5)'; g.beginPath(); g.arc(s.x - 2, s.y - 2, 2, 0, 7); g.fill(); }
-  });
+  for (const s of G.shots) g.rigid(s.x, s.y, () => drawShot(g, G, s));
+
   drawFog(g, G); // la garúa tapa tráfico y obstáculos, pero no los avisos del jefe ni sus proyectiles
   drawHazards(g, G); // la carretilla y las aves siempre se ven, aunque haya neblina
   drawJet(g, G); drawThrow(g, G);
-  for (const f of G.foes) g.rigid(f.x, f.y, () => {
-    if (f.look === 'piedra') { // piedra del acantilado rodando
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(f.x + 2, f.y + 3, f.r, 0, 7); g.fill();
-      g.fillStyle = f.col; g.beginPath(); g.ellipse(f.x, f.y, f.r, f.r * 0.85, G.t * 4 + f.x, 0, 7); g.fill();
-      g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, 2);
-      return;
-    }
-    if (f.look === 'rompellantas') { // tira de clavos que rueda hacia abajo
-      const rw = f.r * 3.2, rh = f.r * 0.9;
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
-      g.fillStyle = '#2a2632'; g.fillRect(f.x - rw / 2, f.y - rh / 2, rw, rh);
-      g.fillStyle = '#c9ccd3';
-      for (let x = f.x - rw / 2 + 2; x < f.x + rw / 2 - 1; x += 4) { g.beginPath(); g.moveTo(x, f.y - rh / 2); g.lineTo(x + 2, f.y - rh / 2 - 4); g.lineTo(x + 4, f.y - rh / 2); g.fill(); }
-      return;
-    }
-    if (f.look === 'contenedor') { // contenedor que se soltó: caja larga con nervaduras, girando apenas
-      const cw = f.r * 1.6, chh = f.r * 3;
-      g.save(); g.translate(f.x, f.y); g.rotate(Math.sin(G.t * 3 + f.x) * 0.12);
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-cw / 2 + 3, -chh / 2 + 4, cw, chh);
-      g.fillStyle = f.col; g.fillRect(-cw / 2, -chh / 2, cw, chh);
-      g.fillStyle = 'rgba(0,0,0,.22)'; for (let y = -chh / 2 + 3; y < chh / 2 - 2; y += 4) g.fillRect(-cw / 2 + 1, y, cw - 2, 1.5);
-      g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(-cw / 2, -chh / 2, cw, 2);
-      g.restore();
-      return;
-    }
-    if (f.look === 'rollo') { // rollo de tela rodando: cilindro visto desde arriba, con las vueltas de tela marcadas
-      const rw = f.r * 2.4, rh = f.r * 1.4, roll = (G.t * 10 + f.x) % 4;
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(f.x - rw / 2 + 2, f.y - rh / 2 + 3, rw, rh);
-      g.fillStyle = f.col; g.roundRect(f.x - rw / 2, f.y - rh / 2, rw, rh, 3); g.fill();
-      g.fillStyle = 'rgba(0,0,0,.22)'; for (let i = 0; i < 3; i++) g.fillRect(f.x - rw / 2 + 1, f.y - rh / 2 + ((i * 4 + roll) % rh), rw - 2, 1.5);
-      g.fillStyle = '#e8e2d0'; g.fillRect(f.x - rw / 2 - 2, f.y - 2, 3, 4); g.fillRect(f.x + rw / 2 - 1, f.y - 2, 3, 4); // tubo de cartón
-      return;
-    }
-    g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(f.x + 2, f.y + 2, f.r, 0, 7); g.fill();
-    g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
-  });
+  for (const f of G.foes) g.rigid(f.x, f.y, () => drawFoe(g, G, f));
+
   drawBoss(L.bossFx, G, g); G.allies.forEach((a) => L.cars.rigid(a.x, a.y, () => L.carsFx.rigid(a.x, a.y, () => drawCombi(L, G, a)))); drawTide(g, G); drawEndingWorld(g, G);
   L.me.rigid(G.p.x, G.p.y, () => L.meFx.rigid(G.p.x, G.p.y, () => drawPlayer(L, G)));
   for (const r of G.rings) f.rigid(r.x, r.y, () => { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; });
@@ -377,12 +246,14 @@ function drawHint(g: Gfx, G: Game): void {
 }
 
 export function createLayers(scene: Phaser.Scene): Layers {
+  const back = new Gfx(scene, -1), world = new Gfx(scene, 0);
+  world.under = back; // los costados horneados van debajo de la pista (ADR 0044)
   return {
-    world: new Gfx(scene, 0), low: new Gfx(scene, 8), cars: new Gfx(scene, 10), carsFx: new Gfx(scene, 11), ents: new Gfx(scene, 12),
+    back, world, low: new Gfx(scene, 8), cars: new Gfx(scene, 10), carsFx: new Gfx(scene, 11), ents: new Gfx(scene, 12),
     bossFx: new Gfx(scene, 12.5), me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30),
   };
 }
-const ALL = (L: Layers) => [L.world, L.low, L.cars, L.carsFx, L.ents, L.bossFx, L.me, L.meFx, L.fx, L.ui];
+const ALL = (L: Layers) => [L.back, L.world, L.low, L.cars, L.carsFx, L.ents, L.bossFx, L.me, L.meFx, L.fx, L.ui];
 export const beginLayers = (L: Layers) => { for (const g of ALL(L)) g.begin(); };
 // la curva se aplica a todo menos al HUD
 export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { for (const g of ALL(L)) if (g !== L.ui) g.warp = w; };

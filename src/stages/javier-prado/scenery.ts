@@ -1,12 +1,12 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
 /* Paisaje de la Javier Prado: torres de oficinas, el cerco eterno del by-pass, semáforos y paraderos donde para cualquiera. */
 
-function drawTorre(g: Gfx, x0: number, y: number, w: number, seg: number, h: number, idx: number): void {
+function drawTorre(g: Painter, x0: number, y: number, w: number, seg: number, h: number, idx: number): void {
   g.fillStyle = h < 0.55 ? '#2b3346' : '#33293f'; g.fillRect(x0 + 2, y + 4, w - 4, seg - 8);
   g.fillStyle = h < 0.4 ? 'rgba(127,212,255,.5)' : 'rgba(255,138,31,.45)'; g.fillRect(x0 + 2, y + 4, w - 4, 3);
   for (let wy = y + 12; wy < y + seg - 10; wy += 10) for (let wx = x0 + 6; wx < x0 + w - 7; wx += 8) {
@@ -15,7 +15,7 @@ function drawTorre(g: Gfx, x0: number, y: number, w: number, seg: number, h: num
 }
 
 // Cerco de la obra del by-pass, con su cartel de siempre.
-function drawObra(g: Gfx, x0: number, y: number, w: number, seg: number): void {
+function drawObra(g: Painter, x0: number, y: number, w: number, seg: number): void {
   g.fillStyle = '#3a3226'; g.fillRect(x0, y, w, seg);
   g.fillStyle = '#5a4a32'; for (let i = 0; i < 3; i++) g.fillRect(x0 + 6 + i * 12, y + 20 + i * 18, 18, 10); // tierra removida
   g.fillStyle = C.orange; g.fillRect(x0 + 2, y, 4, seg); g.fillRect(x0 + w - 6, y, 4, seg);
@@ -26,7 +26,7 @@ function drawObra(g: Gfx, x0: number, y: number, w: number, seg: number): void {
 }
 
 // Paradero con su techito, el poste del semáforo y gente esperando.
-function drawParadero(g: Gfx, x0: number, y: number, w: number, seg: number, h: number, side: number): void {
+function drawParadero(g: Painter, x0: number, y: number, w: number, seg: number, h: number, side: number): void {
   g.fillStyle = '#2a2438'; g.fillRect(x0, y, w, seg);
   const px = side ? x0 + 4 : x0 + w - 12;
   g.fillStyle = '#4a4452'; g.fillRect(px, y + 14, 8, 44); // techito
@@ -39,7 +39,7 @@ function drawParadero(g: Gfx, x0: number, y: number, w: number, seg: number, h: 
   g.save(); g.translate(x0 + w / 2 + 1, y + seg - 16); g.rotate(-Math.PI / 2); g.fillStyle = C.yellow; g.font = FONT(5); g.textAlign = 'center'; g.fillText('PARADERO', 0, 2); g.restore();
 }
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   const h = hash(idx * 2.3 + side * 41.9), k = ((idx % 40) + 40) % 40;
   if (side <= 1 && (k === 6 || k === 7 || k === 8)) drawObra(g, x0, y, w, seg); // el by-pass ocupa varias cuadras
   else if (side <= 1 && h < 0.2) drawParadero(g, x0, y, w, seg, h, side);
