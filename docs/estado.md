@@ -25,7 +25,7 @@
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
 - **Tutorial en contexto** (ADR 0037 y 0039): ayudas breves sobre el Tico en las diez etapas, hasta que cada una se alcanza a leer, por modo de disparo. "Ver ayudas otra vez" e interruptor de ayudas en el menú.
 - **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
-- **Gráficos nivel B** (ADR 0041 y 0042): el tráfico y el Tico son imágenes horneadas con sombreado y daño procedural por etapas. Faltan jefes, combi aliada y escenarios.
+- **Gráficos nivel B** (ADR 0041 a 0043): el tráfico, el Tico, los diez jefes y la combi aliada son imágenes horneadas con sombreado y daño procedural por etapas. Faltan escenarios, obstáculos y proyectiles.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
 - **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro.

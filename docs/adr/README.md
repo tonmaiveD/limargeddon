@@ -46,3 +46,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0040](0040-curva-rigida-por-objeto.md) | Curva rígida por objeto en la Costa Verde | Aceptada |
 | [0041](0041-prueba-graficos-nivel-b.md) | Prueba de gráficos nivel B: vehículos horneados con sombreado | Aceptada |
 | [0042](0042-trafico-nivel-b.md) | Tráfico y Tico en nivel B | Aceptada |
+| [0043](0043-jefes-nivel-b.md) | Jefes y combi aliada en nivel B | Aceptada |

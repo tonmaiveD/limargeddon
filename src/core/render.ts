@@ -1,5 +1,4 @@
 import { H, W, view } from './constants';
-import { drawCar } from './damage-render';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
 import { tramo, type Game, type Pickup } from './state';
@@ -9,14 +8,16 @@ import { drawHazards, drawSplat } from './hazards';
 import { drawEndingUI, drawEndingWorld } from './ending';
 import { drawLights } from './lights';
 import { ART_SCALE, drawVehicle, lights, texture, ticoArt } from './art/vehicles';
+import { bossCar } from './art/bosses';
+import { cobrador } from '../bosses/combi-render';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
 // Capas de dibujo, de abajo hacia arriba (ADR 0042): asfalto; bonus; tráfico (imágenes) y sus luces; jefe, proyectiles
-// y peligros; el Tico (imagen) y sus luces; efectos; interfaz.
-export interface Layers { world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
+// y peligros (el jefe en imagen, ADR 0043); lo que va sobre el jefe; el Tico (imagen) y sus luces; efectos; interfaz.
+export interface Layers { world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; bossFx: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
 
 // Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
 export const ui = { touch: false };
@@ -197,14 +198,10 @@ function drawJet(g: Gfx, G: Game): void {
   for (let i = 0; i < 14; i++) { const yy = top + ((G.t * 520 + i * 47) % Math.max(1, z.h)), xx = z.x + Math.sin(i * 2.3 + G.t * 9) * z.w * 0.4; g.fillRect(xx, yy, 2, 4); }
 }
 
-function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: number }): void {
-  drawCar(g, G.t, a, {
-    body: '#f4f1e6', roof: '#d93b3b', extra: (g, w, h) => {
-      g.fillStyle = '#2a7de1'; g.fillRect(-w / 2, -h / 2 + h * 0.55, w, 5);
-      g.fillStyle = '#d93b3b'; g.font = FONT(5); g.textAlign = 'center'; g.fillText('JAVIER PRADO', 0, -h / 2 + h * 0.5);
-      g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(w / 2 + 3, 0, 4, 0, 7); g.fill(); // cobrador colgado
-    },
-  });
+// Socio de la Combi: la combi aliada, horneada como el tráfico, con el cobrador colgado (ADR 0043).
+function drawCombi(L: Layers, G: Game, a: { x: number; y: number; w: number; h: number }): void {
+  const art = { kind: 'combi', w: a.w, h: a.h, body: '#f4f1e6', roof: '#d93b3b', band: '#2a7de1', label: 'JAVIER PRADO', labelCol: '#d93b3b' } as const;
+  bossCar(L.cars, L.carsFx, G, a.x, a.y, art, 29, {}, (fx, w) => cobrador(fx, G.t, w, -4, false));
 }
 
 // El Tico con su pintura y sus mejoras visibles (imagen horneada, ADR 0042); también lo usa el cierre del carguero.
@@ -302,7 +299,7 @@ function drawBubble(g: Gfx, G: Game): void {
   g.fillStyle = C.pink; g.textAlign = 'left'; g.fillText(bb.text, x + 8, y + 15);
 }
 
-export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) => void): void {
+export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, img: Gfx) => void): void {
   const g = L.ents, f = L.fx, lo = L.low;
   drawLights(L.world, G); drawObstacles(L.world, G);
   G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickup(lo, G, u)));
@@ -357,7 +354,7 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
     g.fillStyle = f.col; g.beginPath(); g.arc(f.x, f.y, f.r, 0, 7); g.fill();
     g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
   });
-  drawBoss(g, G); G.allies.forEach((a) => g.rigid(a.x, a.y, () => drawCombi(g, G, a))); drawTide(g, G); drawEndingWorld(g, G);
+  drawBoss(L.bossFx, G, g); G.allies.forEach((a) => L.cars.rigid(a.x, a.y, () => L.carsFx.rigid(a.x, a.y, () => drawCombi(L, G, a)))); drawTide(g, G); drawEndingWorld(g, G);
   L.me.rigid(G.p.x, G.p.y, () => L.meFx.rigid(G.p.x, G.p.y, () => drawPlayer(L, G)));
   for (const r of G.rings) f.rigid(r.x, r.y, () => { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; });
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
@@ -382,10 +379,10 @@ function drawHint(g: Gfx, G: Game): void {
 export function createLayers(scene: Phaser.Scene): Layers {
   return {
     world: new Gfx(scene, 0), low: new Gfx(scene, 8), cars: new Gfx(scene, 10), carsFx: new Gfx(scene, 11), ents: new Gfx(scene, 12),
-    me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30),
+    bossFx: new Gfx(scene, 12.5), me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30),
   };
 }
-const ALL = (L: Layers) => [L.world, L.low, L.cars, L.carsFx, L.ents, L.me, L.meFx, L.fx, L.ui];
+const ALL = (L: Layers) => [L.world, L.low, L.cars, L.carsFx, L.ents, L.bossFx, L.me, L.meFx, L.fx, L.ui];
 export const beginLayers = (L: Layers) => { for (const g of ALL(L)) g.begin(); };
 // la curva se aplica a todo menos al HUD
 export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { for (const g of ALL(L)) if (g !== L.ui) g.warp = w; };

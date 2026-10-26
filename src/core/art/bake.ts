@@ -13,9 +13,20 @@ export interface CarArt {
   kind: ArtKind; w: number; h: number; body: string;
   roof?: string; band?: string; panel?: string; label?: string; labelCol?: string; labelSize?: number; labelY?: number;
   taxi?: boolean; shades?: boolean; siren?: boolean; box?: string; bumper?: boolean; plates?: boolean;
+  // detalles de los jefes (ADR 0043)
+  driver?: { hair: string; cap?: string; shades?: boolean; badge?: string }; // quien maneja, visto por el parabrisas
+  rings?: boolean;      // cuatro anillos en el capó, uno deformado (parodia del Q8)
+  rack?: boolean;       // parrilla en el techo
+  grilles?: number;     // rejillas del blindado
+  turret?: boolean;     // torreta y cañón de agua sobre el techo
+  cargo?: { kind: 'rollos' | 'contenedores'; cols: string[] }; // carga del camión
+  bandLabel?: boolean;  // el rótulo va sobre la franja, sin placa
+  blind?: boolean;      // marca verde del punto ciego en el costado derecho
+  joint?: 'front' | 'rear'; // mitad de un articulado: la de adelante sin luneta, la de atrás con el fuelle y sin parabrisas
 }
 
 export const PAD = 8; // margen alrededor del vehículo para la sombra
+export const sirenHalf = (w: number) => Math.min(15, (w - 12) / 2); // media circulina, crece con el ancho
 export const SIREN_Y = 0.395; // altura de la circulina, en fracción del largo (la imagen trae la base; las luces van encima)
 
 // Aclara (k > 0) u oscurece (k < 0) un color #rrggbb. Otros formatos se devuelven igual.
@@ -142,7 +153,7 @@ export function bakeCar(a: CarArt, d = 0, sd = 0, scale = 4): HTMLCanvasElement 
   const ix = 4;
   if (a.kind === 'truck') bakeTruck(c, a, yAt);
   else {
-    glass(c, -w / 2 + ix, w / 2 - ix, yAt(S.hood), yAt(S.shield), 3, true);
+    if (a.joint !== 'rear') glass(c, -w / 2 + ix, w / 2 - ix, yAt(S.hood), yAt(S.shield), 3, true);
     const roofC = a.roof ?? shade(body, 0.06);
     rrect(c, -w / 2 + ix + 0.5, yAt(S.shield) + 0.6, w - 2 * ix - 1, yAt(S.roof) - yAt(S.shield) - 1.2, 3);
     const gr = c.createLinearGradient(-w / 2, 0, w / 2, 0);
@@ -156,12 +167,13 @@ export function bakeCar(a: CarArt, d = 0, sd = 0, scale = 4): HTMLCanvasElement 
       rrect(c, -w / 2 + 9, yAt(0.4), w - 18, h * 0.14, 2); c.fillStyle = shade(roofC, 0.25); c.fill();
       c.fillStyle = 'rgba(0,0,0,.25)'; for (let i = 0; i < 4; i++) c.fillRect(-w / 2 + 11, yAt(0.42) + i * 2.6, w - 22, 0.8);
     }
-    glass(c, -w / 2 + ix + 1, w / 2 - ix - 1, yAt(S.roof), yAt(S.rear), 2.5, false);
+    if (a.joint !== 'front') glass(c, -w / 2 + ix + 1, w / 2 - ix - 1, yAt(S.roof), yAt(S.rear), 2.5, false);
   }
 
   // franja de color: sobre el techo, de lado a lado, para que se vea desde arriba
+  const bandY = yAt(a.bandLabel && a.labelY !== undefined ? a.labelY : a.kind === 'bus' ? 0.76 : 0.62);
   if (a.band) {
-    const y = yAt(a.kind === 'bus' ? 0.76 : 0.62);
+    const y = bandY;
     c.save(); bodyPath(c, a, d, sd); c.clip();
     c.fillStyle = volume(c, w, a.band, 0.6); c.fillRect(-w / 2, y - 2.2, w, 4.4);
     c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(-w / 2, y - 2.2, w, 0.8);
@@ -169,7 +181,7 @@ export function bakeCar(a: CarArt, d = 0, sd = 0, scale = 4): HTMLCanvasElement 
   }
   // panel del serenazgo o la policía, con la base de la circulina (las luces que parpadean van encima, cada cuadro)
   if (a.panel) { rrect(c, -w / 2 + ix + 1, yAt(0.46), w - 2 * ix - 2, h * 0.18, 2); c.fillStyle = a.panel; c.fill(); }
-  if (a.siren) { rrect(c, -9.5, yAt(SIREN_Y) - 0.5, 19, 5, 1.5); c.fillStyle = '#2a2632'; c.fill(); }
+  if (a.siren) { const sh = sirenHalf(w); rrect(c, -sh - 0.5, yAt(SIREN_Y) - 0.5, sh * 2 + 1, 5, 1.5); c.fillStyle = '#2a2632'; c.fill(); }
   // lentes oscuros de la conductora
   if (a.shades) { c.fillStyle = '#000'; rrect(c, -w / 4 - 2.5, yAt(S.hood + 0.08), 8, 2.2, 1); c.fill(); }
 
@@ -177,16 +189,18 @@ export function bakeCar(a: CarArt, d = 0, sd = 0, scale = 4): HTMLCanvasElement 
   c.fillStyle = shade(body, -0.35);
   if (a.kind !== 'bus') for (const sx of [-1, 1]) { rrect(c, sx * (w / 2 + 0.6) - 1.4, yAt(S.hood) + 1, 2.8, 2.2, 1); c.fill(); }
 
+  bossDetails(c, a, yAt, S, scale);
+
   // faros con halo; las luces traseras se dibujan apagadas (frenar las enciende encima)
   const lights: number[] = [];
-  if (d < 0.75) lights.push(-1);
-  if (d < 0.45) lights.push(1);
+  if (d < 0.75 && a.joint !== 'rear') lights.push(-1);
+  if (d < 0.45 && a.joint !== 'rear') lights.push(1);
   for (const sx of lights) {
     c.save(); c.shadowColor = 'rgba(255,240,180,.9)'; c.shadowBlur = 2.5 * scale;
     c.fillStyle = '#fff6c8'; c.beginPath(); c.ellipse(sx * (w / 2 - 4.2), yAt(0) + 1.8, 2.6, 1.4, 0, 0, Math.PI * 2); c.fill(); c.restore();
   }
   c.fillStyle = '#7a1424';
-  for (const sx of [-1, 1]) { rrect(c, sx * (w / 2 - 4.5) - 2.5, h / 2 - 3 - d * h * 0.05, 5, 2, 0.8); c.fill(); }
+  if (a.joint !== 'front') for (const sx of [-1, 1]) { rrect(c, sx * (w / 2 - 4.5) - 2.5, h / 2 - 3 - d * h * 0.05, 5, 2, 0.8); c.fill(); }
 
   // mejoras visibles del Tico
   if (a.bumper) { rrect(c, -w / 2 - 1, yAt(0) - 3, w + 2, 3.6, 1); c.fillStyle = '#4a4452'; c.fill(); c.fillStyle = '#8c869a'; c.fillRect(-w / 2 + 2, yAt(0) - 2.2, w - 4, 0.8); }
@@ -199,9 +213,9 @@ export function bakeCar(a: CarArt, d = 0, sd = 0, scale = 4): HTMLCanvasElement 
     text(c, 'TAXI', 0, y + 0.2, 4, '#ffe14d');
   }
   if (a.label) {
-    // en el panel si lo hay; si no, sobre una placa oscura para que se lea aunque tenga el color del techo
-    const y = a.panel ? yAt(0.55) : yAt(a.labelY ?? 0.52), size = Math.min(a.labelSize ?? 5, ((w - 6) / a.label.length) * 1.25);
-    if (!a.panel) { c.font = `${size}px Bungee, sans-serif`; const tw = c.measureText(a.label).width + 3; rrect(c, -tw / 2, y - size * 0.75, tw, size * 1.5, 1.2); c.fillStyle = 'rgba(14,10,22,.55)'; c.fill(); }
+    // en el panel o la franja si los hay; si no, sobre una placa oscura para que se lea aunque tenga el color del techo
+    const y = a.bandLabel ? bandY : a.panel ? yAt(0.55) : yAt(a.labelY ?? 0.52), size = Math.min(a.labelSize ?? 5, ((w - 6) / a.label.length) * 1.25);
+    if (!a.panel && !a.bandLabel) { c.font = `${size}px Bungee, sans-serif`; const tw = c.measureText(a.label).width + 3; rrect(c, -tw / 2, y - size * 0.75, tw, size * 1.5, 1.2); c.fillStyle = 'rgba(14,10,22,.55)'; c.fill(); }
     text(c, a.label, 0, y, size, a.labelCol ?? '#fff');
   }
 
@@ -237,8 +251,65 @@ function bakeTruck(c: CanvasRenderingContext2D, a: CarArt, yAt: (t: number) => n
   const top = yAt(0.3), bot = yAt(0.99), cargo = a.roof ?? '#c9ccd3';
   rrect(c, -w / 2 + 0.5, top, w - 1, bot - top, 2); c.fillStyle = volume(c, w, cargo, 0.8); c.fill();
   c.strokeStyle = shade(cargo, -0.4); c.lineWidth = 0.6; c.stroke();
+  if (a.cargo?.kind === 'rollos') { // rollos de tela apilados en la tolva
+    const cw = (w - 10) / 3, rows = Math.floor((bot - top - 8) / 13);
+    for (let r = 0; r < rows; r++) for (let k = 0; k < 3; k++) {
+      const x = -w / 2 + 5 + k * cw, y = top + 4 + r * 13, col = a.cargo.cols[(r + k) % a.cargo.cols.length];
+      rrect(c, x, y, cw - 2, 10, 4); c.fillStyle = volume(c, cw, col, 0.9); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(x + 1.5, y + 2, cw - 5, 1);
+      c.fillStyle = '#e8e2d0'; c.fillRect(x - 0.5, y + 3.5, 1.5, 3); c.fillRect(x + cw - 3, y + 3.5, 1.5, 3); // tubo de cartón
+    }
+    return;
+  }
+  if (a.cargo?.kind === 'contenedores') { // contenedores con nervaduras y la cadena suelta
+    const ch = (bot - top - 6) / a.cargo.cols.length;
+    a.cargo.cols.forEach((col, i) => {
+      const y = top + 3 + i * ch;
+      rrect(c, -w / 2 + 3, y, w - 6, ch - 2, 1); c.fillStyle = volume(c, w, col, 0.8); c.fill();
+      c.strokeStyle = shade(col, -0.45); c.lineWidth = 0.5; c.stroke();
+      c.fillStyle = 'rgba(0,0,0,.2)'; for (let x = -w / 2 + 6; x < w / 2 - 5; x += 4) c.fillRect(x, y + 2, 1.2, ch - 6);
+      c.fillStyle = 'rgba(255,255,255,.22)'; c.fillRect(-w / 2 + 3, y, w - 6, 1);
+    });
+    c.strokeStyle = '#c9ccd3'; c.lineWidth = 0.8; c.beginPath(); c.moveTo(-w / 2 + 4, top + ch * 0.4); c.lineTo(w / 2 - 10, top + ch * 0.7); c.stroke();
+    return;
+  }
   c.strokeStyle = 'rgba(0,0,0,.2)'; c.lineWidth = 0.5;
   for (let y = top + 6; y < bot - 2; y += 6) { c.beginPath(); c.moveTo(-w / 2 + 1.5, y); c.lineTo(w / 2 - 1.5, y); c.stroke(); }
+}
+
+// Detalles fijos de los jefes: conductor, anillos, parrilla, rejillas y torreta, fuelle y marca del punto ciego.
+function bossDetails(c: CanvasRenderingContext2D, a: CarArt, yAt: (t: number) => number, S: (typeof SHAPE)[string], scale: number): void {
+  const { w, h } = a;
+  if (a.rack) { rrect(c, -w / 2 + 5, yAt(S.shield) + 1.5, w - 10, 3, 1); c.fillStyle = '#15111d'; c.fill(); c.fillStyle = 'rgba(255,255,255,.18)'; for (let x = -w / 2 + 7; x < w / 2 - 6; x += 4) c.fillRect(x, yAt(S.shield) + 1.5, 0.8, 3); }
+  if (a.grilles) {
+    c.fillStyle = 'rgba(0,0,0,.35)';
+    for (let i = 0; i < a.grilles; i++) c.fillRect(-w / 2 + 5, yAt(0.4) + i * 7, w - 10, 2);
+  }
+  if (a.turret) {
+    const ty = yAt(0.62);
+    c.save(); c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 2 * scale; c.shadowOffsetY = 1.5 * scale;
+    c.fillStyle = volume(c, 18, '#7a8457'); c.beginPath(); c.arc(0, ty, 9, 0, Math.PI * 2); c.fill(); c.restore();
+    c.fillStyle = 'rgba(255,255,255,.25)'; c.beginPath(); c.arc(-3, ty - 3, 3.5, 0, Math.PI * 2); c.fill();
+    rrect(c, -3, ty, 6, h / 2 - ty - 3, 1.5); c.fillStyle = volume(c, 6, '#2a2f1f'); c.fill();
+    c.fillStyle = '#4a5236'; c.beginPath(); c.arc(0, h / 2 - 3, 4, 0, Math.PI * 2); c.fill(); // boquilla (brilla encima al apuntar)
+  }
+  if (a.rings) { // cuatro anillos, el último deformado
+    c.strokeStyle = '#8c8a96'; c.lineWidth = 0.9;
+    for (const dx of [-7.5, -2.5, 2.5]) { c.beginPath(); c.arc(dx, yAt(0) + 8, 2.6, 0, Math.PI * 2); c.stroke(); }
+    c.beginPath(); c.ellipse(7.5, yAt(0) + 8, 3.6, 2, 0, 0, Math.PI * 2); c.stroke();
+  }
+  if (a.driver) { // quien maneja, por el parabrisas (lado izquierdo)
+    const D = a.driver, dx = -w / 4 + 2, dy = (yAt(S.hood) + yAt(S.shield)) / 2 + 1;
+    c.fillStyle = D.hair; c.beginPath(); c.arc(dx, dy, 3.3, 0, Math.PI * 2); c.fill();
+    if (D.cap) { rrect(c, dx - 4, dy - 3.5, 8, 2.8, 1); c.fillStyle = D.cap; c.fill(); }
+    if (D.shades) { c.fillStyle = '#000'; c.fillRect(dx - 3.5, dy - 0.8, 7, 1.6); }
+    if (D.badge) { c.fillStyle = D.badge; c.beginPath(); c.arc(dx, dy - 2.2, 1.2, 0, Math.PI * 2); c.fill(); }
+  }
+  if (a.joint === 'rear') { // fuelle: el acordeón que une las dos mitades
+    rrect(c, -w / 2 + 6, -h / 2 - 4, w - 12, 8, 1.5); c.fillStyle = '#15111d'; c.fill();
+    c.fillStyle = '#4a4452'; for (let i = 0; i < 4; i++) c.fillRect(-w / 2 + 8 + i * ((w - 16) / 4), -h / 2 - 3, 2, 6);
+  }
+  if (a.blind) { c.fillStyle = 'rgba(61,255,154,.6)'; c.fillRect(w / 2 - 2, -h / 4, 2, h / 2); }
 }
 
 // Vehículos chicos (sin etapas de daño): moto, bici, mototaxi y triciclo, con su conductor visto desde arriba.
