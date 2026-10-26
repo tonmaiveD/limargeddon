@@ -39,7 +39,7 @@ import { drawWorld as sanIsidroWorld } from './san-isidro/scenery';
 export interface StageDef {
   cfg: StageConfig;
   ai: BossAI;
-  drawBoss: (g: Gfx, G: Game) => void;
+  drawBoss: (g: Gfx, G: Game, img: Gfx) => void; // g: capa de encima del jefe; img: su capa de imágenes (ADR 0043)
   drawWorld: (g: Gfx, cfg: StageConfig, scroll: number, G: Game | null) => void;
 }
 

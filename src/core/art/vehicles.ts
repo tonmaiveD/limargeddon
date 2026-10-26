@@ -3,7 +3,7 @@ import type { VehicleLook } from '../config';
 import type { Gfx } from '../gfx';
 import type { Car } from '../state';
 import { C } from '../util';
-import { SIREN_Y, bakeCar, damageStep, isSmall, type ArtKind, type CarArt } from './bake';
+import { SIREN_Y, bakeCar, sirenHalf, damageStep, isSmall, type ArtKind, type CarArt } from './bake';
 
 /*
  * Vehículos en nivel B (ADR 0042): traduce cada auto del juego a su dibujo horneado, lo guarda como textura (una por
@@ -66,7 +66,7 @@ export function drawVehicle(img: Gfx, fx: Gfx, t: number, c: Car): void {
  * Luces que cambian cada cuadro, en coordenadas del vehículo (centro en 0,0): freno o reversa con halo, circulina
  * roja y azul, y balizas. Coinciden con las luces apagadas que trae la imagen.
  */
-export function lights(g: Gfx, t: number, a: CarArt, d: number, brake: boolean, rev: boolean, hazard: boolean): void {
+export function lights(g: Gfx, t: number, a: CarArt, d: number, brake: boolean, rev: boolean, hazard: boolean, fast = false): void {
   const { w, h } = a, fr = d * h * 0.12, ty = h / 2 - 3 - d * h * 0.05;
   if (brake || rev) {
     const halo = rev ? 'rgba(255,255,255,' : 'rgba(255,51,85,';
@@ -78,10 +78,10 @@ export function lights(g: Gfx, t: number, a: CarArt, d: number, brake: boolean, 
     for (const sx of [-1, 1]) g.fillRect(sx * (w / 2 - 4.5) - 2.5, ty, 5, 2);
   }
   if (a.siren) {
-    const blink = Math.floor(t * 8) % 2, y = -h / 2 + h * SIREN_Y + fr * (1 - SIREN_Y);
-    g.fillStyle = blink ? '#ff3355' : '#3a7bff'; g.fillRect(-9, y, 8, 4);
-    g.fillStyle = blink ? '#3a7bff' : '#ff3355'; g.fillRect(1, y, 8, 4);
-    g.fillStyle = blink ? 'rgba(255,51,85,.25)' : 'rgba(58,123,255,.25)'; g.fillRect(-14, y - 3, 28, 10);
+    const blink = Math.floor(t * (fast ? 14 : 8)) % 2, y = -h / 2 + h * SIREN_Y + fr * (1 - SIREN_Y), sh = sirenHalf(w);
+    g.fillStyle = blink ? '#ff3355' : '#3a7bff'; g.fillRect(-sh, y, sh - 1, 4);
+    g.fillStyle = blink ? '#3a7bff' : '#ff3355'; g.fillRect(1, y, sh - 1, 4);
+    g.fillStyle = blink ? 'rgba(255,51,85,.25)' : 'rgba(58,123,255,.25)'; g.fillRect(-sh - 5, y - 3, sh * 2 + 10, 10);
   }
   if (hazard && Math.floor(t * 6) % 2 === 0) {
     g.fillStyle = C.orange;

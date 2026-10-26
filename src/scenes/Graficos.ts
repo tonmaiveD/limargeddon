@@ -5,7 +5,8 @@ import { FONT, Gfx } from '../core/gfx';
 import { bakeCar, type CarArt } from '../core/art/bake';
 import { drawVehicle } from '../core/art/vehicles';
 import { STAGES, STAGE_ORDER } from '../stages';
-import type { Car } from '../core/state';
+import { createGame, newKeys, type Car, type Game } from '../core/state';
+import { update as stepGame } from '../core/world';
 
 const BAKE_SCALE = 4;
 
@@ -59,6 +60,7 @@ export class GraficosScene extends Phaser.Scene {
   private cars2!: Gfx;
   private carsFx!: Gfx;
   private list: Car[] = gallery();
+  private bosses: { id: string; G: Game }[] = [];
   private imgs: Phaser.GameObjects.Image[][] = [];
 
   constructor() { super('Graficos'); }
@@ -73,15 +75,37 @@ export class GraficosScene extends Phaser.Scene {
         return this.add.image(0, r.y, key).setDepth(10).setScale(1 / BAKE_SCALE); // la imagen es BAKE_SCALE veces más grande
       });
     });
-    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 3); });
+    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 6); });
+    // un juego por jefe, avanzado hasta que el jefe entra, para dibujarlo con su propio código (ADR 0043)
+    for (const id of STAGE_ORDER) {
+      const def = STAGES[id], G = createGame(structuredClone(def.cfg), 'normal', newKeys(), def.ai);
+      for (let i = 0; i < 600 && (G.b.state === 'enter' || (def.cfg.boss.body && !G.chains.length)); i++) { stepGame(G, 1 / 60); G.traffic = []; G.p.hp = G.p.max; }
+      for (const ch of G.chains) ch.segs.length = Math.min(ch.segs.length, 2);
+      this.bosses.push({ id, G });
+    }
     document.getElementById('menu')!.hidden = true;
   }
 
   update(): void {
     const cam = this.cameras.main, t0 = this.time.now / 1000;
-    const gal = this.view > ROWS.length;
+    const gal = this.view > ROWS.length, bossView = this.view >= ROWS.length + 3;
     this.cars2.begin(); this.carsFx.begin();
-    if (gal) { // galería: todo el tráfico, en grilla de cuatro columnas
+    if (bossView) { // galería de jefes: sanos, dañados y el carguero
+      const page = this.view - (ROWS.length + 3);
+      this.bosses.forEach(({ id, G }, i) => {
+        G.t = t0; G.b.flash = null; G.b.hitFlash = 0; G.b.hp = page === 1 ? G.b.max * 0.3 : G.b.max; G.b.state = 'cruise'; G.b.ang = 0;
+        if (id === 'linea-amarilla') {
+          if (page !== 2) return;
+          G.route.plane = { phase: 'hold', x: W / 2, y: H / 2, t: 1 };
+        } else {
+          if (page === 2) return;
+          const n = i; G.b.x = 62 + (n % 3) * 118; G.b.y = 150 + Math.floor(n / 3) * 175;
+          for (const ch of G.chains) ch.segs.forEach((sg, k) => { sg.x = G.b.x + (k + 1) * 4; sg.y = G.b.y + G.b.h / 2 + 24 + k * 46; sg.hp = page === 1 ? sg.max * 0.3 : sg.max; });
+        }
+        STAGES[id].drawBoss(this.carsFx, G, this.cars2);
+      });
+    }
+    if (gal && !bossView) { // galería: todo el tráfico, en grilla de cuatro columnas
       const hurt = this.view === ROWS.length + 2;
       this.list.forEach((c, i) => {
         c.x = 50 + (i % 4) * 87; c.y = 120 + Math.floor(i / 4) * 92; c.hp = hurt ? 0.35 : 1; c.brakeT = hurt ? 0 : (i % 3 === 0 ? 1 : 0);
@@ -95,9 +119,11 @@ export class GraficosScene extends Phaser.Scene {
       const g0 = this.bg; g0.begin(); g0.fillStyle = '#2b2733'; g0.fillRect(-100, 0, W + 200, H); g0.end();
       this.cars.begin(); this.cars.end();
       const u = this.ui; u.begin(); u.textAlign = 'center'; u.fillStyle = '#ffe14d'; u.font = FONT(11);
-      u.fillText(this.view === ROWS.length + 2 ? 'TRÁFICO DAÑADO' : 'TRÁFICO · NIVEL B', W / 2, 40);
+      const titles = ['TRÁFICO · NIVEL B', 'TRÁFICO DAÑADO', 'JEFES · NIVEL B', 'JEFES DAÑADOS', 'EL CARGUERO'];
+      u.fillText(titles[this.view - ROWS.length - 1], W / 2, 40);
       u.font = FONT(5); u.fillStyle = '#b9b4c4';
-      this.list.forEach((c) => u.fillText(c.k.toUpperCase(), c.x, c.y + c.h / 2 + 12));
+      if (!bossView) this.list.forEach((c) => u.fillText(c.k.toUpperCase(), c.x, c.y + c.h / 2 + 12));
+      else if (this.view < ROWS.length + 5) this.bosses.forEach(({ G }) => { if (G.cfg.route) return; u.fillText(G.cfg.boss.title.toUpperCase(), G.b.x, G.b.y - G.b.h / 2 - 10); });
       u.end(); return;
     }
     if (this.view === 0) cam.setZoom(ZOOM).centerOn(W / 2, H / 2);
