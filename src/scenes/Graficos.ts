@@ -2,13 +2,31 @@ import Phaser from 'phaser';
 import { H, W, ZOOM } from '../core/constants';
 import { drawCar } from '../core/damage-render';
 import { FONT, Gfx } from '../core/gfx';
-import { BAKE_SCALE, bakeCar, type CarArt } from '../core/art/bake';
+import { bakeCar, type CarArt } from '../core/art/bake';
+import { drawVehicle } from '../core/art/vehicles';
+import { STAGES, STAGE_ORDER } from '../stages';
+import type { Car } from '../core/state';
+
+const BAKE_SCALE = 4;
 
 /*
  * Prueba de gráficos (ADR 0041, en evaluación): se abre con ?graficos en la dirección y no cambia nada del juego.
  * Compara el dibujo actual con el nivel B (vehículos horneados con sombreado) en el Tico, un sedán y una combi,
- * sanos y dañados. Tocar la pantalla alterna entre la vista completa y cada vehículo al doble de tamaño.
+ * sanos y dañados. Tocar la pantalla alterna entre la vista completa, cada vehículo al doble de tamaño y la galería
+ * de todo el tráfico de las diez etapas (sano y dañado), dibujado con el mismo código del juego (ADR 0042).
  */
+
+// Un vehículo de cada tipo distinto del tráfico de las diez etapas, con su primer color.
+function gallery(): Car[] {
+  const seen = new Set<string>(), out: Car[] = [];
+  for (const id of STAGE_ORDER) for (const t of STAGES[id].cfg.traffic.types) {
+    const key = t.k + JSON.stringify(t.look ?? {});
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ k: t.k, x: 0, y: 0, w: t.w, h: t.h, vy: 0, hp: 1, max: 1, col: t.cols[0], spin: 0, seed: out.length, look: t.look } as Car);
+  }
+  return out;
+}
 
 interface Row { name: string; art: CarArt; now: { body: string; roof?: string; extra?: (g: Gfx, w: number, h: number) => void }; y: number }
 
@@ -37,26 +55,51 @@ export class GraficosScene extends Phaser.Scene {
   private bg!: Gfx;
   private cars!: Gfx;
   private ui!: Gfx;
-  private view = 0; // 0 todo, 1..3 un vehículo al doble
+  private view = 0; // 0 todo, 1..3 un vehículo al doble, 4 y 5 galería sana y dañada
+  private cars2!: Gfx;
+  private carsFx!: Gfx;
+  private list: Car[] = gallery();
   private imgs: Phaser.GameObjects.Image[][] = [];
 
   constructor() { super('Graficos'); }
 
   create(): void {
     this.bg = new Gfx(this, 0); this.cars = new Gfx(this, 10); this.ui = new Gfx(this, 30);
+    this.cars2 = new Gfx(this, 15); this.carsFx = new Gfx(this, 16);
     ROWS.forEach((r, i) => {
       this.imgs[i] = [0, HIT].map((d) => {
         const key = `art-${i}-${d}`;
-        if (!this.textures.exists(key)) this.textures.addCanvas(key, bakeCar(r.art, d, SEED));
+        if (!this.textures.exists(key)) this.textures.addCanvas(key, bakeCar(r.art, d, SEED, BAKE_SCALE));
         return this.add.image(0, r.y, key).setDepth(10).setScale(1 / BAKE_SCALE); // la imagen es BAKE_SCALE veces más grande
       });
     });
-    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 1); });
+    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 3); });
     document.getElementById('menu')!.hidden = true;
   }
 
   update(): void {
-    const cam = this.cameras.main;
+    const cam = this.cameras.main, t0 = this.time.now / 1000;
+    const gal = this.view > ROWS.length;
+    this.cars2.begin(); this.carsFx.begin();
+    if (gal) { // galería: todo el tráfico, en grilla de cuatro columnas
+      const hurt = this.view === ROWS.length + 2;
+      this.list.forEach((c, i) => {
+        c.x = 50 + (i % 4) * 87; c.y = 120 + Math.floor(i / 4) * 92; c.hp = hurt ? 0.35 : 1; c.brakeT = hurt ? 0 : (i % 3 === 0 ? 1 : 0);
+        drawVehicle(this.cars2, this.carsFx, t0, c);
+      });
+    }
+    this.cars2.end(); this.carsFx.end();
+    for (const row of this.imgs) for (const im of row) im.setVisible(!gal);
+    if (gal) {
+      cam.setZoom(ZOOM).centerOn(W / 2, H / 2);
+      const g0 = this.bg; g0.begin(); g0.fillStyle = '#2b2733'; g0.fillRect(-100, 0, W + 200, H); g0.end();
+      this.cars.begin(); this.cars.end();
+      const u = this.ui; u.begin(); u.textAlign = 'center'; u.fillStyle = '#ffe14d'; u.font = FONT(11);
+      u.fillText(this.view === ROWS.length + 2 ? 'TRÁFICO DAÑADO' : 'TRÁFICO · NIVEL B', W / 2, 40);
+      u.font = FONT(5); u.fillStyle = '#b9b4c4';
+      this.list.forEach((c) => u.fillText(c.k.toUpperCase(), c.x, c.y + c.h / 2 + 12));
+      u.end(); return;
+    }
     if (this.view === 0) cam.setZoom(ZOOM).centerOn(W / 2, H / 2);
     else cam.setZoom(ZOOM * 2).centerOn(W / 2, ROWS[this.view - 1].y);
     const t = this.time.now / 1000;

@@ -55,6 +55,8 @@ export class Gfx {
   private path: SubPath[] = [];
   private cur: SubPath | null = null;
   private pools = new Map<string, Pool>();
+  private imgs: Phaser.GameObjects.Image[] = []; // imágenes de vehículos horneados (ADR 0042), sobre las figuras de la capa
+  private imgUsed = 0;
 
   constructor(private scene: Phaser.Scene, private depth: number) {
     this.g = scene.add.graphics().setDepth(depth);
@@ -63,11 +65,30 @@ export class Gfx {
   begin(): void {
     this.g.clear();
     for (const p of this.pools.values()) p.used = 0;
+    this.imgUsed = 0;
     this.m = [1, 0, 0, 1, 0, 0]; this.stack.length = 0; this.globalAlpha = 1;
   }
 
   end(): void {
     for (const p of this.pools.values()) for (let i = p.used; i < p.items.length; i++) p.items[i].t.setVisible(false);
+    for (let i = this.imgUsed; i < this.imgs.length; i++) this.imgs[i].setVisible(false);
+  }
+
+  get textures(): Phaser.Textures.TextureManager { return this.scene.textures; }
+
+  /*
+   * Imagen con la transformación actual (posición, giro y curva), centrada en (x, y). Va sobre las figuras de esta
+   * capa, en el orden en que se piden. tint: rellena la imagen de un color (el destello del golpe).
+   */
+  image(key: string, x: number, y: number, scale: number, ang = 0, tint?: number, alpha = 1): void {
+    let im = this.imgs[this.imgUsed];
+    if (!im) { im = this.scene.add.image(0, 0, key).setDepth(this.depth); this.imgs.push(im); }
+    this.imgUsed++;
+    const p = this.tx(x, y), m = this.m;
+    if (im.texture.key !== key) im.setTexture(key);
+    im.setPosition(p.x, p.y).setRotation(Math.atan2(m[1], m[0]) + ang).setScale(scale * Math.hypot(m[0], m[1]))
+      .setAlpha(Math.min(1, alpha * this.globalAlpha)).setVisible(true);
+    if (tint !== undefined) im.setTintFill(tint); else if (im.isTinted) im.clearTint();
   }
 
   /* ---------- transformaciones ---------- */

@@ -2,96 +2,26 @@ import { H, W, view } from './constants';
 import { drawCar } from './damage-render';
 import type Phaser from 'phaser';
 import { BODY, FONT, Gfx } from './gfx';
-import { tramo, type Car, type Game, type Pickup } from './state';
-import type { VehicleLook } from './config';
+import { tramo, type Game, type Pickup } from './state';
 import { jetZone, throwOrigin } from '../bosses/phase-boss';
 import { gateClosed } from './world';
 import { drawHazards, drawSplat } from './hazards';
 import { drawEndingUI, drawEndingWorld } from './ending';
 import { drawLights } from './lights';
+import { ART_SCALE, drawVehicle, lights, texture, ticoArt } from './art/vehicles';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
-export interface Layers { world: Gfx; ents: Gfx; fx: Gfx; ui: Gfx }
+// Capas de dibujo, de abajo hacia arriba (ADR 0042): asfalto; bonus; tráfico (imágenes) y sus luces; jefe, proyectiles
+// y peligros; el Tico (imagen) y sus luces; efectos; interfaz.
+export interface Layers { world: Gfx; low: Gfx; cars: Gfx; carsFx: Gfx; ents: Gfx; me: Gfx; meFx: Gfx; fx: Gfx; ui: Gfx }
 
 // Pantalla táctil (lo fija main.ts): cambia qué muestra el HUD.
 export const ui = { touch: false };
 
 // Detalles declarativos sobre la carrocería (ver VehicleLook en config.ts).
-function drawLook(g: Gfx, G: Game, L: VehicleLook, w: number, h: number): void {
-  if (L.panel) { g.fillStyle = L.panel; g.fillRect(-w / 2 + 4, -h / 2 + h * 0.36, w - 8, h * 0.3); }
-  if (L.siren) {
-    const blink = Math.floor(G.t * 8) % 2;
-    g.fillStyle = blink ? '#ff3355' : '#3a7bff'; g.fillRect(-9, -h / 2 + h * 0.4, 8, 4);
-    g.fillStyle = blink ? '#3a7bff' : '#ff3355'; g.fillRect(1, -h / 2 + h * 0.4, 8, 4);
-  }
-  if (L.band) { g.fillStyle = L.band; g.fillRect(-w / 2, -h / 2 + h * 0.55, w, 5); }
-  if (L.shades) { g.fillStyle = '#000'; g.fillRect(-w / 4 - 2, -h / 2 + h * 0.25, 7, 2); }
-  if (L.label) {
-    g.fillStyle = L.labelCol ?? '#fff'; g.font = FONT(L.labelSize ?? 5); g.textAlign = 'center';
-    g.fillText(L.label, 0, -h / 2 + h * (L.labelY ?? 0.6));
-  }
-}
-
-function drawMoto(g: Gfx, c: Car): void {
-  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.25 : 0);
-  g.fillStyle = '#222'; g.fillRect(-2, -12, 4, 24); g.fillStyle = c.col; g.fillRect(-4, -4, 8, 12);
-  if (c.look?.box) { g.fillStyle = c.look.box; g.fillRect(-6, 3, 12, 10); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-6, 11, 12, 2); }
-  g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(0, -2, 4, 0, 7); g.fill(); g.fillStyle = '#111'; g.fillRect(-6, -12, 12, 2);
-  g.restore();
-}
-
-function drawBici(g: Gfx, c: Car): void {
-  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.15 : 0);
-  g.fillStyle = '#1b1b22'; g.fillRect(-1, -11, 2, 22);                       // ruedas y cuadro
-  g.fillStyle = c.col; g.fillRect(-3, -3, 6, 8);                             // ciclista
-  g.fillStyle = c.look?.box ?? '#ffe14d'; g.beginPath(); g.arc(0, -3, 3.4, 0, 7); g.fill(); // casco
-  g.fillStyle = '#111'; g.fillRect(-5, -9, 10, 1.5);                         // timón
-  g.restore();
-}
-
-// Mototaxi: tres ruedas, cabina con toldo del color del vehículo y el techo (roof) como lona.
-function drawMototaxi(g: Gfx, c: Car): void {
-  const w = c.w, h = c.h;
-  g.save(); g.translate(c.x, c.y); g.rotate(c.zz !== undefined ? Math.sin(c.zz) * 0.12 : 0);
-  g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-w / 2 + 2, -h / 2 + 3, w, h);
-  g.fillStyle = '#1b1b22'; g.fillRect(-2, -h / 2, 4, 6); g.fillRect(-w / 2, h / 2 - 7, 4, 7); g.fillRect(w / 2 - 4, h / 2 - 7, 4, 7); // ruedas
-  g.fillStyle = c.col; g.fillRect(-w / 2 + 1, -h / 2 + 7, w - 2, h - 10);                   // carrocería
-  g.fillStyle = c.look?.roof ?? '#2a2238'; g.roundRect(-w / 2 + 2, -h / 2 + h * 0.36, w - 4, h * 0.5, 3); g.fill(); // toldo
-  g.fillStyle = '#10131c'; g.fillRect(-w / 2 + 3, -h / 2 + h * 0.26, w - 6, 3);             // parabrisas
-  if (c.look?.label) { g.fillStyle = c.look.labelCol ?? '#fff'; g.font = FONT(c.look.labelSize ?? 4); g.textAlign = 'center'; g.fillText(c.look.label, 0, -h / 2 + h * (c.look.labelY ?? 0.66)); }
-  if (c.flash && c.flash > 0) { g.fillStyle = 'rgba(255,255,255,.6)'; g.fillRect(-w / 2, -h / 2, w, h); }
-  g.restore();
-}
-
-// Triciclo de carga: el que pedalea atrás y la plataforma adelante con fardos apilados.
-function drawTriciclo(g: Gfx, c: Car): void {
-  const w = c.w, h = c.h;
-  g.save(); g.translate(c.x, c.y);
-  g.fillStyle = '#1b1b22'; g.fillRect(-w / 2, -h / 2 + 2, 3, 7); g.fillRect(w / 2 - 3, -h / 2 + 2, 3, 7); g.fillRect(-1, h / 2 - 7, 2, 7);
-  g.fillStyle = '#4a4452'; g.fillRect(-w / 2 + 1, -h / 2 + 1, w - 2, h * 0.55);                // plataforma
-  const box = c.look?.box ?? '#e0954a';
-  g.fillStyle = box; g.fillRect(-w / 2 + 2, -h / 2 + 2, w - 4, h * 0.25); g.fillRect(-w / 2 + 3, -h / 2 + 2 + h * 0.27, w - 6, h * 0.24);
-  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-w / 2 + 2, -h / 2 + 2 + h * 0.25, w - 4, 1.5);
-  g.fillStyle = c.col; g.fillRect(-3, h * 0.08, 6, 8);                                        // el que pedalea
-  g.fillStyle = '#e8c4a0'; g.beginPath(); g.arc(0, h * 0.08 + 1, 3, 0, 7); g.fill();
-  g.restore();
-}
-
-function drawTraffic(g: Gfx, G: Game, c: Car): void {
-  if (c.look?.kind === 'moto') { drawMoto(g, c); return; }
-  if (c.look?.kind === 'bici') { drawBici(g, c); return; }
-  if (c.look?.kind === 'mototaxi') { drawMototaxi(g, c); return; }
-  if (c.look?.kind === 'triciclo') { drawTriciclo(g, c); return; }
-  const L = c.look;
-  drawCar(g, G.t, c, {
-    body: c.col, roof: L?.roof, ang: c.spin > 0 ? Math.sin(G.t * 14) * 0.5 : 0, extra: L ? (g, w, h) => drawLook(g, G, L, w, h) : undefined,
-    flash: c.flash, dmg: c.max && !c.invulnerable ? 1 - c.hp / c.max : 0, seed: c.seed, brake: (c.brakeT ?? 0) > 0,
-  });
-}
-
 // Obstáculos declarados en el JSON (ver ObstacleDef). Van en la capa del asfalto, debajo de los vehículos.
 function drawObstacles(g: Gfx, G: Game): void {
   const defs = G.cfg.obstacles ?? [];
@@ -277,28 +207,22 @@ function drawCombi(g: Gfx, G: Game, a: { x: number; y: number; w: number; h: num
   });
 }
 
-// El Tico con su pintura y sus mejoras visibles; también lo usa el cierre del carguero.
-function drawTico(g: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
-  drawCar(g, G.t, body, {
-    body: '#f2c230', roof: '#e0ae1a', flash, brake, dmg, seed: 7, extra: (g, w, h) => {
-      const look = G.cfg.player.look;
-      if (look?.bumper) { g.fillStyle = '#4a4452'; g.fillRect(-w / 2 - 1, -h / 2 - 3, w + 2, 4); g.fillStyle = '#8c869a'; g.fillRect(-w / 2 + 2, -h / 2 - 2, w - 4, 1); } // parachoques de fierro
-      if (look?.plates) { g.fillStyle = '#6c7a8c'; g.fillRect(-w / 2 - 2, -h / 4, 2, h / 2); g.fillRect(w / 2, -h / 4, 2, h / 2); }            // blindaje lateral
-      g.fillStyle = '#111'; g.fillRect(-8, -h / 2 + h * 0.42, 16, 6);
-      g.fillStyle = C.yellow; g.font = FONT(5); g.textAlign = 'center'; g.fillText('TAXI', 0, -h / 2 + h * 0.42 + 5);
-    },
-  });
+// El Tico con su pintura y sus mejoras visibles (imagen horneada, ADR 0042); también lo usa el cierre del carguero.
+function drawTico(img: Gfx, fx: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
+  const a = ticoArt(G.cfg.player.look), k = body.w / a.w;
+  img.image(texture(img, a, dmg, 7), body.x, body.y, k / ART_SCALE, 0, flash > 0 ? 0xffffff : undefined);
+  if (k === 1 && brake) { fx.save(); fx.translate(body.x, body.y); lights(fx, G.t, a, dmg, true, false, false); fx.restore(); }
 }
 
-function drawPlayer(g: Gfx, G: Game): void {
-  const p = G.p;
+function drawPlayer(L: Layers, G: Game): void {
+  const p = G.p, g = L.meFx;
   // en el aire: sombra en el piso y el Tico más grande, como si se acercara a la cámara
   const lift = p.air > 0 && p.airMax > 0 ? Math.sin(Math.PI * (1 - p.air / p.airMax)) : 0;
-  if (lift > 0) { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(p.x + 6 * lift, p.y + 8 * lift, p.w / 2 + 2, p.h / 2, 0, 0, 7); g.fill(); }
+  if (lift > 0) { L.ents.fillStyle = 'rgba(0,0,0,.35)'; L.ents.beginPath(); L.ents.ellipse(p.x + 6 * lift, p.y + 8 * lift, p.w / 2 + 2, p.h / 2, 0, 0, 7); L.ents.fill(); }
   const body = lift > 0 ? { x: p.x, y: p.y - 10 * lift, w: p.w * (1 + 0.3 * lift), h: p.h * (1 + 0.3 * lift) } : p;
-  if (p.hitCd > 0 && Math.floor(G.t * 20) % 2) g.globalAlpha = 0.6;
-  drawTico(g, G, body, G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, p.flash, 1 - p.hp / p.max);
-  g.globalAlpha = 1;
+  L.me.globalAlpha = p.hitCd > 0 && Math.floor(G.t * 20) % 2 ? 0.6 : 1;
+  drawTico(L.me, g, G, body, G.cfg.player.throttle === 'libre' ? G.keys.down : !G.keys.up && p.vy > 40, p.flash, 1 - p.hp / p.max);
+  L.me.globalAlpha = 1;
   if (p.pw.soat > 0) { g.strokeStyle = C.green; g.globalAlpha = 0.5 + Math.sin(G.t * 10) * 0.2; g.lineWidth = 2; g.beginPath(); g.ellipse(p.x, p.y, 24, 34, 0, 0, 7); g.closePath(); g.stroke(); g.globalAlpha = 1; }
   if (p.stun > 0) { g.fillStyle = C.yellow; g.font = FONT(9); g.textAlign = 'center'; g.fillText('★ ★ ★', p.x, p.y - p.h / 2 - 8); }
 }
@@ -379,10 +303,11 @@ function drawBubble(g: Gfx, G: Game): void {
 }
 
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) => void): void {
-  const g = L.ents, f = L.fx;
+  const g = L.ents, f = L.fx, lo = L.low;
   drawLights(L.world, G); drawObstacles(L.world, G);
-  G.pickups.forEach((u) => g.rigid(u.x, u.y, () => drawPickup(g, G, u)));
-  G.traffic.forEach((c) => g.rigid(c.x, c.y, () => drawTraffic(g, G, c)));
+  G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickup(lo, G, u)));
+  // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
+  G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));
   for (const s of G.shots) g.rigid(s.x, s.y, () => {
     if (s.k === 'cone') { g.fillStyle = C.orange; g.beginPath(); g.moveTo(s.x, s.y - 7); g.lineTo(s.x + 5, s.y + 5); g.lineTo(s.x - 5, s.y + 5); g.fill(); g.fillStyle = '#fff'; g.fillRect(s.x - 3, s.y, 6, 2); }
     else if (s.k === 'kernel') { g.fillStyle = '#fff3c2'; g.beginPath(); g.arc(s.x, s.y, 2.6, 0, 7); g.fill(); g.fillStyle = '#e6b64a'; g.fillRect(s.x - 1, s.y, 2, 2); }
@@ -433,15 +358,15 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game) =
     g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(f.x - f.r / 2, f.y - f.r / 2, f.r / 2, f.r / 2);
   });
   drawBoss(g, G); G.allies.forEach((a) => g.rigid(a.x, a.y, () => drawCombi(g, G, a))); drawTide(g, G); drawEndingWorld(g, G);
-  g.rigid(G.p.x, G.p.y, () => drawPlayer(g, G));
+  L.me.rigid(G.p.x, G.p.y, () => L.meFx.rigid(G.p.x, G.p.y, () => drawPlayer(L, G)));
   for (const r of G.rings) f.rigid(r.x, r.y, () => { f.strokeStyle = r.col; f.globalAlpha = clamp(r.life * 2, 0, 1); f.lineWidth = 3; f.beginPath(); f.arc(r.x, r.y, r.r, 0, 7); f.closePath(); f.stroke(); f.globalAlpha = 1; });
   for (const q of G.parts) { f.globalAlpha = clamp(q.life / q.max, 0, 1); f.fillStyle = q.col; f.fillRect(q.x, q.y, q.size, q.size); } f.globalAlpha = 1;
   f.textAlign = 'center';
   for (const t of G.floats) { f.font = FONT(t.size ?? 10); f.globalAlpha = clamp(t.life * 1.5, 0, 1); f.fillStyle = t.col; f.fillText(t.text, t.x, t.y); } f.globalAlpha = 1;
   drawBlindSpot(L.fx, G); drawDark(L.fx, G); drawSplat(L.ui, G); drawBubble(L.ui, G); drawHint(L.ui, G);
   // dentro del carguero no hay pista: el HUD se oculta (sus textos quedarían sobre el interior del avión)
-  if (G.ending && G.cfg.ending?.kind === 'carguero') drawEndingUI(L.ui, G, (g, box) => drawTico(g, G, box));
-  else { drawHUD(L.ui, G); drawEndingUI(L.ui, G, (g, box) => drawTico(g, G, box)); }
+  if (G.ending && G.cfg.ending?.kind === 'carguero') drawEndingUI(L.ui, G, (g, box) => drawTico(g, g, G, box));
+  else { drawHUD(L.ui, G); drawEndingUI(L.ui, G, (g, box) => drawTico(g, g, G, box)); }
 }
 
 // Ayuda del tutorial: una píldora sobre el Tico que se desvanece al final.
@@ -455,9 +380,13 @@ function drawHint(g: Gfx, G: Game): void {
 }
 
 export function createLayers(scene: Phaser.Scene): Layers {
-  return { world: new Gfx(scene, 0), ents: new Gfx(scene, 10), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30) };
+  return {
+    world: new Gfx(scene, 0), low: new Gfx(scene, 8), cars: new Gfx(scene, 10), carsFx: new Gfx(scene, 11), ents: new Gfx(scene, 12),
+    me: new Gfx(scene, 13), meFx: new Gfx(scene, 14), fx: new Gfx(scene, 20), ui: new Gfx(scene, 30),
+  };
 }
-export const beginLayers = (L: Layers) => { L.world.begin(); L.ents.begin(); L.fx.begin(); L.ui.begin(); };
+const ALL = (L: Layers) => [L.world, L.low, L.cars, L.carsFx, L.ents, L.me, L.meFx, L.fx, L.ui];
+export const beginLayers = (L: Layers) => { for (const g of ALL(L)) g.begin(); };
 // la curva se aplica a todo menos al HUD
-export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { L.world.warp = w; L.ents.warp = w; L.fx.warp = w; };
-export const endLayers = (L: Layers) => { L.world.end(); L.ents.end(); L.fx.end(); L.ui.end(); };
+export const setWarp = (L: Layers, w: ((y: number) => number) | null) => { for (const g of ALL(L)) if (g !== L.ui) g.warp = w; };
+export const endLayers = (L: Layers) => { for (const g of ALL(L)) g.end(); };

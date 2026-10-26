@@ -1,6 +1,6 @@
 # 0041. Prueba de gráficos nivel B: vehículos horneados con sombreado
 
-**Estado:** en evaluación. Es una prueba visual que no reemplaza nada del juego (pedido del dueño, 25 de octubre de 2026).
+**Estado:** aceptada. El dueño aprobó el estilo el 25 de octubre de 2026 y se integró al juego en la ADR 0042.
 
 ## Contexto
 El dueño ve los gráficos "de los 80". Se evaluaron tres niveles:
