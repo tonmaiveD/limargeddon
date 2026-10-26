@@ -1,12 +1,12 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
 /* Paisaje de la Costa Verde de noche: el acantilado con sus mallas a la izquierda y el mar con la playa a la derecha. */
 
-function drawAcantilado(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number): void {
+function drawAcantilado(g: Painter, x0: number, y: number, w: number, seg: number, idx: number): void {
   g.fillStyle = '#3b3326'; g.fillRect(x0, y, w, seg);
   for (let i = 0; i < 5; i++) { // estratos de tierra y piedra
     g.fillStyle = i % 2 ? '#4a4030' : '#2f281e'; g.fillRect(x0, y + i * 22 + hash(idx + i) * 6, w, 8);
@@ -17,7 +17,7 @@ function drawAcantilado(g: Gfx, x0: number, y: number, w: number, seg: number, i
   if (hash(idx * 2.9) < 0.12) { g.fillStyle = '#2f6b3f'; g.beginPath(); g.arc(x0 + w / 2, y + seg / 2, 10, 0, 7); g.fill(); } // matorral
 }
 
-function drawPlaya(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, near: boolean): void {
+function drawPlaya(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, near: boolean): void {
   g.fillStyle = '#0d2236'; g.fillRect(x0, y, w, seg); // mar de noche
   g.fillStyle = 'rgba(127,212,255,.18)'; for (let i = 0; i < 5; i++) g.fillRect(x0 + 6 + hash(idx * 1.3 + i) * (w - 18), y + 8 + i * 21, 10, 1.5);
   if (!near) return;
@@ -29,7 +29,7 @@ function drawPlaya(g: Gfx, x0: number, y: number, w: number, seg: number, idx: n
   }
 }
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   if (side % 2 === 0) drawAcantilado(g, x0, y, w, seg, idx);
   else drawPlaya(g, x0, y, w, seg, idx, side === 1);
 }

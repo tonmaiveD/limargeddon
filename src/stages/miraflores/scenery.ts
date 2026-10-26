@@ -1,6 +1,6 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
@@ -9,7 +9,7 @@ import { C, hash } from '../../core/util';
  * y el mar (pantallas anchas). A la derecha, edificios frente al mar y tiendas de Av. Larco.
  */
 
-function drawPark(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number): void {
+function drawPark(g: Painter, x0: number, y: number, w: number, seg: number, idx: number): void {
   g.fillStyle = '#1d4a2c'; g.fillRect(x0, y, w, seg);
   g.fillStyle = 'rgba(247,241,255,.55)'; g.fillRect(x0 + 1, y, 2, seg); // baranda del malecón
   const k = ((idx % 40) + 40) % 40;
@@ -35,20 +35,20 @@ function drawPark(g: Gfx, x0: number, y: number, w: number, seg: number, idx: nu
   if (hash(idx * 3.3) < 0.5) { g.fillStyle = '#8c6a4a'; g.fillRect(x0 + 6, y + seg - 18, 14, 4); }
 }
 
-function drawCliff(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number): void {
+function drawCliff(g: Painter, x0: number, y: number, w: number, seg: number, idx: number): void {
   g.fillStyle = '#7a5a3a'; g.fillRect(x0, y, w, seg);
   g.fillStyle = '#5e4429';
   for (let i = 0; i < 5; i++) g.fillRect(x0 + hash(idx + i * 3) * (w - 14), y + i * 22 + 4, 14, 3); // estratos
   g.fillStyle = '#3e2c1c'; g.fillRect(x0, y, 3, seg);
 }
 
-function drawSea(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number): void {
+function drawSea(g: Painter, x0: number, y: number, w: number, seg: number, idx: number): void {
   g.fillStyle = '#1b3a5c'; g.fillRect(x0 - 2, y, w + 6, seg);
   g.fillStyle = 'rgba(127,212,255,.35)';
   for (let i = 0; i < 4; i++) g.fillRect(x0 + hash(idx * 2.1 + i) * (w - 16), y + 10 + i * 26, 16, 2); // espuma
 }
 
-function drawBuilding(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawBuilding(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   const h = hash(idx * 4.7 + side * 13.1);
   if (side === 1 && h < 0.22) { // tiendas de Larco con toldo
     g.fillStyle = '#2a2238'; g.fillRect(x0 + 2, y + 4, w - 4, seg - 8);
@@ -66,7 +66,7 @@ function drawBuilding(g: Gfx, x0: number, y: number, w: number, seg: number, idx
   }
 }
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   if (side === 0) drawPark(g, x0, y, w, seg, idx);
   else if (side === 2) drawCliff(g, x0, y, w, seg, idx);
   else if (side % 2 === 0) drawSea(g, x0, y, w, seg, idx);

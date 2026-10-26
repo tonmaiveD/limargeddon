@@ -4,6 +4,7 @@ import { drawCar } from '../core/damage-render';
 import { FONT, Gfx } from '../core/gfx';
 import { bakeCar, type CarArt } from '../core/art/bake';
 import { drawVehicle } from '../core/art/vehicles';
+import { drawFoe, drawObstacle, drawPickupB, drawShot } from '../core/art/props';
 import { STAGES, STAGE_ORDER } from '../stages';
 import { createGame, newKeys, type Car, type Game } from '../core/state';
 import { update as stepGame } from '../core/world';
@@ -75,7 +76,7 @@ export class GraficosScene extends Phaser.Scene {
         return this.add.image(0, r.y, key).setDepth(10).setScale(1 / BAKE_SCALE); // la imagen es BAKE_SCALE veces más grande
       });
     });
-    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 6); });
+    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 9); });
     // un juego por jefe, avanzado hasta que el jefe entra, para dibujarlo con su propio código (ADR 0043)
     for (const id of STAGE_ORDER) {
       const def = STAGES[id], G = createGame(structuredClone(def.cfg), 'normal', newKeys(), def.ai);
@@ -88,7 +89,7 @@ export class GraficosScene extends Phaser.Scene {
 
   update(): void {
     const cam = this.cameras.main, t0 = this.time.now / 1000;
-    const gal = this.view > ROWS.length, bossView = this.view >= ROWS.length + 3;
+    const gal = this.view > ROWS.length, bossView = this.view >= ROWS.length + 3 && this.view <= ROWS.length + 5, propsView = this.view >= ROWS.length + 6;
     this.cars2.begin(); this.carsFx.begin();
     if (bossView) { // galería de jefes: sanos, dañados y el carguero
       const page = this.view - (ROWS.length + 3);
@@ -105,7 +106,28 @@ export class GraficosScene extends Phaser.Scene {
         STAGES[id].drawBoss(this.carsFx, G, this.cars2);
       });
     }
-    if (gal && !bossView) { // galería: todo el tráfico, en grilla de cuatro columnas
+    const labels: [string, number, number][] = [];
+    if (propsView) { // obstáculos de las diez etapas (dos páginas) y proyectiles con bonus (ADR 0044)
+      const page = this.view - (ROWS.length + 6);
+      if (page < 2) {
+        const all = this.bosses.flatMap(({ G }) => (G.cfg.obstacles ?? []).map((o, i) => ({ G, o, i })));
+        all.slice(page * 13, page * 13 + 13).forEach(({ G, o, i }, row) => {
+          const w = o.w ?? Math.min(o.lanes * G.cfg.road.laneWidth, 130), y = 90 + row * 42;
+          G.t = t0; drawObstacle(this.cars2, G, { i, x: 220, y, w, h: o.h, hit: false, ph: 0 } as never);
+          labels.push([`${G.cfg.id.slice(0, 8)} · ${o.k}`.toUpperCase(), 60, y]);
+        });
+      } else {
+        const G = this.bosses[1].G; G.t = t0;
+        const foes = [['moneda', 5, '#ffd23f'], ['rollo', 7, '#ff2e88'], ['contenedor', 8, '#d93b3b'], ['rompellantas', 6, '#2a2632'], ['piedra', 9, '#8a7a5a']] as const;
+        foes.forEach(([look, r, col], k) => { drawFoe(this.cars2, G, { x: 50 + k * 65, y: 130, vx: 0, vy: 0, r, dmg: 0, col, look } as never); labels.push([look.toUpperCase(), 50 + k * 65, 165]); });
+        (['cone', 'picaron', 'oil', 'kernel'] as const).forEach((k, n) => { drawShot(this.cars2, G, { k, x: 70 + n * 75, y: 250, vx: 0, vy: 0, r: 5 }); labels.push([k.toUpperCase(), 70 + n * 75, 280]); });
+        (Object.keys(G.cfg.powers) as (keyof typeof G.cfg.powers)[]).forEach((k, n) => {
+          const x = 50 + (n % 4) * 87, y = 380 + Math.floor(n / 4) * 90;
+          drawPickupB(this.cars2, G, { k, x, y, r: 12, rot: t0 * 3 } as never); labels.push([G.cfg.powers[k].label.toUpperCase(), x, y + 34]);
+        });
+      }
+    }
+    if (gal && !bossView && !propsView) { // galería: todo el tráfico, en grilla de cuatro columnas
       const hurt = this.view === ROWS.length + 2;
       this.list.forEach((c, i) => {
         c.x = 50 + (i % 4) * 87; c.y = 120 + Math.floor(i / 4) * 92; c.hp = hurt ? 0.35 : 1; c.brakeT = hurt ? 0 : (i % 3 === 0 ? 1 : 0);
@@ -119,9 +141,11 @@ export class GraficosScene extends Phaser.Scene {
       const g0 = this.bg; g0.begin(); g0.fillStyle = '#2b2733'; g0.fillRect(-100, 0, W + 200, H); g0.end();
       this.cars.begin(); this.cars.end();
       const u = this.ui; u.begin(); u.textAlign = 'center'; u.fillStyle = '#ffe14d'; u.font = FONT(11);
-      const titles = ['TRÁFICO · NIVEL B', 'TRÁFICO DAÑADO', 'JEFES · NIVEL B', 'JEFES DAÑADOS', 'EL CARGUERO'];
+      const titles = ['TRÁFICO · NIVEL B', 'TRÁFICO DAÑADO', 'JEFES · NIVEL B', 'JEFES DAÑADOS', 'EL CARGUERO', 'OBSTÁCULOS 1', 'OBSTÁCULOS 2', 'PROYECTILES Y BONUS'];
       u.fillText(titles[this.view - ROWS.length - 1], W / 2, 40);
       u.font = FONT(5); u.fillStyle = '#b9b4c4';
+      for (const [txt, x, y] of labels) u.fillText(txt, x, y);
+      if (propsView) { u.end(); return; }
       if (!bossView) this.list.forEach((c) => u.fillText(c.k.toUpperCase(), c.x, c.y + c.h / 2 + 12));
       else if (this.view < ROWS.length + 5) this.bosses.forEach(({ G }) => { if (G.cfg.route) return; u.fillText(G.cfg.boss.title.toUpperCase(), G.b.x, G.b.y - G.b.h / 2 - 10); });
       u.end(); return;

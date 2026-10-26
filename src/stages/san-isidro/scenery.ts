@@ -1,12 +1,12 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
 /* Paisaje de San Isidro: Huaca Huallamarca, Lima Golf, Bosque El Olivar y torres de vidrio; cruces y rompemuelles. */
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   const h = hash(idx * 3.1 + side * 91.7);
   if (side === 0 && ((idx % 64) + 64) % 64 === 22) { // Huaca Huallamarca, adobe escalonado
     g.fillStyle = '#3b2a1e'; g.fillRect(x0, y, w, seg);

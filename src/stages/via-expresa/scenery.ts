@@ -1,13 +1,13 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
 import { H } from '../../core/constants';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
 /* Paisaje del Zanjón: muros de concreto a los lados de la pista hundida, la ciudad arriba y puentes que cruzan por encima. */
 
-function drawMuro(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawMuro(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   g.fillStyle = '#4a4655'; g.fillRect(x0, y, w, seg);
   g.fillStyle = '#5a5666'; for (let yy = y; yy < y + seg; yy += 22) g.fillRect(x0 + 2, yy + 1, w - 4, 20); // paneles
   g.fillStyle = '#2f6b3f'; g.fillRect(side ? x0 + w - 8 : x0, y, 8, seg);                                 // talud con pasto
@@ -20,7 +20,7 @@ function drawMuro(g: Gfx, x0: number, y: number, w: number, seg: number, idx: nu
 }
 
 // La ciudad sobre el zanjón: edificios bajos y parques, en las columnas extra de pantallas anchas.
-function drawCiudad(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number): void {
+function drawCiudad(g: Painter, x0: number, y: number, w: number, seg: number, idx: number): void {
   const h = hash(idx * 4.1);
   if (h < 0.3) { g.fillStyle = '#1d4a2c'; g.fillRect(x0, y, w, seg); g.fillStyle = '#2f6b3f'; g.beginPath(); g.arc(x0 + w / 2, y + seg / 2, 14, 0, 7); g.fill(); return; }
   g.fillStyle = h < 0.65 ? '#33293f' : '#2b3346'; g.fillRect(x0 + 2, y + 4, w - 4, seg - 8);
@@ -29,12 +29,12 @@ function drawCiudad(g: Gfx, x0: number, y: number, w: number, seg: number, idx: 
   }
 }
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   if (side <= 1) drawMuro(g, x0, y, w, seg, idx, side); else drawCiudad(g, x0, y, w, seg, idx);
 }
 
 // Puentes que cruzan sobre el zanjón: una franja de sombra y el tablero con el nombre de la avenida.
-function drawPuentes(g: Gfx, cfg: StageConfig, scroll: number): void {
+function drawPuentes(g: Painter, cfg: StageConfig, scroll: number): void {
   const period = 560, off = scroll % period, base = Math.floor(scroll / period);
   for (let k = -1; k < H / period + 1; k++) {
     const y = off + k * period - 200, name = cfg.streets[(((base - k) % cfg.streets.length) + cfg.streets.length) % cfg.streets.length];

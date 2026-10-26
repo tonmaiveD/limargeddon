@@ -12,7 +12,7 @@ export const FONT = (size: number): FontSpec => ({ fam: 'display', size });
 export const BODY = (weight: number, size: number): FontSpec => ({ fam: 'body', size, weight });
 
 const FAMILY = { display: "Bungee, Impact, 'Arial Black', sans-serif", body: 'Archivo, system-ui, sans-serif' };
-const cssFont = (f: FontSpec) => `${f.weight ?? 400} ${f.size}px ${FAMILY[f.fam]}`;
+export const cssFont = (f: FontSpec) => `${f.weight ?? 400} ${f.size}px ${FAMILY[f.fam]}`;
 
 interface Rgba { c: number; a: number }
 const colorCache = new Map<string, Rgba>();
@@ -39,7 +39,22 @@ interface Pool { items: PoolItem[]; used: number; baseline: number }
 
 let measureCtx: CanvasRenderingContext2D | null = null;
 
-export class Gfx {
+/*
+ * Lo que necesita el dibujo procedural (paisaje, obstáculos, proyectiles). Lo cumplen Gfx, que dibuja en Phaser cada
+ * cuadro, y CanvasPainter (art/canvas-painter.ts), que dibuja una sola vez en un canvas para hornearlo (ADR 0044).
+ */
+export interface Painter {
+  fillStyle: string; strokeStyle: string; lineWidth: number; globalAlpha: number; font: FontSpec; textAlign: 'left' | 'center' | 'right';
+  save(): void; restore(): void; translate(x: number, y: number): void; rotate(r: number): void;
+  fillRect(x: number, y: number, w: number, h: number): void;
+  beginPath(): void; moveTo(x: number, y: number): void; lineTo(x: number, y: number): void; closePath(): void;
+  arc(x: number, y: number, r: number, a0: number, a1: number): void;
+  ellipse(x: number, y: number, rx: number, ry: number, rot: number, a0: number, a1: number): void;
+  roundRect(x: number, y: number, w: number, h: number, r: number): void;
+  fill(): void; stroke(): void; fillText(text: string, x: number, y: number): void; measureText(text: string): { width: number };
+}
+
+export class Gfx implements Painter {
   readonly g: Phaser.GameObjects.Graphics;
   fillStyle = '#000';
   strokeStyle = '#000';
@@ -57,6 +72,9 @@ export class Gfx {
   private pools = new Map<string, Pool>();
   private imgs: Phaser.GameObjects.Image[] = []; // imágenes de vehículos horneados (ADR 0042), sobre las figuras de la capa
   private imgUsed = 0;
+  private tiles: Phaser.GameObjects.Image[] = []; // tramos de paisaje horneados (ADR 0044), en franjas si la pista es curva
+  private tileUsed = 0;
+  under: Gfx | null = null; // capa de abajo (el paisaje va debajo de la pista)
 
   constructor(private scene: Phaser.Scene, private depth: number) {
     this.g = scene.add.graphics().setDepth(depth);
@@ -65,16 +83,35 @@ export class Gfx {
   begin(): void {
     this.g.clear();
     for (const p of this.pools.values()) p.used = 0;
-    this.imgUsed = 0;
+    this.imgUsed = 0; this.tileUsed = 0;
     this.m = [1, 0, 0, 1, 0, 0]; this.stack.length = 0; this.globalAlpha = 1;
   }
 
   end(): void {
     for (const p of this.pools.values()) for (let i = p.used; i < p.items.length; i++) p.items[i].t.setVisible(false);
     for (let i = this.imgUsed; i < this.imgs.length; i++) this.imgs[i].setVisible(false);
+    for (let i = this.tileUsed; i < this.tiles.length; i++) this.tiles[i].setVisible(false);
   }
 
   get textures(): Phaser.Textures.TextureManager { return this.scene.textures; }
+
+  /*
+   * Tramo de paisaje horneado con su esquina arriba a la izquierda en (x, y), de w por h unidades (la textura incluye un
+   * margen de mx a cada lado). Con pista curva se corta en franjas de 8 que siguen la curva (con franjas más altas el
+   * borde del mar y los letreros se veían escalonados).
+   */
+  tile(key: string, x: number, y: number, w: number, h: number, mx: number, scale: number): void {
+    const n = this.warp ? Math.max(1, Math.ceil(h / 8)) : 1, sh = h / n;
+    for (let i = 0; i < n; i++) {
+      let im = this.tiles[this.tileUsed];
+      if (!im) { im = this.scene.add.image(0, 0, key).setOrigin(0, 0).setDepth(this.depth); this.tiles.push(im); }
+      this.tileUsed++;
+      if (im.texture.key !== key) im.setTexture(key);
+      const dx = this.warp ? this.warp(y + (i + 0.5) * sh + this.m[5]) : 0;
+      im.setPosition(x - mx + this.m[4] + dx, y + this.m[5]).setScale(1 / scale).setVisible(true).setAlpha(1);
+      if (n > 1) im.setCrop(0, i * sh * scale, (w + 2 * mx) * scale, sh * scale + 1); else im.setCrop();
+    }
+  }
 
   /*
    * Imagen con la transformación actual (posición, giro y curva), centrada en (x, y). Va sobre las figuras de esta

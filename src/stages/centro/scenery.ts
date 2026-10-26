@@ -1,6 +1,6 @@
 import type { StageConfig } from '../../core/config';
 import { drawRoad, drawSides } from '../../core/road';
-import { FONT, type Gfx } from '../../core/gfx';
+import { FONT, type Gfx, type Painter } from '../../core/gfx';
 import type { Game } from '../../core/state';
 import { C, hash } from '../../core/util';
 
@@ -8,7 +8,7 @@ import { C, hash } from '../../core/util';
 
 const FACHADAS = ['#e8c35a', '#7fb6d9', '#e59aa8', '#d9d4c7', '#9cc59a'];
 
-function drawCasona(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawCasona(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   const h = hash(idx * 2.9 + side * 7.7);
   g.fillStyle = FACHADAS[Math.floor(h * FACHADAS.length)]; g.fillRect(x0 + 2, y + 4, w - 4, seg - 8);
   g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x0 + 2, y + 4, w - 4, 4); // cornisa
@@ -23,7 +23,7 @@ function drawCasona(g: Gfx, x0: number, y: number, w: number, seg: number, idx: 
   g.fillStyle = 'rgba(255,225,77,.45)'; if (h > 0.5) g.fillRect(x0 + 8, y + seg - 40, 6, 8);
 }
 
-function drawIglesia(g: Gfx, x0: number, y: number, w: number, seg: number): void {
+function drawIglesia(g: Painter, x0: number, y: number, w: number, seg: number): void {
   g.fillStyle = '#e3c27a'; g.fillRect(x0 + 2, y + 4, w - 4, seg - 8);
   g.fillStyle = '#c9a35a'; g.fillRect(x0 + 4, y + 8, 10, 30); g.fillRect(x0 + w - 14, y + 8, 10, 30); // torres
   g.fillStyle = '#8a6a3a'; g.beginPath(); g.arc(x0 + 9, y + 10, 5, 0, 7); g.fill(); g.beginPath(); g.arc(x0 + w - 9, y + 10, 5, 0, 7); g.fill();
@@ -31,7 +31,7 @@ function drawIglesia(g: Gfx, x0: number, y: number, w: number, seg: number): voi
   g.save(); g.translate(x0 + w / 2 + 1, y + seg / 2 + 6); g.rotate(-Math.PI / 2); g.fillStyle = '#5a3a22'; g.font = FONT(6); g.textAlign = 'center'; g.fillText('IGLESIA', 0, 2); g.restore();
 }
 
-function drawPlaza(g: Gfx, x0: number, y: number, w: number, seg: number): void {
+function drawPlaza(g: Painter, x0: number, y: number, w: number, seg: number): void {
   g.fillStyle = '#4a4452'; g.fillRect(x0, y, w, seg);
   g.fillStyle = '#2f6b3f'; g.fillRect(x0 + 3, y + 8, w - 6, 18); g.fillRect(x0 + 3, y + seg - 26, w - 6, 18);
   g.fillStyle = '#b9b4c4'; g.beginPath(); g.arc(x0 + w / 2, y + seg / 2, 13, 0, 7); g.fill();
@@ -39,7 +39,7 @@ function drawPlaza(g: Gfx, x0: number, y: number, w: number, seg: number): void 
   g.save(); g.translate(x0 + w / 2 + 1, y + seg / 2); g.rotate(-Math.PI / 2); g.fillStyle = C.yellow; g.font = FONT(6); g.textAlign = 'center'; g.fillText('PLAZA', 0, -16); g.restore();
 }
 
-function drawSide(g: Gfx, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
+function drawSide(g: Painter, x0: number, y: number, w: number, seg: number, idx: number, side: number): void {
   const k = ((idx % 48) + 48) % 48;
   if (side === 1 && k === 10) drawIglesia(g, x0, y, w, seg);
   else if (side === 0 && k === 30) drawPlaza(g, x0, y, w, seg);
