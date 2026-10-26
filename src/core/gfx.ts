@@ -75,6 +75,7 @@ export class Gfx implements Painter {
   private tiles: Phaser.GameObjects.Image[] = []; // tramos de paisaje horneados (ADR 0044), en franjas si la pista es curva
   private tileUsed = 0;
   under: Gfx | null = null; // capa de abajo (el paisaje va debajo de la pista)
+  over: Gfx | null = null; // figuras que van sobre las imágenes de esta capa (las correas que cruzan el Tico, ADR 0045)
 
   constructor(private scene: Phaser.Scene, private depth: number) {
     this.g = scene.add.graphics().setDepth(depth);
@@ -158,6 +159,20 @@ export class Gfx implements Painter {
     this.translate(x, y); this.rotate(-Math.atan(slope)); this.translate(-x, -y);
     try { draw(); } finally { this.restore(); this.warp = w; }
   }
+
+  /*
+   * Señal anclada a un punto de la pista que apunta en la dirección ang (ADR 0045). A diferencia de rigid, el origen
+   * cae exactamente donde la curva lleva ese punto y el eje x sigue la dirección ya proyectada, así una flecha marca el
+   * lugar y el sentido que ve el jugador. Supone una transformación sin escala, como la de las capas del juego.
+   */
+  pin(x: number, y: number, ang: number, draw: () => void): void {
+    const p = this.tx(x, y), q = this.tx(x + Math.cos(ang), y + Math.sin(ang)), w = this.warp;
+    this.save(); this.warp = null;
+    this.m = [1, 0, 0, 1, p.x, p.y]; this.rotate(Math.atan2(q.y - p.y, q.x - p.x));
+    try { draw(); } finally { this.restore(); this.warp = w; }
+  }
+  // dónde queda en pantalla un punto de la pista (con la curva)
+  project(x: number, y: number): Pt { return this.tx(x, y); }
 
   private tx(x: number, y: number): Pt {
     const m = this.m, py = m[1] * x + m[3] * y + m[5];

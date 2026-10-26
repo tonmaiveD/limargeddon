@@ -1,4 +1,5 @@
 import type { DiffKey, FireMode } from './config';
+import type { FrameSummary } from './frames';
 
 /*
  * Guardado local con versión de esquema. Por ahora solo registra cada pelea para calibrar el balance con
@@ -17,6 +18,8 @@ export interface FightRecord {
   gross?: number; fines?: number; earned?: number; replay?: boolean; tolls?: number;
   // puntaje con su versión de fórmula, último golpe y daño recibido por fuente (ADR 0037, auditoría N09)
   points?: number; scoreV?: number; lastHit?: string; dmgBy?: Record<string, number>;
+  // tiempo entre cuadros en milisegundos y equipo (ADR 0045)
+  frames?: FrameSummary;
 }
 // Contexto de un récord (ADR 0037): con qué se hizo y cuánto aportó cada parte, para explicarlo aunque cambie el balance.
 export interface ScoreCtx {

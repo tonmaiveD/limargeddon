@@ -66,7 +66,7 @@ export function scareFlock(G: Game): void {
   if (f.on && !f.scared && !f.hit) { f.scared = true; floatText(G, f.x, f.y - 20, '¡FUERA, GAVIOTAS!', C.yellow, 10); }
 }
 
-const CART = { w: 30, h: 22 };
+export const CART = { w: 30, h: 22 };
 // Carretilla de helados: cruza la pista de un lado al otro. No se toca, ni con el Tico ni con los conos.
 function updateCart(G: Game, dt: number): void {
   const K = G.cfg.hazards?.cart, c = G.cart, p = G.p;

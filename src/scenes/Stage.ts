@@ -13,6 +13,7 @@ import { SCORE_VERSION, scoreFight, scorePoints } from '../core/score';
 import { earnedMedals } from '../core/medals';
 import { startEnding, updateEnding } from '../core/ending';
 import { learnedHints } from '../core/hints';
+import { FrameMeter } from '../core/frames';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -27,6 +28,7 @@ export class StageScene extends Phaser.Scene {
   private G!: Game;
   private data0: Required<StageData> = { stageId: DEFAULT_STAGE, dk: 'normal' };
   private paused = false;
+  private meter = new FrameMeter(); // fluidez para el registro (ADR 0045)
   private results: (() => void) | null = null; // abre los resultados una sola vez
   private skip = false; // un toque o una tecla salta la animación de cierre
   private onSkip = () => { if (this.G?.ending && this.G.ending.t > 0.3) this.skip = true; };
@@ -52,7 +54,7 @@ export class StageScene extends Phaser.Scene {
     this.G.hintsOn = getSettings().hints !== false; // el jugador puede apagarlas en el menú
     this.results = null; this.skip = false;
     setDeckMode(this.G.fireMode);
-    this.paused = false;
+    this.paused = false; this.meter = new FrameMeter();
     Sfx.init(); Sfx.music(true, cfg.music);
 
     // pausa: botón, teclas P/Escape y automática al salir de la app o perder el foco (llamada, notificación)
@@ -80,7 +82,7 @@ export class StageScene extends Phaser.Scene {
       Object.assign(keys, newKeys());
       Sfx.music(false); Sfx.engine(0);
       ($('resume') as HTMLButtonElement).focus();
-    } else Sfx.music(true, this.G.cfg.music);
+    } else { Sfx.music(true, this.G.cfg.music); this.meter.resume(); }
   }
 
   // Guarda las ayudas que se alcanzaron a leer. El modo prueba no gasta el tutorial (auditoría R01).
@@ -98,6 +100,7 @@ export class StageScene extends Phaser.Scene {
   update(_t: number, delta: number): void {
     const G = this.G, dt = Math.min(0.05, delta / 1000);
     if (this.paused) return;
+    if (G.mode === 'play') this.meter.add(delta);
     if (G.hitstop > 0) {
       // congelamiento de impacto: la simulación espera unos ms y el cuadro se sigue dibujando
       G.hitstop = Math.max(0, G.hitstop - delta / 1000);
@@ -109,7 +112,8 @@ export class StageScene extends Phaser.Scene {
           const { earned, replay, wallet } = settleFight(
             { stage: stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
               build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
-              points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined },
+              points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined,
+              frames: this.meter.summary() },
             G.cfg.number, summary.pay, stageNumber);
           this.saveHints();
           // puntaje (ADR 0029) con su contexto (ADR 0037): solo las victorias, y el modo prueba no entra al ranking ni da medallas
