@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #42 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #45 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -55,7 +55,7 @@
 - Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
-Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026, y con la cuarta (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) el mismo día. La sexta (`docs/auditorias/2026-10-26-sexta-auditoria.md`, 26 de octubre) agrega el bloque G. Cada bloque es un PR.
+Orden recalibrado con la tercera auditoría (`docs/auditorias/2026-10-25-tercera-auditoria.md`) el 25 de octubre de 2026, y con la cuarta (`docs/auditorias/2026-10-25-cuarta-auditoria.md`) el mismo día. La sexta (`docs/auditorias/2026-10-26-sexta-auditoria.md`, 26 de octubre) agrega el bloque G, y la séptima (`docs/auditorias/2026-10-26-septima-auditoria.md`) sus límites (ADR 0047). Cada bloque es un PR.
 
 Hechos:
 - Claridad del combate (ADR 0032).
@@ -83,7 +83,7 @@ Hechos:
 3. ~~C · Aprender y volver~~: hecho (ADR 0037).
 4. ~~D · Ambiente~~: hecho (ADR 0038).
 4b. ~~F · Cuarta auditoría (R01 a R04)~~: hecho (ADR 0039), antes del bloque E por decisión del dueño.
-4c. ~~G · Instrumentos de diagnóstico~~: hecho (ADR 0046, sexta auditoría S01 y S02).
+4c. ~~G · Instrumentos de diagnóstico~~: hecho (ADR 0046, sexta auditoría S01 y S02, y ADR 0047, séptima auditoría T01 y T02).
 5. **E · Con los datos reales:**
    - Ajustar la dificultad, incluida la vida del jefe en el modo por toque.
    - Variar el aviso del enrosque (1,0 o 1,2 s) solo si las personas no ven la salida.
