@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #43 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #45 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -92,6 +92,9 @@ Hechos:
    - Las propuestas aplazadas de las auditorías, solo si los datos las piden.
    - No endurecer la Línea Amarilla solo porque el bot gana siempre.
 5b. **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre de 2026): falta decidir quién produce el arte. Según la sexta auditoría, el piloto debe mostrar una mejora visible sobre el nivel B actual, no sobre la versión anterior. El esfuerzo de 25 a 45 jornadas se vuelve a estimar al cerrar el piloto.
+5c. **Créditos de la Línea Amarilla** (plan aprobado el 27 de octubre de 2026): escena que une el despegue, el desfile por los diez distritos con fichas de reparto y lo que pasó después, y el poscrédito del vuelo de regreso; 60 a 90 s; la primera vez no se salta; botón "Ver créditos" en el menú.
+   - Música: hecha (ADR 0048, popurrí con `?popurri`).
+   - Escena, poscrédito, botón y guardado: pendiente. Nombres y roles: los define el dueño más adelante.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 
 **Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.
