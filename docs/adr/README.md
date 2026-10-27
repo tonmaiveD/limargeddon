@@ -50,3 +50,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0044](0044-paisaje-obstaculos-proyectiles-nivel-b.md) | Paisaje, obstáculos y proyectiles en nivel B | Aceptada |
 | [0045](0045-paso-previo-graficos.md) | Paso previo a la mejora gráfica: salida del enrosque, correas, fluidez y colisiones | Aceptada |
 | [0046](0046-instrumentos-diagnostico.md) | Instrumentos de diagnóstico fieles: fluidez sin suavizar y colisiones por regla | Aceptada |
+| [0048](0048-popurri-de-los-creditos.md) | Popurrí de los créditos | Aceptada |

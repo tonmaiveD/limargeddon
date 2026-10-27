@@ -6,7 +6,8 @@
 
 export type Drum = 'kick' | 'snare' | 'hat' | 'guiro' | 'clave' | 'cowbell' | 'cajon' | 'shaker' | 'bombo' | 'quijada';
 export interface Voice { wave: OscillatorType; vol: number; dur: number; notes: (number | number[])[]; double?: number }
-export interface Song { bpm: number; sub: number; bass: Voice; lead: Voice; chords?: Voice; drums: Partial<Record<Drum, string>> }
+// beats: pulsos por compás (4 si falta; 3 en el vals del popurrí)
+export interface Song { bpm: number; sub: number; beats?: number; bass: Voice; lead: Voice; chords?: Voice; drums: Partial<Record<Drum, string>> }
 
 const bar = (n: number, ...steps: (number | number[])[]) => Array.from({ length: n }, (_, i) => steps[i] ?? 0);
 // arpegio de una tríada en dieciseisavos: sube y baja dos veces

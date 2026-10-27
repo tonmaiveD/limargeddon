@@ -28,6 +28,17 @@ export class MenuScene extends Phaser.Scene {
     this.setupStageSelector();
     this.showStage();
     this.setupPlayer();
+    this.setupMedley();
+  }
+
+  // Con ?popurri en la dirección se puede escuchar la música de los créditos antes de que exista la escena (ADR 0048).
+  private medleyBtn: HTMLElement | null = null;
+  private setupMedley(): void {
+    if (typeof location === 'undefined' || !new URLSearchParams(location.search).has('popurri')) return;
+    const b = this.medleyBtn = document.getElementById('toMedley')!;
+    b.hidden = false; b.textContent = 'Escuchar popurrí';
+    b.onclick = () => { Sfx.init(); if (Sfx.section()) Sfx.music(false); else Sfx.music(true, 'creditos'); };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { Sfx.music(false); b.hidden = true; this.medleyBtn = null; });
   }
 
   // Jugador (ADR 0029): nombre, ranking y empezar de nuevo. La primera vez se pide el nombre antes de jugar.
@@ -137,5 +148,6 @@ export class MenuScene extends Phaser.Scene {
     track.scroll += def.cfg.road.idleScroll * dt;
     setupCamera(this); // la vista puede cambiar de ancho al rotar o redimensionar
     beginLayers(this.L); setWarp(this.L, roadWarp(def.cfg, track.scroll)); def.drawWorld(this.L.world, def.cfg, track.scroll, null); endLayers(this.L);
+    if (this.medleyBtn) { Sfx.tick(); const s = Sfx.section(); this.medleyBtn.textContent = s ? `Popurrí · ${s} · detener` : 'Escuchar popurrí'; }
   }
 }

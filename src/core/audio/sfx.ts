@@ -1,6 +1,8 @@
 /* Audio 100% sintetizado con WebAudio, independiente de Phaser. Portado de prototipo/san-isidro-v3.html; la música por
- * distrito (ADR 0038) toca las canciones de songs.ts con el mismo secuenciador. */
+ * distrito (ADR 0038) toca las canciones de songs.ts con el mismo secuenciador, y el popurrí de los créditos (ADR 0048)
+ * encadena secciones de medley.ts. */
 import { DEFAULT_SONG, SONGS, type Drum, type Song, type Voice } from './songs';
+import { MEDLEYS, sectionSteps, type Medley } from './medley';
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
@@ -10,6 +12,8 @@ let ac: AudioContext | null = null;
 let master: GainNode, music: GainNode, noiseBuf: AudioBuffer;
 let eng: OscillatorNode, engGain: GainNode, engFilt: BiquadFilterNode;
 let on = true, playing = false, step = 0, nextT = 0, song: Song = SONGS[DEFAULT_SONG];
+// popurrí en curso: sección actual y transposición; al terminar la última sección la música se detiene sola
+let medley: Medley | null = null, sec = 0, shiftN = 0;
 const stepDur = () => 60 / song.bpm / song.sub;
 
 function init(): void {
@@ -50,8 +54,8 @@ function voice(v: Voice | undefined, i: number, w: number): void {
   if (!v) return;
   const n = v.notes[i % v.notes.length];
   for (const m of Array.isArray(n) ? n : n ? [n] : []) {
-    tone(N(m), v.dur, v.wave, v.vol, null, w, music);
-    if (v.double) tone(N(m) * 1.005, v.dur, v.wave, v.double, null, w, music); // segunda voz desafinada, como la chicha
+    tone(N(m + shiftN), v.dur, v.wave, v.vol, null, w, music);
+    if (v.double) tone(N(m + shiftN) * 1.005, v.dur, v.wave, v.double, null, w, music); // segunda voz desafinada, como la chicha
   }
 }
 
@@ -88,8 +92,29 @@ export const Sfx = {
   get on() { return on; },
   toggle(): boolean { on = !on; if (master && ac) master.gain.setTargetAtTime(on ? 0.55 : 0, ac.currentTime, 0.02); return on; },
   // id: canción del distrito (songs.ts); sin id, o con uno desconocido, la cumbia chicha del prototipo
-  music(v: boolean, id?: string): void { playing = v; if (v) song = SONGS[id ?? DEFAULT_SONG] ?? SONGS[DEFAULT_SONG]; if (v && ac) { nextT = ac.currentTime + 0.05; step = 0; } },
-  tick(): void { if (!ac || !playing) return; while (nextT < ac.currentTime + 0.15) { schedule(step, nextT); nextT += stepDur(); step++; } },
+  // un id de medley.ts toca ese popurrí una vez, desde el principio
+  music(v: boolean, id?: string): void {
+    playing = v;
+    if (v) {
+      medley = (id && MEDLEYS[id]) || null; sec = 0;
+      song = medley ? medley.sections[0].song : SONGS[id ?? DEFAULT_SONG] ?? SONGS[DEFAULT_SONG];
+      shiftN = medley?.sections[0].transpose ?? 0;
+    }
+    if (v && ac) { nextT = ac.currentTime + 0.05; step = 0; }
+  },
+  tick(): void {
+    if (!ac || !playing) return;
+    while (playing && nextT < ac.currentTime + 0.15) {
+      schedule(step, nextT); nextT += stepDur(); step++;
+      if (medley && step >= sectionSteps(medley.sections[sec])) {
+        step = 0; sec++;
+        if (sec >= medley.sections.length) { playing = false; break; }
+        song = medley.sections[sec].song; shiftN = medley.sections[sec].transpose ?? 0;
+      }
+    }
+  },
+  // nombre de la sección del popurrí que está sonando (null fuera de un popurrí), para sincronizar los créditos
+  section(): string | null { return medley && playing ? medley.sections[sec].name : null; },
   engine(level: number): void {
     if (!ac) return; const t = ac.currentTime;
     engGain.gain.setTargetAtTime(level > 0 ? 0.05 + level * 0.03 : 0, t, 0.08);
