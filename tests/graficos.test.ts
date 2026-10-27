@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('phaser', () => ({ default: {} }));
 import { Gfx } from '../src/core/gfx';
 import { roadWarp } from '../src/core/road';
-import { FrameMeter, JANK_MS, STALL_MS, frameMs, stats } from '../src/core/frames';
+import { ANOMALY_MS, FrameMeter, JANK_MS, STALL_MS, frameMs, stats } from '../src/core/frames';
 import { drawCoil, EXIT_R } from '../src/bosses/doblefila-render';
 import { drawEndingUI } from '../src/core/ending';
 import { drawHitboxes } from '../src/core/hitboxes';
@@ -96,7 +96,6 @@ describe('Medición de fluidez para el registro', () => {
     for (let i = 0; i < 4; i++) m.add(25);
     m.add(40);
     m.resume(); m.add(900); // la vuelta de una pausa no cuenta
-    m.add(6000); // ni un salto de más de cinco segundos (equipo suspendido)
     const s = m.summary();
     expect(s.warm).toMatchObject({ n: 150, p50: 20, over20: 0 });
     expect(s.play).toMatchObject({ n: 100, p50: 16, p95: 16, p99: 25, max: 40, over20: 5, over33: 1 });
@@ -115,6 +114,34 @@ describe('Medición de fluidez para el registro', () => {
     expect(s.over33).toBe(10);
     expect(s.over20).toBe(10);
     expect(m.summary().stalls).toEqual(spike >= STALL_MS ? Array(10).fill(spike) : []);
+  });
+
+  // séptima auditoría, T01: sin pausa, ningún intervalo desaparece
+  it.each([4999, 5000, 5001, 6000])('con el juego en primer plano conserva un intervalo de %i ms', (ms) => {
+    const m = new FrameMeter();
+    m.add(16);
+    for (let i = 0; i < 400; i++) m.add(16);
+    m.add(ms);
+    const s = m.summary();
+    if (ms <= ANOMALY_MS) { expect(s.play!.max).toBe(ms); expect(s.stalls).toEqual([ms]); expect(s.anomalies).toEqual([]); }
+    else { expect(s.anomalies).toEqual([ms]); expect(s.play!.max).toBe(16); } // anomalía de causa desconocida, aparte
+  });
+
+  it('el regreso de una pausa explícita sí se descarta', () => {
+    const m = new FrameMeter();
+    m.add(16);
+    for (let i = 0; i < 400; i++) m.add(16);
+    m.resume(); m.add(9000);
+    const s = m.summary();
+    expect(s.anomalies).toEqual([]); expect(s.stallCount).toBe(0); expect(s.play!.max).toBe(16);
+  });
+
+  it('cuenta todos los bloqueos aunque la lista se corte en 30', () => {
+    const m = new FrameMeter();
+    m.add(16);
+    for (let i = 0; i < 40; i++) { for (let k = 0; k < 20; k++) m.add(16); m.add(120); }
+    const s = m.summary();
+    expect(s.stalls.length).toBe(30); expect(s.stallCount).toBe(40); expect(s.stallsCut).toBe(true);
   });
 
   it('mide el intervalo crudo del bucle y no el suavizado', () => {
@@ -185,10 +212,12 @@ describe('Vista de colisiones', () => {
     expect(lines.filter((l) => l.color === HURT).every((l) => (l.alpha ?? 1) > 0.5)).toBe(true);
   });
 
-  it('en el enrosque muestra un sector por auto del anillo', () => {
+  // séptima auditoría, T02: el anillo solo bloquea mientras lo sostiene
+  it.each([['tele', false], ['hold', true], ['release', false]] as const)('en el enrosque (%s) muestra un sector por auto, activo solo al sostener', (st, on) => {
     const G = bare();
-    Object.assign(G.coil, { st: 'hold', cx: 180, cy: 470, r: 54, gap: 0, half: 0.4, slots: [1, 2, 3, 4, 5] });
+    Object.assign(G.coil, { st, cx: 180, cy: 470, r: 54, gap: 0, half: 0.4, slots: [1, 2, 3, 4, 5] });
     const sectors = view(G).filter((l) => l.color === HURT && l.pts.length > 20 && radius(l.pts, { x: 180, y: 470 }) > 54);
     expect(sectors.length).toBe(5);
+    for (const l of sectors) expect((l.alpha ?? 1) > 0.5).toBe(on);
   });
 });
