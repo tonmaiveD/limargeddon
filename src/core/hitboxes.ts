@@ -15,7 +15,8 @@ import { rampBox } from '../bosses/route-ai';
  * - Los conos del jugador chocan como una raya horizontal de ancho 2r (la regla compara el centro con la caja
  *   ensanchada por r de cada lado).
  * - En el enrosque el anillo choca por casilleros: un sector por auto con su ancho de banda. La regla mira el ángulo del
- *   centro del Tico y, a lo largo del radio, su caja.
+ *   centro del Tico y, a lo largo del radio, su caja. Solo bloquea mientras sostiene el anillo; en el aviso y al soltarse
+ *   los sectores se ven tenues.
  * - Cada contorno se proyecta punto a punto sobre la curva, como el área lógica (no rígido como los dibujos), así la
  *   diferencia entre dibujo y choque queda a la vista.
  * - Lo que en este cuadro no puede chocar (en el aire, ya golpeado, barrera abierta) se ve tenue.
@@ -49,11 +50,11 @@ function line(g: Gfx, x: number, y: number, half: number, col: string): void {
   g.strokeStyle = col; g.globalAlpha = 0.95; g.beginPath(); g.moveTo(x - half, y); g.lineTo(x + half, y); g.stroke();
 }
 // sector del anillo: de a0 a a1 en ángulo y de r0 a r1 en radio
-function sector(g: Gfx, cx: number, cy: number, r0: number, r1: number, a0: number, a1: number, col: string): void {
+function sector(g: Gfx, cx: number, cy: number, r0: number, r1: number, a0: number, a1: number, col: string, on: boolean): void {
   const pts: [number, number][] = [], n = Math.max(2, Math.ceil(((a1 - a0) * r1) / STEP));
   for (let i = 0; i <= n; i++) { const a = a0 + ((a1 - a0) * i) / n; pts.push([cx + Math.cos(a) * r1, cy + Math.sin(a) * r1]); }
   for (let i = n; i >= 0; i--) { const a = a0 + ((a1 - a0) * i) / n; pts.push([cx + Math.cos(a) * r0, cy + Math.sin(a) * r0]); }
-  poly(g, pts, col, true);
+  poly(g, pts, col, on);
 }
 
 export function drawHitboxes(g: Gfx, G: Game): void {
@@ -73,7 +74,8 @@ export function drawHitboxes(g: Gfx, G: Game): void {
   const c = G.coil, body = G.cfg.boss.body;
   if (c.st !== 'off' && body) {
     const reach = (body.h / 2) / c.r + ((p.w / 2) / c.r) * 0.7;
-    for (const s of c.slots) sector(g, c.cx, c.cy, c.r - body.w / 2, c.r + body.w / 2, s - reach, s + reach, HIT_COL.hurt);
+    // el bloqueo del anillo solo corre mientras lo sostiene; en el aviso y al soltarse el sector es referencia (T02)
+    for (const s of c.slots) sector(g, c.cx, c.cy, c.r - body.w / 2, c.r + body.w / 2, s - reach, s + reach, HIT_COL.hurt, c.st === 'hold');
   } else for (const ch of G.chains) { for (const s of ch.segs) box(g, s, HIT_COL.hurt, ground); box(g, ch.lead, HIT_COL.hurt, ground); }
   if (G.b.state !== 'enter' && !G.cfg.route) box(g, G.b, HIT_COL.hurt, ground);
   box(g, jetZone(G), HIT_COL.hurt, ground && !G.b.jetHit); box(g, fuselage(G), HIT_COL.solid, ground); box(g, rampBox(G), HIT_COL.good);
