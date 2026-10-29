@@ -166,7 +166,7 @@ export interface StageConfig {
   // ayudas breves sobre el Tico en los primeros segundos (at = segundo de la pelea en que aparece)
   hints?: HintDef[]; // tutorial en contexto (ADR 0037)
   music?: string; // canción del distrito en core/audio/songs.ts (ADR 0038); sin ella, la cumbia chicha
-  ending?: { kind: 'carretilla' | 'carguero'; dur: number; text: string }; // cierre al ganar (ADR 0038)
+  ending?: { kind: 'carretilla' | 'carguero'; dur: number; text: string; credits?: boolean }; // cierre al ganar (ADR 0038); credits: después van los créditos (ADR 0049)
   // semáforos en ola (ADR 0038): olas de `wave` semáforos separados `gap` px que se ponen en verde al llegar a greenY
   lights?: { first: number; every: [number, number]; wave: number; gap: number; greenY: number; fine: number; bossQuip?: string };
   difficulties: Record<DiffKey, Difficulty>;

@@ -34,10 +34,11 @@ export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey;
 // scores: mejor puntaje de cada jugador en cada etapa, { nombre: { etapa: puntos } } (ADR 0029)
 // scoreCtx: contexto de cada récord; medals: medallas de cada jugador por etapa (ADR 0037)
 // hints: ayudas ya leídas, como "etapa|modo|texto" (ADR 0039; reemplaza a `tutorial`, que marcaba la etapa entera)
+// credits: true cuando los créditos se vieron completos una vez (ADR 0049); desde ahí se pueden saltar
 interface SaveV1 {
   v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string };
   scores?: Record<string, Record<string, number>>; scoreCtx?: Record<string, Record<string, ScoreCtx>>;
-  medals?: Record<string, Record<string, string[]>>; tutorial?: string[]; hints?: string[];
+  medals?: Record<string, Record<string, string[]>>; tutorial?: string[]; hints?: string[]; credits?: boolean;
 }
 
 function load(): SaveV1 {
@@ -74,6 +75,10 @@ export function fightStats(stage: string, dk: DiffKey, fireMode?: FireMode): Fig
 
 // Todo el registro, para copiarlo y compartirlo al calibrar.
 export const exportFights = (): FightRecord[] => load().fights;
+
+// Créditos vistos completos al menos una vez (ADR 0049). Empezar de nuevo no los borra.
+export const creditsSeen = (): boolean => load().credits === true;
+export function markCreditsSeen(): void { const data = load(); data.credits = true; store(data); }
 
 export function getSettings(): Settings { return load().settings ?? {}; }
 export function setSettings(patch: Settings): void {

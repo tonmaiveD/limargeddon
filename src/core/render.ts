@@ -65,9 +65,13 @@ const MAREA = ['#f4f6fb', '#1d1b22', '#56603f', '#f2c230', '#c9ccd3', '#2a7de1',
 function drawTide(g: Gfx, G: Game): void {
   const y0 = G.route.tideY;
   if (!tramo(G)?.tide || y0 >= H + 40) return;
+  drawMarea(g, y0, G.t, G.cfg.road.left);
+}
+// La marea de personajes desde la altura y0 hacia abajo; también la usa el poscrédito (ADR 0049).
+export function drawMarea(g: Gfx, y0: number, t: number, left: number): void {
   g.fillStyle = 'rgba(14,10,22,.85)'; g.fillRect(-view.extra, y0 + 10, W + 2 * view.extra, H - y0);
   for (let row = 0; row < 6; row++) for (let i = 0; i < 9; i++) {
-    const x = G.cfg.road.left - 30 + i * 44 + ((row * 23) % 44) + Math.sin(G.t * 6 + i + row) * 3, y = y0 + 8 + row * 26 + Math.sin(G.t * 9 + i * 2) * 3;
+    const x = left - 30 + i * 44 + ((row * 23) % 44) + Math.sin(t * 6 + i + row) * 3, y = y0 + 8 + row * 26 + Math.sin(t * 9 + i * 2) * 3;
     if (y > H + 20) continue;
     g.fillStyle = MAREA[(i * 3 + row * 5) % MAREA.length]; g.roundRect(x - 11, y - 14, 22, 30, 4); g.fill();
     g.fillStyle = '#10131c'; g.fillRect(x - 8, y - 9, 16, 5);
@@ -125,7 +129,7 @@ function drawCombi(L: Layers, G: Game, a: { x: number; y: number; w: number; h: 
 }
 
 // El Tico con su pintura y sus mejoras visibles (imagen horneada, ADR 0042); también lo usa el cierre del carguero.
-function drawTico(img: Gfx, fx: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
+export function drawTico(img: Gfx, fx: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
   const a = ticoArt(G.cfg.player.look), k = body.w / a.w;
   img.image(texture(img, a, dmg, 7), body.x, body.y, k / ART_SCALE, 0, flash > 0 ? 0xffffff : undefined);
   if (k === 1 && brake) { fx.save(); fx.translate(body.x, body.y); lights(fx, G.t, a, dmg, true, false, false); fx.restore(); }
