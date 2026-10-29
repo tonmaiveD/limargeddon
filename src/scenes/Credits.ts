@@ -19,8 +19,8 @@ import { STAGES, TEST_MODE } from '../stages';
  * Créditos de la Línea Amarilla del Terror (ADR 0049). Siguen el popurrí (ADR 0048) con su propio reloj:
  * - Despegue: Lima de noche desde la ventanilla del carguero, que se abre, y el título.
  * - Desfile: un tramo por distrito, con su paisaje y su jefe. El Tico se maneja sin daño y el claxon hace hablar al
- *   jefe. Arriba, la ficha de reparto y lo que pasó después. Los nombres van pintados en el asfalto.
- * - Cierre: de vuelta al avión, "Gracias por manejar".
+ *   jefe. Arriba, la ficha de reparto y lo que pasó después. Los roles y nombres van pintados en el asfalto.
+ * - Cierre: de vuelta al avión, "Gracias por manejar" y los agradecimientos especiales.
  * - Poscrédito: el vuelo regresa a Lima, el Tico baja por la rampa a la Vía de Evitamiento y la marea lo espera.
  * La primera vez no se saltan. Después, un toque salta los créditos y otro el poscrédito. No tocan cobro, puntaje,
  * ranking ni medallas.
@@ -31,6 +31,7 @@ import { STAGES, TEST_MODE } from '../stages';
 export interface CreditsData { done: (scene: Phaser.Scene) => void; at?: number; talk?: boolean }
 
 const SPEED = 210; // avance de la pista en el desfile
+const PAINT_W = 240; // ancho máximo de un nombre pintado en el asfalto
 const PLANE = STAGES['linea-amarilla'].cfg.route!.plane!;
 const PLANE_KEY = `carguero-${PLANE.w}-${PLANE.h}`;
 
@@ -161,11 +162,20 @@ export class CreditsScene extends Phaser.Scene {
   }
 
   private drawClosing(p: Part): void {
-    const L = this.L, lt = this.t - p.start, dur = p.end - p.start;
+    const L = this.L, lt = this.t - p.start, dur = p.end - p.start, g = L.ui;
     this.drawCity(L.world, this.t * 40);
-    this.drawPlane(L.ents, W / 2, H * 0.55 - lt * 10, 0.42);
-    this.title(L.ui, TEXT.title, 170, 26, '#ffe14d', clamp(lt * 2, 0, 1));
-    this.title(L.ui, TEXT.thanks.toUpperCase(), 210, 12, '#ffffff', clamp(lt * 2 - 1, 0, 1));
+    this.drawPlane(L.ents, W / 2, H * 0.66 - lt * 10, 0.42);
+    this.title(g, TEXT.title, 120, 26, '#ffe14d', clamp(lt * 2, 0, 1));
+    this.title(g, TEXT.thanks.toUpperCase(), 156, 12, '#ffffff', clamp(lt * 2 - 1, 0, 1));
+    // los agradecimientos especiales, debajo
+    const ded = TEXT.dedication;
+    if (ded) {
+      g.globalAlpha = clamp(lt * 1.5 - 2, 0, 1); g.textAlign = 'center';
+      g.fillStyle = '#3dff9a'; g.font = BODY(800, 9); g.fillText(ded.role.toUpperCase(), W / 2, 206);
+      g.fillStyle = '#ffffff'; g.font = BODY(700, 12);
+      wrap(ded.text, W - 70, (s) => g.measureText(s).width).forEach((l, i) => g.fillText(l, W / 2, 226 + i * 17));
+      g.globalAlpha = 1;
+    }
     // al final se cierra la ventanilla
     if (lt > dur - 1.6) this.windowRing(L.fx, 700 - (lt - (dur - 1.6)) / 1.6 * 700);
   }
@@ -217,9 +227,13 @@ export class CreditsScene extends Phaser.Scene {
     const staff = TEXT.staff[p.index!], y = -60 + (lt - 0.6) * SPEED;
     if (y < -60 || y > H + 60) return;
     const role = staff?.role, name = staff?.name ?? STAGES[p.stage!].cfg.eyebrow.split(' · ')[1] ?? '';
-    g.globalAlpha = 0.5; g.fillStyle = '#ffffff'; g.textAlign = 'center';
-    if (role) { g.font = BODY(800, 10); g.fillText(role.toUpperCase(), W / 2, y - 20); }
-    g.font = FONT(18); g.fillText(name.toUpperCase(), W / 2, y);
+    g.globalAlpha = 0.55; g.fillStyle = '#ffffff'; g.textAlign = 'center';
+    if (role) { g.font = BODY(800, 10); g.fillText(role.toUpperCase(), W / 2, y - 22); }
+    // el nombre se achica hasta caber entre las líneas de la pista
+    let size = 18;
+    g.font = FONT(size);
+    while (size > 9 && g.measureText(name.toUpperCase()).width > PAINT_W) g.font = FONT(--size);
+    g.fillText(name.toUpperCase(), W / 2, y);
     g.globalAlpha = 1;
   }
 

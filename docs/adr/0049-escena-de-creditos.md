@@ -47,6 +47,7 @@ En el navegador:
 - Capturas de cada parte.
 - El flujo completo: ganar la Línea Amarilla, cierre, créditos con el `Stage` en pausa, dos toques y resultados, sin errores.
 
-## Pendiente
-- Nombres y roles del equipo: los define el dueño.
-- Las frases de los jefes son borradores para aprobar.
+## Equipo y frases (29 de octubre de 2026)
+- El dueño definió siete roles con sus nombres. Van pintados en el asfalto de los siete primeros distritos, y el nombre se achica hasta caber.
+- Los agradecimientos especiales van en el cierre, debajo de "Gracias por manejar".
+- El dueño aprobó las frases de los jefes tal como están.

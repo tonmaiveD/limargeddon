@@ -34,7 +34,8 @@ describe('Créditos', () => {
   });
 
   it('los textos cumplen las reglas de puntuación del juego', () => {
-    const all = [TEXT.title, TEXT.thanks, ...Object.values(TEXT.post), ...TEXT.cast.flatMap((c) => [c.name ?? '', c.as, c.after, c.honk, c.sign ?? ''])];
+    const all = [TEXT.title, TEXT.thanks, ...Object.values(TEXT.post), ...TEXT.cast.flatMap((c) => [c.name ?? '', c.as, c.after, c.honk, c.sign ?? '']),
+      ...TEXT.staff.flatMap((s) => [s.role, s.name]), TEXT.dedication?.role ?? '', TEXT.dedication?.text ?? ''];
     for (const s of all) expect(s, s).not.toMatch(/[:;—–]/);
   });
 
@@ -57,6 +58,13 @@ describe('Créditos', () => {
     expect(creditsSeen()).toBe(true);
     resetProgress();
     expect(creditsSeen()).toBe(true);
+  });
+
+  it('hay un rol por distrito como máximo, y los agradecimientos van aparte', () => {
+    expect(TEXT.staff.length).toBeLessThanOrEqual(STAGE_ORDER.length);
+    for (const s of TEXT.staff) { expect(s.role.length).toBeGreaterThan(0); expect(s.name.length).toBeGreaterThan(0); }
+    expect(TEXT.dedication?.text).toContain('Lima');
+    expect(wrap(TEXT.dedication!.text, 290, (s) => s.length * 6.8).length).toBeLessThanOrEqual(3);
   });
 
   it('solo la Línea Amarilla termina en créditos', () => {
