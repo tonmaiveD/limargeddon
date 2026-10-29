@@ -180,3 +180,14 @@ export const MEDLEYS: Record<string, Medley> = { creditos: CREDITS };
 export const sectionSteps = (s: Section) => s.bars * (s.song.beats ?? 4) * s.song.sub;
 export const sectionSeconds = (s: Section) => (s.bars * (s.song.beats ?? 4) * 60) / s.song.bpm;
 export const medleySeconds = (m: Medley) => m.sections.reduce((t, s) => t + sectionSeconds(s), 0);
+
+/*
+ * Dónde va la música, en segundos desde el inicio del popurrí, según el secuenciador: la sección y el paso que tiene
+ * agendados para el instante nextT, y la hora actual del audio. Sirve para que los créditos sigan a la música.
+ */
+export function medleyClock(m: Medley, sec: number, step: number, nextT: number, now: number): number {
+  let t = 0;
+  for (let i = 0; i < sec; i++) t += sectionSeconds(m.sections[i]);
+  const s = m.sections[Math.min(sec, m.sections.length - 1)].song;
+  return t + step * (60 / s.bpm / s.sub) - (nextT - now);
+}

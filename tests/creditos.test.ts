@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, partAt, skipTo, timeline, wrap } from '../src/core/credits';
+import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, narrativeStep, partAt, skipTo, timeline, wrap } from '../src/core/credits';
+import { CREDITS, medleyClock, medleySeconds, sectionSeconds } from '../src/core/audio/medley';
 import { creditsSeen, markCreditsSeen, resetProgress } from '../src/core/save';
 import { STAGES, STAGE_ORDER } from '../src/stages';
 
@@ -50,6 +51,42 @@ describe('Créditos', () => {
     expect(canSkip(false, true)).toBe(true); // modo prueba
     expect(skipTo(10)).toBe(POST_START);
     expect(skipTo(POST_START + 1)).toBe(CREDITS_SECONDS);
+  });
+
+  // octava auditoría, U01: saltar al volver a verlos se mantiene, pero manejar no salta
+  it('saltan con un toque en la pantalla o Enter, nunca con los controles de manejo ni el claxon', () => {
+    expect(isSkipInput({ kind: 'pointer', onControls: false })).toBe(true);
+    expect(isSkipInput({ kind: 'pointer', onControls: true })).toBe(false); // volante, acelerador, claxon del deck
+    expect(isSkipInput({ kind: 'key', key: 'Enter' })).toBe(true);
+    for (const key of [' ', 'c', 'ArrowLeft', 'ArrowUp', 'Escape']) expect(isSkipInput({ kind: 'key', key }), key).toBe(false);
+  });
+
+  // octava auditoría, U02: la narración no se alarga cuando el teléfono dibuja pocos cuadros
+  it.each([10, 15, 20, 30, 60])('a %i cuadros por segundo, sin audio, terminan a tiempo (dentro de un cuadro)', (fps) => {
+    let t = 0, wall = 0;
+    while (t < CREDITS_SECONDS) { t = narrativeStep(t, 1000 / fps, null); wall += 1 / fps; }
+    expect(Math.abs(wall - CREDITS_SECONDS)).toBeLessThanOrEqual(1 / fps + 1e-9);
+  });
+
+  it.each([10, 15, 60])('a %i cuadros por segundo, con música, cada parte cae en su sección (tolerancia 150 ms)', (fps) => {
+    const parts = timeline();
+    let t = 0;
+    for (let wall = 0; wall < POST_START; wall += 1 / fps) {
+      t = narrativeStep(t, 1000 / fps, wall); // el reloj del audio corre con el tiempo real
+      expect(Math.abs(t - wall)).toBeLessThanOrEqual(0.15);
+    }
+    expect(parts.filter((p) => p.kind !== 'post').at(-1)!.end).toBeCloseTo(medleySeconds(CREDITS), 9);
+  });
+
+  it('un salto largo (el juego estuvo detenido) no se come los créditos', () => {
+    expect(narrativeStep(10, 5000, null)).toBeCloseTo(10.25, 9);
+  });
+
+  it('el reloj de la música sale de la sección y el paso agendados', () => {
+    const s0 = sectionSeconds(CREDITS.sections[0]), song = CREDITS.sections[1].song, step = 60 / song.bpm / song.sub;
+    // sección 1, paso 4 agendado para dentro de 0,1 s: suenan s0 + 4 pasos - 0,1
+    expect(medleyClock(CREDITS, 1, 4, 10.1, 10)).toBeCloseTo(s0 + 4 * step - 0.1, 9);
+    expect(medleyClock(CREDITS, 0, 0, 5.05, 5)).toBeCloseTo(-0.05, 9);
   });
 
   it('quedan vistos al guardar, y empezar de nuevo no lo borra', () => {

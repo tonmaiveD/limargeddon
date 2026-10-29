@@ -2,7 +2,7 @@
  * distrito (ADR 0038) toca las canciones de songs.ts con el mismo secuenciador, y el popurrí de los créditos (ADR 0048)
  * encadena secciones de medley.ts. */
 import { DEFAULT_SONG, SONGS, type Drum, type Song, type Voice } from './songs';
-import { MEDLEYS, sectionSteps, type Medley } from './medley';
+import { MEDLEYS, medleyClock, sectionSteps, type Medley } from './medley';
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
@@ -13,7 +13,7 @@ let master: GainNode, music: GainNode, noiseBuf: AudioBuffer;
 let eng: OscillatorNode, engGain: GainNode, engFilt: BiquadFilterNode;
 let on = true, playing = false, step = 0, nextT = 0, song: Song = SONGS[DEFAULT_SONG];
 // popurrí en curso: sección actual y transposición; al terminar la última sección la música se detiene sola
-let medley: Medley | null = null, sec = 0, shiftN = 0;
+let medley: Medley | null = null, sec = 0, shiftN = 0, held = false;
 const stepDur = () => 60 / song.bpm / song.sub;
 
 function init(): void {
@@ -94,7 +94,7 @@ export const Sfx = {
   // id: canción del distrito (songs.ts); sin id, o con uno desconocido, la cumbia chicha del prototipo
   // un id de medley.ts toca ese popurrí una vez, desde el principio
   music(v: boolean, id?: string): void {
-    playing = v;
+    playing = v; held = false;
     if (v) {
       medley = (id && MEDLEYS[id]) || null; sec = 0;
       song = medley ? medley.sections[0].song : SONGS[id ?? DEFAULT_SONG] ?? SONGS[DEFAULT_SONG];
@@ -115,6 +115,15 @@ export const Sfx = {
   },
   // nombre de la sección del popurrí que está sonando (null fuera de un popurrí), para sincronizar los créditos
   section(): string | null { return medley && playing ? medley.sections[sec].name : null; },
+  // segundos del popurrí que ya sonaron, según el reloj del audio; null si no hay popurrí sonando o el audio no corre
+  // (sin audio, o suspendido por el navegador: ahí la imagen sigue con su propio reloj y no se queda congelada)
+  medleyTime(): number | null { return medley && playing && ac && ac.state === 'running' ? medleyClock(medley, sec, step, nextT, ac.currentTime) : null; },
+  // detiene la música donde va y la retoma desde ahí (pausa de los créditos al salir de la app)
+  hold(v: boolean): void {
+    if (v) { held = playing; playing = false; return; }
+    if (held && ac) { playing = true; nextT = ac.currentTime + 0.05; }
+    held = false;
+  },
   engine(level: number): void {
     if (!ac) return; const t = ac.currentTime;
     engGain.gain.setTargetAtTime(level > 0 ? 0.05 + level * 0.03 : 0, t, 0.08);
