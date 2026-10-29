@@ -1,7 +1,16 @@
 {
   "title": "LIMARGEDDON",
   "thanks": "Gracias por manejar",
-  "staff": [],
+  "staff": [
+    { "role": "Idea y dirección", "name": "Pablo" },
+    { "role": "Diseño de juego", "name": "Pablo" },
+    { "role": "Pruebas en el teléfono", "name": "Noam" },
+    { "role": "Auditoría y balance", "name": "Pablo + ChatGPT" },
+    { "role": "Programación", "name": "Pablo con Claude Code" },
+    { "role": "Música y sonido", "name": "Pablo + Claude" },
+    { "role": "Gráficos", "name": "Pablo + ChatGPT + Claude Code" }
+  ],
+  "dedication": { "role": "Agradecimientos especiales", "text": "A mi familia, amigos y a esa Lima que nunca me deja de sorprender." },
   "cast": [
     { "stage": "miraflores", "as": "como ella misma", "after": "Ahora vigila el malecón desde la ciclovía.", "honk": "¡Circule, circule!" },
     { "stage": "san-isidro", "as": "como ella misma", "after": "Sigue buscando dónde estacionar. En doble fila, claro.", "honk": "¿Sabes con quién estás hablando?" },

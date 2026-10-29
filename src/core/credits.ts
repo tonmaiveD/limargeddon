@@ -10,8 +10,10 @@ import { CREDITS, sectionSeconds } from './audio/medley';
 
 export interface CastEntry { stage: string; name?: string; as: string; after: string; honk: string; sign?: string }
 export interface StaffEntry { role: string; name: string }
+// staff: un rol y su nombre por distrito, pintados en el asfalto; dedication: los agradecimientos, en el cierre
 export interface CreditsText {
-  title: string; thanks: string; staff: StaffEntry[]; cast: CastEntry[]; post: { later: string; speaker: string; end: string };
+  title: string; thanks: string; staff: StaffEntry[]; dedication?: { role: string; text: string }; cast: CastEntry[];
+  post: { later: string; speaker: string; end: string };
 }
 export const TEXT = data as CreditsText;
 
