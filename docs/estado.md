@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #46 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #47 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -95,6 +95,7 @@ Hechos:
 5c. **Créditos de la Línea Amarilla** (plan aprobado el 27 de octubre de 2026): escena que une el despegue, el desfile por los diez distritos con fichas de reparto y lo que pasó después, y el poscrédito del vuelo de regreso; 60 a 90 s; la primera vez no se salta; botón "Ver créditos" en el menú.
    - Música: hecha (ADR 0048, popurrí con `?popurri`).
    - Escena, poscrédito, botón y guardado: hechos (ADR 0049). En el modo prueba, `?creditos=segundos` los muestra quietos para revisar.
+   - Octava auditoría (`docs/auditorias/2026-10-29-octava-auditoria.md`): U01 y U02 resueltos (ADR 0050). Saltar al volver a verlos se mantiene por diseño; manejar ya no salta, y la imagen sigue al reloj de la música.
    - Nombres y roles del equipo cargados y frases de los jefes aprobadas por el dueño (29 de octubre de 2026). Los agradecimientos especiales van en el cierre.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 

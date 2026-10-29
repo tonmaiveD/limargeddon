@@ -53,3 +53,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0047](0047-limites-de-los-instrumentos.md) | Límites de los instrumentos: intervalos largos, sectores del anillo y conteo de bloqueos | Aceptada |
 | [0048](0048-popurri-de-los-creditos.md) | Popurrí de los créditos | Aceptada |
 | [0049](0049-escena-de-creditos.md) | Escena de créditos y poscrédito del vuelo de regreso | Aceptada |
+| [0050](0050-creditos-entrada-y-reloj.md) | Créditos: saltar sin chocar con el manejo, y un solo reloj con la música | Aceptada |

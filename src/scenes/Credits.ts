@@ -12,7 +12,8 @@ import { ART_SCALE } from '../core/art/vehicles';
 import { C, clamp, hash } from '../core/util';
 import { creditsSeen, getGarage, markCreditsSeen } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, partAt, skipTo, wrap, type Part } from '../core/credits';
+import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, narrativeStep, partAt, skipTo, wrap, type Part, type SkipInput } from '../core/credits';
+import { frameMs } from '../core/frames';
 import { STAGES, TEST_MODE } from '../stages';
 
 /*
@@ -22,8 +23,9 @@ import { STAGES, TEST_MODE } from '../stages';
  *   jefe. Arriba, la ficha de reparto y lo que pasó después. Los roles y nombres van pintados en el asfalto.
  * - Cierre: de vuelta al avión, "Gracias por manejar" y los agradecimientos especiales.
  * - Poscrédito: el vuelo regresa a Lima, el Tico baja por la rampa a la Vía de Evitamiento y la marea lo espera.
- * La primera vez no se saltan. Después, un toque salta los créditos y otro el poscrédito. No tocan cobro, puntaje,
- * ranking ni medallas.
+ * La primera vez no se saltan. Después, un toque en la pantalla (o Enter) salta los créditos y otro el poscrédito; los
+ * controles de manejo y el claxon no saltan. La narración sigue al reloj de la música y se pausa con ella al salir de la
+ * app. No tocan cobro, puntaje, ranking ni medallas.
  */
 
 // at: solo para revisar (modo prueba con ?creditos=segundos), deja la escena quieta en ese instante, sin música;
@@ -64,17 +66,34 @@ export class CreditsScene extends Phaser.Scene {
     this.tico = createGame(applyUpgrades(la.cfg, getGarage().levels), 'normal', newKeys(), la.ai);
     Object.assign(keys, newKeys());
     Sfx.init(); Sfx.engine(0); if (this.d.at === undefined) Sfx.music(true, 'creditos');
+    this.paused = false;
     addEventListener('pointerdown', this.onSkip); addEventListener('keydown', this.onSkip);
+    // al salir de la app o perder el foco, imagen y música se detienen juntas y siguen juntas al volver (U02)
+    document.addEventListener('visibilitychange', this.onVisibility); addEventListener('blur', this.onBlur); addEventListener('focus', this.onFocus);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
-      Sfx.music(false);
+      document.removeEventListener('visibilitychange', this.onVisibility); removeEventListener('blur', this.onBlur); removeEventListener('focus', this.onFocus);
+      Sfx.hold(false); Sfx.music(false);
     });
   }
 
-  // un toque salta, si se puede; el primer medio segundo no cuenta (es el toque que cerró la escena anterior)
+  private paused = false;
+  private setPaused(v: boolean): void {
+    if (v === this.paused || this.finished) return;
+    this.paused = v; Sfx.hold(v);
+    if (v) Object.assign(keys, newKeys()); // sin controles pegados al volver
+  }
+  private onVisibility = () => this.setPaused(document.hidden);
+  private onBlur = () => this.setPaused(true);
+  private onFocus = () => { if (!document.hidden) this.setPaused(false); };
+
+  // un toque en la pantalla o Enter salta, si se puede; los controles de manejo y el claxon no (U01). El primer medio
+  // segundo no cuenta: es el toque que cerró la escena anterior.
   private onSkip = (e: Event) => {
-    if (!this.skippable || this.t < 0.5) return;
-    if (e instanceof KeyboardEvent && !['Enter', ' ', 'Escape'].includes(e.key)) return;
+    if (!this.skippable || this.t < 0.5 || this.paused) return;
+    const input: SkipInput = e instanceof KeyboardEvent ? { kind: 'key', key: e.key }
+      : { kind: 'pointer', onControls: !!(e.target as Element | null)?.closest?.('#deck, button, a, input, dialog, form') };
+    if (!isSkipInput(input)) return;
     this.t = skipTo(this.t);
     if (this.t >= CREDITS_SECONDS) this.finish(); else Sfx.music(false);
   };
@@ -94,10 +113,13 @@ export class CreditsScene extends Phaser.Scene {
 
   update(_t: number, delta: number): void {
     if (this.finished) return;
+    if (this.paused) return;
+    // el manejo y el avance de la pista usan un paso con tope; la narración, el reloj de la música (U02)
     const frozen = this.d.at !== undefined, dt = frozen ? 0 : Math.min(0.05, delta / 1000);
-    if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
-    this.t += dt; this.scroll += SPEED * dt; this.tico.t = this.t;
     Sfx.tick();
+    if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
+    else this.t = narrativeStep(this.t, frameMs(this.game.loop), Sfx.medleyTime());
+    this.scroll += SPEED * dt; this.tico.t = this.t;
     if (this.t >= POST_START && !this.seenMarked && !frozen) { this.seenMarked = true; if (!TEST_MODE) markCreditsSeen(); this.skippable = true; }
     if (this.t >= CREDITS_SECONDS) { this.finish(); return; }
     setupCamera(this);
@@ -206,6 +228,8 @@ export class CreditsScene extends Phaser.Scene {
     if (this.talk && this.t < this.talk.until && lt < dur - 0.6) this.bubble(L.ui, this.talk.text, cast.sign ? W / 2 : b.x, Math.max(40, by + 50));
     else if (this.talk && this.t >= this.talk.until) this.talk = null;
 
+    // en el primer distrito, cómo se juega el desfile
+    if (p.index === 0 && lt > 0.6 && lt < dur - 0.6 && !this.talk) this.pill(L.ui, 'Maneja y toca el claxon', this.me.y + 40);
     const vis = clamp(lt / 0.35, 0, 1) * clamp((dur - lt) / 0.3, 0, 1);
     this.card(L.ui, cfg.eyebrow, cast.name ?? cfg.boss.name, cast.as, cast.after, vis);
     // corte entre distritos
@@ -250,6 +274,13 @@ export class CreditsScene extends Phaser.Scene {
     const w = g.measureText(text).width + 18, bx = clamp(x - w / 2, 6, W - w - 6);
     g.fillStyle = 'rgba(255,255,255,.95)'; g.roundRect(bx, y, w, 22, 11); g.fill();
     g.fillStyle = '#15111d'; g.textAlign = 'center'; g.fillText(text, bx + w / 2, y + 15);
+  }
+
+  private pill(g: Gfx, text: string, y: number): void {
+    g.font = BODY(800, 10);
+    const w = g.measureText(text).width + 20;
+    g.fillStyle = 'rgba(14,10,22,.8)'; g.roundRect(W / 2 - w / 2, y, w, 20, 10); g.fill();
+    g.fillStyle = '#ffe14d'; g.textAlign = 'center'; g.fillText(text, W / 2, y + 14);
   }
 
   // ficha de reparto: el distrito, el jefe "como él mismo" y lo que pasó después

@@ -49,6 +49,25 @@ export const canSkip = (seen: boolean, test: boolean) => seen || test;
 // Un toque durante los créditos salta al poscrédito; durante el poscrédito, termina.
 export const skipTo = (t: number): number => (t < POST_START ? POST_START : CREDITS_SECONDS);
 
+/*
+ * Qué entrada salta (octava auditoría, U01): un toque en la pantalla o Enter. Los controles de manejo y el claxon no,
+ * porque el desfile se maneja: un toque en el deck o en un botón, la barra espaciadora (claxon) y las flechas siguen
+ * siendo del Tico.
+ */
+export type SkipInput = { kind: 'pointer'; onControls: boolean } | { kind: 'key'; key: string };
+export const isSkipInput = (e: SkipInput): boolean => (e.kind === 'pointer' ? !e.onControls : e.key === 'Enter');
+
+/*
+ * Reloj de la narración (octava auditoría, U02). Mientras suena el popurrí, la imagen sigue al reloj de la música, así
+ * las partes coinciden con sus secciones aunque el teléfono dibuje pocos cuadros. Sin música (sin audio, o ya en el
+ * poscrédito) avanza con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo; solo un salto de más de
+ * un cuarto de segundo se recorta, porque ahí el juego estuvo detenido.
+ */
+export function narrativeStep(t: number, rawMs: number, audioT: number | null): number {
+  if (audioT !== null && t < POST_START) return Math.max(t, audioT);
+  return t + Math.min(0.25, Math.max(0, rawMs) / 1000);
+}
+
 // Corta un texto en líneas que caben en el ancho dado, según la función que mide.
 export function wrap(text: string, width: number, measure: (s: string) => number): string[] {
   const lines: string[] = [];
