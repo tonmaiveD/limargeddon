@@ -1,0 +1,18 @@
+{
+  "title": "LIMARGEDDON",
+  "thanks": "Gracias por manejar",
+  "staff": [],
+  "cast": [
+    { "stage": "miraflores", "as": "como ella misma", "after": "Ahora vigila el malecón desde la ciclovía.", "honk": "¡Circule, circule!" },
+    { "stage": "san-isidro", "as": "como ella misma", "after": "Sigue buscando dónde estacionar. En doble fila, claro.", "honk": "¿Sabes con quién estás hablando?" },
+    { "stage": "centro", "as": "como él mismo", "after": "Lo jubilaron y ahora riega los jardines de la plaza.", "honk": "¡Despejen la calzada!" },
+    { "stage": "javier-prado", "as": "como ella misma", "after": "Sigue cobrando pasaje completo por media cuadra.", "honk": "¡Al fondo hay sitio!" },
+    { "stage": "gamarra", "as": "como él mismo", "after": "Abrió su propia galería. Vende polos con tu cara.", "honk": "¡Tres por diez, casero!" },
+    { "stage": "callao", "as": "como él mismo", "after": "Todavía está dando la vuelta en U en la Colonial.", "honk": "¡Ya casi termino de voltear!" },
+    { "stage": "via-expresa", "as": "como él mismo", "after": "Lo partieron en dos. Ahora son dos expresos igual de llenos.", "honk": "¡Avancen al fondo!" },
+    { "stage": "panamericana", "as": "como él mismo", "after": "Sigue poniendo papeletas. Ahora también a los peajes.", "honk": "¡Documentos, por favor!" },
+    { "stage": "costa-verde", "as": "como ella misma", "after": "Se quedó a vivir en la playa. Con las balizas prendidas.", "honk": "¡Es solo un ratito!" },
+    { "stage": "linea-amarilla", "name": "EL PUENTE PROVISIONAL", "as": "como él mismo", "after": "El definitivo sigue en camino.", "honk": "¡Solo dos carriles, joven!", "sign": "PUENTE DEFINITIVO, PRONTO" }
+  ],
+  "post": { "later": "Más tarde...", "speaker": "Atención pasajeros. Por mantenimiento, este vuelo regresa a Lima.", "end": "CONTINUARÁ" }
+}

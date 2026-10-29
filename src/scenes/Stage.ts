@@ -14,6 +14,7 @@ import { earnedMedals } from '../core/medals';
 import { startEnding, updateEnding } from '../core/ending';
 import { learnedHints } from '../core/hints';
 import { FrameMeter, frameMs } from '../core/frames';
+import type { CreditsData } from './Credits';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -130,6 +131,18 @@ export class StageScene extends Phaser.Scene {
             removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
             this.scene.launch('Results', { summary, stageId, dk: this.data0.dk, earned, replay, wallet, score, medals });
           };
+          // tras el cierre de la Línea Amarilla van los créditos (ADR 0049), y de ahí los resultados
+          if (summary.win && G.cfg.ending?.credits) {
+            const show = this.results;
+            let rolled = false;
+            this.results = () => {
+              if (rolled) return; rolled = true;
+              removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
+              this.scene.pause();
+              const data: CreditsData = { done: (cs) => { cs.scene.stop(); this.scene.resume(); show(); } };
+              this.scene.launch('Credits', data); this.scene.bringToTop('Credits');
+            };
+          }
           // cierre de la etapa (ADR 0038): la carretilla cruza la meta o el Tico sube al carguero; si no hay, resultados
           if (summary.win && G.cfg.ending) { startEnding(G); addEventListener('pointerdown', this.onSkip); addEventListener('keydown', this.onSkip); }
           else this.time.delayedCall(900, () => this.results?.());

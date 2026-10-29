@@ -5,10 +5,11 @@ import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../c
 import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { DEFAULT_NAME, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, creditsSeen, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
 import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
+import type { CreditsData } from './Credits';
 import { DEFAULT_STAGE, STAGES, STAGE_ORDER, TEST_MODE, stageForUnlocked, stageNumber, track } from '../stages';
 
 /* Menú: overlay DOM con dificultad y bonus sobre el asfalto que sigue corriendo. */
@@ -25,6 +26,14 @@ export class MenuScene extends Phaser.Scene {
     // (ADR 0039). Solo el modo prueba deja elegir cualquiera y recuerda la última elegida.
     const saved = getSettings().stageId;
     this.stageId = TEST_MODE ? (saved && STAGES[saved] ? saved : DEFAULT_STAGE) : this.latest();
+    // revisión de los créditos (ADR 0049): en el modo prueba, ?creditos=segundos los muestra quietos en ese instante
+    const at = new URLSearchParams(location.search).get('creditos');
+    if (TEST_MODE && at !== null) {
+      document.getElementById('menu')!.hidden = true;
+      const data: CreditsData = { done: (cs) => cs.scene.start('Menu'), at: Number(at) || 0, talk: new URLSearchParams(location.search).has('claxon') };
+      this.scene.start('Credits', data);
+      return;
+    }
     this.setupStageSelector();
     this.showStage();
     this.setupPlayer();
@@ -48,6 +57,14 @@ export class MenuScene extends Phaser.Scene {
     label();
     name.onclick = () => openName(false, () => { label(); this.showStage(); }); // las medallas son del jugador (auditoría R04)
     document.getElementById('toRanking')!.onclick = () => openRanking();
+    // créditos (ADR 0049): el botón aparece cuando ya se vieron completos una vez, y siempre en el modo prueba
+    const credits = document.getElementById('toCredits')!;
+    credits.hidden = !(creditsSeen() || TEST_MODE);
+    credits.onclick = () => {
+      Sfx.init(); document.getElementById('menu')!.hidden = true;
+      const data: CreditsData = { done: (cs) => cs.scene.start('Menu') };
+      this.scene.start('Credits', data);
+    };
     // interruptor de ayudas (ADR 0039): apagadas no sale ninguna; al prenderlas vuelven solo las no leídas
     const hints = document.getElementById('toHintsOnOff')!;
     const paintHints = () => { const on = getSettings().hints !== false; hints.textContent = on ? 'Ayudas activadas' : 'Ayudas desactivadas'; hints.setAttribute('aria-pressed', String(on)); };
