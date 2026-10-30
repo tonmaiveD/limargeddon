@@ -12,7 +12,7 @@ import { ART_SCALE } from '../core/art/vehicles';
 import { C, clamp, hash } from '../core/util';
 import { creditsSeen, getGarage, markCreditsSeen } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, narrativeStep, partAt, skipTo, wrap, type Part, type SkipInput } from '../core/credits';
+import { CREDITS_SECONDS, POST_START, TEXT, advance, canSkip, castFor, isSkipInput, newClock, partAt, skipTo, wrap, type Clock, type Part, type SkipInput } from '../core/credits';
 import { frameMs } from '../core/frames';
 import { STAGES, TEST_MODE } from '../stages';
 
@@ -66,35 +66,37 @@ export class CreditsScene extends Phaser.Scene {
     this.tico = createGame(applyUpgrades(la.cfg, getGarage().levels), 'normal', newKeys(), la.ai);
     Object.assign(keys, newKeys());
     Sfx.init(); Sfx.engine(0); if (this.d.at === undefined) Sfx.music(true, 'creditos');
-    this.paused = false;
+    this.paused = false; this.clock = newClock();
     addEventListener('pointerdown', this.onSkip); addEventListener('keydown', this.onSkip);
-    // al salir de la app o perder el foco, imagen y música se detienen juntas y siguen juntas al volver (U02)
-    document.addEventListener('visibilitychange', this.onVisibility); addEventListener('blur', this.onBlur); addEventListener('focus', this.onFocus);
+    // al salir de la app, imagen y música se detienen juntas y siguen juntas al volver (U02). Solo cuenta salir de verdad
+    // (la página oculta): perder el foco no pausa, porque en iPad muchas veces no avisa al recuperarlo (ADR 0052)
+    document.addEventListener('visibilitychange', this.onVisibility);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
-      document.removeEventListener('visibilitychange', this.onVisibility); removeEventListener('blur', this.onBlur); removeEventListener('focus', this.onFocus);
+      document.removeEventListener('visibilitychange', this.onVisibility);
       Sfx.hold(false); Sfx.music(false);
     });
   }
 
   private paused = false;
+  private clock: Clock = newClock();
   private setPaused(v: boolean): void {
     if (v === this.paused || this.finished) return;
     this.paused = v; Sfx.hold(v);
     if (v) Object.assign(keys, newKeys()); // sin controles pegados al volver
   }
   private onVisibility = () => this.setPaused(document.hidden);
-  private onBlur = () => this.setPaused(true);
-  private onFocus = () => { if (!document.hidden) this.setPaused(false); };
 
   // un toque en la pantalla o Enter salta, si se puede; los controles de manejo y el claxon no (U01). El primer medio
   // segundo no cuenta: es el toque que cerró la escena anterior.
   private onSkip = (e: Event) => {
-    if (!this.skippable || this.t < 0.5 || this.paused) return;
+    // en pausa, cualquier toque o tecla la levanta (y no salta nada)
+    if (this.paused) { if (!document.hidden) this.setPaused(false); return; }
+    if (!this.skippable || this.t < 0.5) return;
     const input: SkipInput = e instanceof KeyboardEvent ? { kind: 'key', key: e.key }
       : { kind: 'pointer', onControls: !!(e.target as Element | null)?.closest?.('#deck, button, a, input, dialog, form') };
     if (!isSkipInput(input)) return;
-    this.t = skipTo(this.t);
+    this.t = skipTo(this.t); this.clock = newClock(this.t);
     if (this.t >= CREDITS_SECONDS) this.finish(); else Sfx.music(false);
   };
 
@@ -113,12 +115,11 @@ export class CreditsScene extends Phaser.Scene {
 
   update(_t: number, delta: number): void {
     if (this.finished) return;
-    if (this.paused) return;
+    // en pausa no avanza nada, pero se sigue dibujando el aviso para tocar y seguir
     // el manejo y el avance de la pista usan un paso con tope; la narración, el reloj de la música (U02)
-    const frozen = this.d.at !== undefined, dt = frozen ? 0 : Math.min(0.05, delta / 1000);
-    Sfx.tick();
+    const frozen = this.d.at !== undefined, paused = this.paused, dt = frozen || paused ? 0 : Math.min(0.05, delta / 1000);
     if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
-    else this.t = narrativeStep(this.t, frameMs(this.game.loop), Sfx.medleyTime());
+    else if (!paused) { Sfx.tick(); this.clock = advance(this.clock, frameMs(this.game.loop), Sfx.medleyTime()); this.t = this.clock.t; }
     this.scroll += SPEED * dt; this.tico.t = this.t;
     if (this.t >= POST_START && !this.seenMarked && !frozen) { this.seenMarked = true; if (!TEST_MODE) markCreditsSeen(); this.skippable = true; }
     if (this.t >= CREDITS_SECONDS) { this.finish(); return; }
@@ -129,8 +130,16 @@ export class CreditsScene extends Phaser.Scene {
     else if (part.kind === 'distrito') this.drawDistrict(part, dt);
     else if (part.kind === 'cierre') this.drawClosing(part);
     else this.drawPost(part);
-    if (this.skippable && this.t > 0.5) { L.ui.globalAlpha = 0.6; L.ui.fillStyle = '#fff'; L.ui.font = BODY(700, 10); L.ui.textAlign = 'center'; L.ui.fillText('Toca para saltar', W / 2, H - 14); L.ui.globalAlpha = 1; }
+    if (paused) this.pausedNotice(L.ui);
+    else if (this.skippable && this.t > 0.5) { L.ui.globalAlpha = 0.6; L.ui.fillStyle = '#fff'; L.ui.font = BODY(700, 10); L.ui.textAlign = 'center'; L.ui.fillText('Toca para saltar', W / 2, H - 14); L.ui.globalAlpha = 1; }
     endLayers(this.L);
+  }
+
+  // aviso de pausa: oscurece la escena y pide un toque para seguir
+  private pausedNotice(g: Gfx): void {
+    g.globalAlpha = 0.6; g.fillStyle = '#000'; g.fillRect(-view.extra - 10, -10, W + 2 * view.extra + 20, H + 20); g.globalAlpha = 1;
+    g.fillStyle = '#ffe14d'; g.font = FONT(16); g.textAlign = 'center'; g.fillText('EN PAUSA', W / 2, H / 2 - 6);
+    g.fillStyle = '#ffffff'; g.font = BODY(700, 12); g.fillText('Toca para seguir', W / 2, H / 2 + 18);
   }
 
   /* ---------- Lima desde el aire ---------- */
@@ -319,7 +328,7 @@ export class CreditsScene extends Phaser.Scene {
       return;
     }
     // de vuelta en la Vía de Evitamiento: el Tico baja por la rampa y la marea ya lo espera
-    if (!this.postMusic) { this.postMusic = true; Sfx.music(true, 'tension'); }
+    if (!this.postMusic && !this.paused) { this.postMusic = true; Sfx.music(true, 'tension'); }
     const la = STAGES['linea-amarilla'], G = this.tico, k = clamp((lt - 5) / 2.4, 0, 1);
     setWarp(L, roadWarp(la.cfg, this.scroll));
     la.drawWorld(L.world, la.cfg, this.scroll, null);
