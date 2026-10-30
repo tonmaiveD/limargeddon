@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, narrativeStep, partAt, skipTo, timeline, wrap } from '../src/core/credits';
+import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, advance, newClock, AUDIO_STALL_S, partAt, skipTo, timeline, wrap } from '../src/core/credits';
 import { CREDITS, medleyClock, medleySeconds, sectionSeconds } from '../src/core/audio/medley';
 import { creditsSeen, markCreditsSeen, resetProgress } from '../src/core/save';
 import { STAGES, STAGE_ORDER } from '../src/stages';
@@ -63,23 +63,34 @@ describe('Créditos', () => {
 
   // octava auditoría, U02: la narración no se alarga cuando el teléfono dibuja pocos cuadros
   it.each([10, 15, 20, 30, 60])('a %i cuadros por segundo, sin audio, terminan a tiempo (dentro de un cuadro)', (fps) => {
-    let t = 0, wall = 0;
-    while (t < CREDITS_SECONDS) { t = narrativeStep(t, 1000 / fps, null); wall += 1 / fps; }
+    let wall = 0;
+    let c = newClock();
+    while (c.t < CREDITS_SECONDS) { c = advance(c, 1000 / fps, null); wall += 1 / fps; }
     expect(Math.abs(wall - CREDITS_SECONDS)).toBeLessThanOrEqual(1 / fps + 1e-9);
   });
 
   it.each([10, 15, 60])('a %i cuadros por segundo, con música, cada parte cae en su sección (tolerancia 150 ms)', (fps) => {
     const parts = timeline();
-    let t = 0;
+    let t = 0, clock = newClock();
     for (let wall = 0; wall < POST_START; wall += 1 / fps) {
-      t = narrativeStep(t, 1000 / fps, wall); // el reloj del audio corre con el tiempo real
+      clock = advance(clock, 1000 / fps, wall); t = clock.t; // el reloj del audio corre con el tiempo real
       expect(Math.abs(t - wall)).toBeLessThanOrEqual(0.15);
     }
     expect(parts.filter((p) => p.kind !== 'post').at(-1)!.end).toBeCloseTo(medleySeconds(CREDITS), 9);
   });
 
+  // ADR 0052: en iPad la imagen quedaba esperando a un audio que no avanzaba
+  it('si el reloj del audio se traba, la imagen sigue con el tiempo real y nunca se congela', () => {
+    let c = newClock();
+    for (let i = 0; i < 60; i++) c = advance(c, 1000 / 60, i / 60); // un segundo con la música andando
+    const t1 = c.t;
+    for (let i = 0; i < 120; i++) c = advance(c, 1000 / 60, 1); // el audio se queda en 1 s durante 2 s
+    expect(c.t).toBeGreaterThan(t1 + 2 - AUDIO_STALL_S - 0.05);
+    expect(c.t).toBeLessThan(t1 + 2.01);
+  });
+
   it('un salto largo (el juego estuvo detenido) no se come los créditos', () => {
-    expect(narrativeStep(10, 5000, null)).toBeCloseTo(10.25, 9);
+    expect(advance(newClock(10), 5000, null).t).toBeCloseTo(10.25, 9);
   });
 
   it('el reloj de la música sale de la sección y el paso agendados', () => {

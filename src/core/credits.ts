@@ -58,14 +58,23 @@ export type SkipInput = { kind: 'pointer'; onControls: boolean } | { kind: 'key'
 export const isSkipInput = (e: SkipInput): boolean => (e.kind === 'pointer' ? !e.onControls : e.key === 'Enter');
 
 /*
- * Reloj de la narración (octava auditoría, U02). Mientras suena el popurrí, la imagen sigue al reloj de la música, así
- * las partes coinciden con sus secciones aunque el teléfono dibuje pocos cuadros. Sin música (sin audio, o ya en el
- * poscrédito) avanza con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo; solo un salto de más de
- * un cuarto de segundo se recorta, porque ahí el juego estuvo detenido.
+ * Reloj de la narración (octava auditoría, U02, y ADR 0052). Mientras suena el popurrí, la imagen sigue al reloj de la
+ * música, así las partes coinciden con sus secciones aunque el teléfono dibuje pocos cuadros. Sin música (sin audio, o
+ * ya en el poscrédito) avanza con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo; solo un salto de
+ * más de un cuarto de segundo se recorta, porque ahí el juego estuvo detenido. Si el reloj del audio deja de avanzar
+ * (hay navegadores que lo dan por activo sin que corra), a los 0,4 s la imagen sigue con el tiempo real: nunca se
+ * queda esperando a una música que no suena.
  */
-export function narrativeStep(t: number, rawMs: number, audioT: number | null): number {
-  if (audioT !== null && t < POST_START) return Math.max(t, audioT);
-  return t + Math.min(0.25, Math.max(0, rawMs) / 1000);
+export const AUDIO_STALL_S = 0.4;
+export interface Clock { t: number; audio: number | null; stall: number }
+export const newClock = (t = 0): Clock => ({ t, audio: null, stall: 0 });
+export function advance(c: Clock, rawMs: number, audioT: number | null): Clock {
+  const wall = Math.min(0.25, Math.max(0, rawMs) / 1000);
+  if (audioT === null || c.t >= POST_START) return { t: c.t + wall, audio: null, stall: 0 };
+  const moved = c.audio === null || audioT > c.audio + 1e-6;
+  const stall = moved ? 0 : c.stall + wall;
+  if (stall > AUDIO_STALL_S) return { t: c.t + wall, audio: audioT, stall };
+  return { t: Math.max(c.t, audioT), audio: audioT, stall };
 }
 
 // Corta un texto en líneas que caben en el ancho dado, según la función que mide.
