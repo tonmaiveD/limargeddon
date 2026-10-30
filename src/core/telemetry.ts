@@ -14,8 +14,8 @@ import type { FrameSummary } from './frames';
  */
 
 export const SCHEMA = 1;
-// Dirección del receptor (Cloudflare Workers, ADR 0051). Vacía hasta que el receptor esté publicado: no se envía nada.
-export const TELEMETRY_URL = '';
+// Dirección del receptor (Cloudflare Workers, ADR 0051).
+export const TELEMETRY_URL = 'https://limargeddon-datos.limargeddon-datos.workers.dev/v1/events';
 const QUEUE_KEY = 'limargeddon.datos';
 const MAX_QUEUE = 200; // si se acumulan más (mucho tiempo sin conexión), se pierden los más viejos
 const BATCH = 50;
@@ -89,20 +89,29 @@ export const queued = (): DataEvent[] => readQueue();
 export function enqueue(e: DataEvent): void { writeQueue([...readQueue(), e]); }
 
 let sending = false;
-// Manda el siguiente grupo. Lo enviado se quita de la cola solo si el receptor respondió bien; si no, queda para después.
+const MAX_ROUNDS = 5; // grupos por llamada, para no quedarse enviando sin fin
+/*
+ * Manda lo pendiente en grupos de 50, hasta vaciar la cola o fallar. Lo enviado se quita de la cola solo si el receptor
+ * respondió bien; si no, queda para después. Lo que se anota mientras sale un grupo va en el siguiente. Devuelve cuántos
+ * registros salieron.
+ */
 export async function flush(url = TELEMETRY_URL, post: typeof fetch = globalThis.fetch): Promise<number> {
   if (!url || sending || !post) return 0;
-  const batch = readQueue().slice(0, BATCH);
-  if (!batch.length) return 0;
   sending = true;
+  let total = 0;
   try {
-    // text/plain evita la consulta previa del navegador; el receptor lee el cuerpo como JSON
-    const res = await post(url, { method: 'POST', body: JSON.stringify({ v: SCHEMA, events: batch }), headers: { 'Content-Type': 'text/plain' }, keepalive: true });
-    if (!res.ok) return 0;
-    const sent = new Set(batch.map((e) => e.id));
-    writeQueue(readQueue().filter((e) => !sent.has(e.id)));
-    return batch.length;
-  } catch { return 0; } finally { sending = false; }
+    for (let round = 0; round < MAX_ROUNDS; round++) {
+      const batch = readQueue().slice(0, BATCH);
+      if (!batch.length) break;
+      // text/plain evita la consulta previa del navegador; el receptor lee el cuerpo como JSON
+      const res = await post(url, { method: 'POST', body: JSON.stringify({ v: SCHEMA, events: batch }), headers: { 'Content-Type': 'text/plain' }, keepalive: true });
+      if (!res.ok) break;
+      const sent = new Set(batch.map((e) => e.id));
+      writeQueue(readQueue().filter((e) => !sent.has(e.id)));
+      total += batch.length;
+    }
+  } catch { /* sin conexión: queda en la cola */ } finally { sending = false; }
+  return total;
 }
 
 // Al cerrar o esconder la app: un último intento que el navegador completa aunque la página se vaya. El receptor ignora

@@ -106,7 +106,7 @@ Hechos:
    - **Datos anónimos de partidas:** salió de la pausa el 30 de octubre. Va en el punto 5e.
 5e. **Datos anónimos de partidas** (ADR 0051, plan aprobado el 30 de octubre de 2026): recopilación automática de todos los jugadores.
    - PR A, el envío desde el juego, la cola, el aviso, el interruptor y la página de privacidad: hecho.
-   - PR B: el receptor en Cloudflare Workers con D1, sin guardar la IP, con 12 meses de retención. El dueño crea la cuenta.
+   - PR B, el receptor en Cloudflare Workers con D1 (`server/`), publicado en `limargeddon-datos.limargeddon-datos.workers.dev`: hecho. No guarda la IP y retiene 12 meses.
    - PR C: el informe con `npm run datos`.
    - PR D: la documentación.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.

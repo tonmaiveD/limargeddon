@@ -44,3 +44,38 @@ En el navegador:
 - El aviso y el interruptor del menú funcionan.
 - La etiqueta se guarda.
 - Un abandono y una pelea quedan en la cola con su forma esperada.
+
+## PR B · Receptor (30 de octubre de 2026)
+- **Dónde:** Cloudflare Workers con una base D1, en la cuenta del dueño. El código está en `server/`:
+  - `src/index.ts`, el receptor.
+  - `src/validate.ts`, la revisión de lo que llega, sin dependencias de Cloudflare para probarla.
+  - `schema.sql` y `wrangler.toml`.
+- **Dirección:** `https://limargeddon-datos.limargeddon-datos.workers.dev`. El juego envía a `/v1/events` (`TELEMETRY_URL`).
+- **Qué hace al recibir:**
+  - Solo acepta envíos desde `https://tonmaived.github.io` y `http://localhost:5173`.
+  - Rechaza envíos de más de 64 KB o de más de 50 registros.
+  - Descarta uno por uno los registros que no calzan con el contrato.
+  - Guarda solo los campos conocidos, aunque lleguen otros.
+  - Ignora los repetidos por su número.
+  - No lee ni guarda la IP, y los registros de cada pedido en Cloudflare están apagados (`observability`).
+- **Descarga:** `GET /v1/export?desde=AAAA-MM-DD` con la clave `EXPORT_TOKEN`. La clave es un secreto del receptor, y en la computadora del dueño está en `.env.datos`, que git ignora.
+- **Retención:** todos los días a las 9:00 UTC borra lo que llegó hace más de 12 meses.
+- **Envío desde el juego:** cada llamada manda en grupos hasta vaciar la cola, como máximo 5 grupos, así lo que se anota mientras sale un grupo va en el siguiente.
+- **Publicar cambios del receptor:** desde `server/`, `npx wrangler deploy`. Requiere la sesión de Wrangler en la cuenta del dueño.
+
+### Pruebas
+- `tests/receptor.test.ts`:
+  - Acepta los tres tipos.
+  - Descarta los registros mal formados.
+  - Rechaza envíos enteros inválidos.
+  - Solo acepta los orígenes permitidos.
+  - No guarda campos ajenos al contrato.
+- Contra el receptor publicado:
+  - Origen permitido, 204. Repetido, 204 y se guarda una sola vez.
+  - Origen ajeno, 403. Envío inválido, 400.
+  - Descarga sin clave, 401. Con clave, devuelve los datos.
+  - Un `playerName` agregado a propósito no se guardó.
+- Ciclo completo desde el juego en desarrollo:
+  - Un abandono y una pelea llegaron con la etiqueta de probador y el tipo de equipo.
+  - Una pelea que quedó pendiente salió al volver a abrir el juego.
+- Los registros de prueba se borraron de la base.
