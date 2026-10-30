@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #47 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #48 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 
 ## Lo que tiene el juego
@@ -97,6 +97,19 @@ Hechos:
    - Escena, poscrédito, botón y guardado: hechos (ADR 0049). En el modo prueba, `?creditos=segundos` los muestra quietos para revisar.
    - Octava auditoría (`docs/auditorias/2026-10-29-octava-auditoria.md`): U01 y U02 resueltos (ADR 0050). Saltar al volver a verlos se mantiene por diseño; manejar ya no salta, y la imagen sigue al reloj de la música.
    - Nombres y roles del equipo cargados y frases de los jefes aprobadas por el dueño (29 de octubre de 2026). Los agradecimientos especiales van en el cierre.
+5d. **En pausa por decisión del dueño (30 de octubre de 2026), evaluados y sin código:**
+   - **Indexación en Google:**
+     - Lo que haría yo en un PR chico: descripción, imagen para compartir, dirección canónica (para no indexar `?prueba` ni `?popurri`), mapa del sitio, datos estructurados de videojuego y un texto breve legible.
+     - Lo que hace el dueño: verificar el sitio en Google Search Console con su cuenta, pedir la indexación y enviar el mapa del sitio.
+     - Límite: en `tonmaived.github.io/limargeddon` no se puede poner `robots.txt`.
+     - Opcional: un dominio propio.
+   - **Datos anónimos de partidas:**
+     - Envío automático del registro de cada pelea, sin nombre ni identificador del navegador, a un receptor externo. Recomendado: Cloudflare Workers con D1, sin guardar la IP.
+     - Antes de empezar, el dueño decide:
+       - Quién crea la cuenta del servicio.
+       - Solo anónimos o con identificador por dispositivo (eso ya es seudónimo).
+       - Preguntar al inicio, que es lo recomendado, o enviar por defecto con aviso.
+       - Si va una página de privacidad.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 
 **Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.
