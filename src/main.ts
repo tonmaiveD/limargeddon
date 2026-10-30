@@ -3,6 +3,8 @@ import { W, H, ZOOM } from './core/constants';
 import { fitStage } from './core/layout';
 import { installInput } from './core/input';
 import { ui } from './core/render';
+import { installSharing } from './core/share';
+import { TEST_MODE } from './stages';
 import { BootScene } from './scenes/Boot';
 import { MenuScene } from './scenes/Menu';
 import { GraficosScene } from './scenes/Graficos';
@@ -13,6 +15,7 @@ import { CreditsScene } from './scenes/Credits';
 
 ui.touch = matchMedia('(pointer: coarse)').matches;
 installInput();
+installSharing(TEST_MODE);
 fitStage();
 
 const game = new Phaser.Game({

@@ -103,13 +103,12 @@ Hechos:
      - Lo que hace el dueño: verificar el sitio en Google Search Console con su cuenta, pedir la indexación y enviar el mapa del sitio.
      - Límite: en `tonmaived.github.io/limargeddon` no se puede poner `robots.txt`.
      - Opcional: un dominio propio.
-   - **Datos anónimos de partidas:**
-     - Envío automático del registro de cada pelea, sin nombre ni identificador del navegador, a un receptor externo. Recomendado: Cloudflare Workers con D1, sin guardar la IP.
-     - Antes de empezar, el dueño decide:
-       - Quién crea la cuenta del servicio.
-       - Solo anónimos o con identificador por dispositivo (eso ya es seudónimo).
-       - Preguntar al inicio, que es lo recomendado, o enviar por defecto con aviso.
-       - Si va una página de privacidad.
+   - **Datos anónimos de partidas:** salió de la pausa el 30 de octubre. Va en el punto 5e.
+5e. **Datos anónimos de partidas** (ADR 0051, plan aprobado el 30 de octubre de 2026): recopilación automática de todos los jugadores.
+   - PR A, el envío desde el juego, la cola, el aviso, el interruptor y la página de privacidad: hecho.
+   - PR B: el receptor en Cloudflare Workers con D1, sin guardar la IP, con 12 meses de retención. El dueño crea la cuenta.
+   - PR C: el informe con `npm run datos`.
+   - PR D: la documentación.
 6. **Opcional:** ranking compartido entre dispositivos. La auditoría recomienda no hacerlo hasta cerrar A y B y versionar el puntaje. Necesita servicio externo, validación de puntajes y moderación de nombres.
 
 **Aplazado (apuestas de mayor alcance de la auditoría):** un contrato por datos de qué bloquea cada estado del jefe (ataques, claxon, contacto). Se retoma si vuelven a aparecer parches sueltos como el de la cabeza expuesta.

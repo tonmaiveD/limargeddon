@@ -10,7 +10,9 @@ import { beginLayers, createLayers, endLayers, type Layers } from '../core/rende
 import { buyUpgrade, getGarage, getSettings, setGoal, unlockedStage, type Garage } from '../core/save';
 import { C } from '../core/util';
 import { CATEGORIES, UPGRADES, applyUpgrades, isLocked, nextGoal, nextLevel, picks } from '../garage/upgrades';
-import { STAGES, itemUses, stageNumber, wonItems } from '../stages';
+import { STAGES, TEST_MODE, itemUses, stageNumber, wonItems } from '../stages';
+import { track } from '../core/share';
+import { buyEvent } from '../core/telemetry';
 
 export interface GarageData { stageId: string; dk: DiffKey }
 
@@ -97,6 +99,7 @@ export class GarageScene extends Phaser.Scene {
         if (!next || locked) return;
         const res = buyUpgrade(u.id, next.price, u.levels.length);
         if (!res) return;
+        track(TEST_MODE, (c) => buyEvent({ upgrade: u.id, level: res.levels[u.id], price: next.price, wallet: res.wallet, unlocked: unlockedStage(stageNumber) }, c));
         this.garage = res; Sfx.init(); Sfx.play('pickup');
         this.paint(u.id);
       };

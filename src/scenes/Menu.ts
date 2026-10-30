@@ -71,6 +71,13 @@ export class MenuScene extends Phaser.Scene {
     hints.onclick = () => { setSettings({ hints: getSettings().hints === false }); paintHints(); this.showStage(); };
     paintHints();
     document.getElementById('toReset')!.onclick = () => openReset(() => this.scene.restart());
+    // datos anónimos de partidas (ADR 0051): aviso la primera vez e interruptor; el modo prueba nunca envía
+    const share = document.getElementById('toShare')!, note = document.getElementById('dataNote')!;
+    const paintShare = () => { const on = getSettings().share !== false; share.textContent = on ? 'Datos anónimos activados' : 'Datos anónimos desactivados'; share.setAttribute('aria-pressed', String(on)); };
+    share.onclick = () => { setSettings({ share: getSettings().share === false, dataNotice: true }); note.hidden = true; paintShare(); };
+    paintShare();
+    note.hidden = TEST_MODE || getSettings().dataNotice === true;
+    document.getElementById('dataOk')!.onclick = () => { setSettings({ dataNotice: true }); note.hidden = true; };
     if (!getPlayerName()) openName(true, label);
   }
 
