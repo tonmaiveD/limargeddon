@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { abandonEvent, buyEvent, cleanTester, coarseDevice, enqueue, fightEvent, flush, queued, type DataEvent } from '../src/core/telemetry';
+import { abandonEvent, buyEvent, cleanTester, coarseDevice, enqueue, fightEvent, flush, queued } from '../src/core/telemetry';
 import { readTester, sharing, track } from '../src/core/share';
 import { getSettings, setSettings, type FightRecord } from '../src/core/save';
 
@@ -16,6 +16,8 @@ const fail = (async () => ({ ok: false })) as unknown as typeof fetch;
 
 describe('Datos anónimos de partidas', () => {
   beforeEach(() => {
+    // las pruebas nunca salen a internet: el envío por defecto se reemplaza por uno que responde bien
+    globalThis.fetch = (async () => ({ ok: true })) as unknown as typeof fetch;
     const mem = new Map<string, string>();
     (globalThis as unknown as { localStorage: Storage }).localStorage = { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => mem.set(k, v) } as unknown as Storage;
   });
@@ -79,13 +81,26 @@ describe('Datos anónimos de partidas', () => {
     expect(queued()).toHaveLength(0);
   });
 
-  it('manda en grupos de 50 y lo que llega mientras tanto se queda en la cola', async () => {
+  it('manda en grupos de 50 hasta vaciar la cola, también lo que se anota mientras tanto', async () => {
     for (let i = 0; i < 70; i++) enqueue(fightEvent(fight(), CTX));
-    let sentBody: { events: DataEvent[] } | null = null;
-    const post = (async (_u: string, init: RequestInit) => { sentBody = JSON.parse(init.body as string); enqueue(fightEvent(fight(), CTX)); return { ok: true }; }) as unknown as typeof fetch;
+    const sizes: number[] = [];
+    let extra = 1; // durante el primer envío se anota una pelea más
+    const post = (async (_u: string, init: RequestInit) => {
+      sizes.push(JSON.parse(init.body as string).events.length);
+      if (extra-- > 0) enqueue(fightEvent(fight(), CTX));
+      return { ok: true };
+    }) as unknown as typeof fetch;
+    expect(await flush('https://receptor.test', post)).toBe(71);
+    expect(sizes).toEqual([50, 21]);
+    expect(queued()).toHaveLength(0);
+  });
+
+  it('si el receptor falla a mitad de camino, lo no enviado queda en la cola', async () => {
+    for (let i = 0; i < 70; i++) enqueue(fightEvent(fight(), CTX));
+    let calls = 0;
+    const post = (async () => ({ ok: calls++ === 0 })) as unknown as typeof fetch;
     expect(await flush('https://receptor.test', post)).toBe(50);
-    expect(sentBody!.events).toHaveLength(50);
-    expect(queued()).toHaveLength(21);
+    expect(queued()).toHaveLength(20);
   });
 
   it('sin conexión por mucho tiempo, la cola guarda los 200 más nuevos', () => {

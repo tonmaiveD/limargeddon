@@ -1,0 +1,18 @@
+# Receptor de datos anónimos de partidas (ADR 0051)
+name = "limargeddon-datos"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# sin registros de cada pedido en Cloudflare: no se guarda nada de quién envía
+[observability]
+enabled = false
+
+# retención: todos los días a las 9:00 UTC borra lo que tiene más de 12 meses
+[triggers]
+crons = ["0 9 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "limargeddon-datos"
+database_id = "82ee073f-83db-4c06-9e5b-ba1dec0c0680"

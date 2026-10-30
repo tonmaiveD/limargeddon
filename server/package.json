@@ -1,0 +1,13 @@
+{
+  "name": "limargeddon-datos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "esquema": "wrangler d1 execute limargeddon-datos --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261009.1",
+    "wrangler": "4.149.0"
+  }
+}
