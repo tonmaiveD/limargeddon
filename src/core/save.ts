@@ -27,7 +27,11 @@ export interface ScoreCtx {
   parts: Record<string, number>;
 }
 // hints: false si el jugador apagó las ayudas en el menú (ADR 0039); por defecto salen
-export interface Settings { fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string; hints?: boolean }
+// share: false si el jugador apagó el envío de datos anónimos (ADR 0051); dataNotice: ya vio el aviso; tester: etiqueta
+// del equipo de pruebas puesta con ?tester=nombre
+export interface Settings {
+  fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string; hints?: boolean; share?: boolean; dataNotice?: boolean; tester?: string;
+}
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
 // garage: billetera en soles y nivel de cada mejora del taller (ADR 0018)

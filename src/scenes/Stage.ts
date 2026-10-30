@@ -15,6 +15,8 @@ import { startEnding, updateEnding } from '../core/ending';
 import { learnedHints } from '../core/hints';
 import { FrameMeter, frameMs } from '../core/frames';
 import type { CreditsData } from './Credits';
+import { track as trackData } from '../core/share';
+import { abandonEvent, fightEvent } from '../core/telemetry';
 import { applyUpgrades } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
@@ -93,6 +95,10 @@ export class StageScene extends Phaser.Scene {
 
   private quitToMenu(): void {
     this.saveHints();
+    // abandonar a mitad de pelea también es un dato: dónde se rinde la gente (ADR 0051)
+    const G = this.G;
+    if (G.mode === 'play') trackData(TEST_MODE, (c) => abandonEvent({ stage: this.data0.stageId, dk: this.data0.dk, fireMode: G.fireMode, t: Math.round(G.t * 10) / 10,
+      phase: G.b.phase, bossPct: Math.round(100 * Math.max(0, G.b.hp) / G.b.max), hpPct: Math.round(100 * Math.max(0, G.p.hp) / G.p.max) }, c));
     this.paused = false; $('pause').hidden = true;
     Sfx.music(false); Sfx.engine(0);
     this.scene.start('Menu');
@@ -110,12 +116,12 @@ export class StageScene extends Phaser.Scene {
       if (G.mode === 'play') {
         if (update(G, dt)) {
           const summary = summarize(G), points = scoreFight(G), stageId = this.data0.stageId, upgrades = getGarage().levels;
-          const { earned, replay, wallet } = settleFight(
-            { stage: stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
-              build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
-              points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined,
-              frames: this.meter.summary() },
-            G.cfg.number, summary.pay, stageNumber);
+          const record = { stage: stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
+            build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
+            points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined,
+            frames: this.meter.summary() };
+          const { earned, replay, wallet } = settleFight(record, G.cfg.number, summary.pay, stageNumber);
+          trackData(TEST_MODE, (c) => fightEvent({ ...record, earned, replay }, c)); // datos anónimos (ADR 0051)
           this.saveHints();
           // puntaje (ADR 0029) con su contexto (ADR 0037): solo las victorias, y el modo prueba no entra al ranking ni da medallas
           const name = getPlayerName() ?? DEFAULT_NAME, parts = scorePoints(G);
