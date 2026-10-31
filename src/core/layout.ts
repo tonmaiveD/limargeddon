@@ -21,3 +21,14 @@ export function fitStage(game?: Phaser.Game): void {
     requestAnimationFrame(() => game.scale.refresh());
   }
 }
+
+/*
+ * Los controles táctiles solo se muestran donde se maneja: el combate y el desfile de los créditos (auditoría UX en
+ * iPhone 15, ADR 0054). En el menú, el taller y los resultados ese espacio pasa a la pantalla. Al cambiar, la escena
+ * se vuelve a medir para que el canvas y los toques coincidan.
+ */
+export function showDeck(game: Phaser.Game, on: boolean): void {
+  if (document.body.classList.contains('sin-deck') === !on) return;
+  document.body.classList.toggle('sin-deck', !on);
+  fitStage(game);
+}

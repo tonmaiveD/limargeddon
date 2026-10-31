@@ -76,12 +76,13 @@ button.pick[hidden]{display:none}
 .ammo i{width:7px;height:7px;border-radius:50%;background:var(--orange);font-size:0}
 .ammo i.off{background:rgba(255,138,31,.2)}
 /* modo "acelerar es atacar": sin botón de conos, el acelerador ocupa toda la fila inferior */
+body.sin-deck #deck{display:none !important}
 #deck.mode-acelerar .c1{display:none}
 #deck.mode-acelerar .gas{grid-column:1/3}
 .setting[hidden]{display:none}
 
 /* Taller: el canvas muestra el Tico arriba; el panel ocupa la parte baja */
-.overlay.garage{top:34%;justify-content:flex-start;gap:8px;background:rgba(14,10,22,.95);border-radius:14px 14px 6px 6px;padding:12px 12px 10px}
+.overlay.garage{top:23%;justify-content:flex-start;gap:8px;background:rgba(14,10,22,.95);border-radius:14px 14px 6px 6px;padding:12px 12px 10px}
 .wallet{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--muted)}
 .wallet b{font:400 22px/1 var(--display);color:var(--yellow)}
 .wallet b.bump{animation:bump .35s ease-out}
@@ -158,3 +159,21 @@ button.pick,.seg{min-height:44px}
 .data-note{min-height:0;max-width:34ch;border:1px solid rgba(169,156,192,.35);border-radius:10px;padding:8px 10px}
 .data-note .link{display:inline;min-height:0;padding:0 0 0 4px;color:var(--yellow)}
 a.link{display:inline-flex;align-items:center}
+
+/* menú vertical (ADR 0054): "Jugar" fijo abajo, la dificultad como selector y los detalles plegados */
+.menu-play{position:sticky;bottom:-18px;margin:4px -18px -18px;padding:10px 18px 14px;width:calc(100% + 36px);box-sizing:border-box;
+  background:rgba(14,10,22,.97);box-shadow:0 -12px 18px rgba(14,10,22,.9);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
+.menu-play .pick.play{width:min(320px,100%);font-size:17px;padding:16px 14px;min-height:54px}
+.menu-play .tip.small{min-height:0}
+.stage-more{width:100%;font-size:12px}
+.stage-more summary{cursor:pointer;color:var(--yellow);font-weight:800;min-height:44px;display:flex;align-items:center;justify-content:center}
+.stage-more[open]{display:flex;flex-direction:column;align-items:center;gap:10px}
+.stage-more[open] summary{width:100%}
+
+/* taller vertical (ADR 0054): categorías en una fila que se desliza, tarjetas compactas para comparar */
+#gCats{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;width:100%;scrollbar-width:none;flex:none}
+#gCats::-webkit-scrollbar{display:none}
+#gCats .seg{white-space:nowrap;flex:none}
+.garage .upg{padding:7px 10px;gap:1px 10px}
+.garage .upg .goal{min-height:40px;padding:8px 6px;font-size:11px}
+.garage .tip.small{min-height:0}

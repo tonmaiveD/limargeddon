@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
 import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../core/render';
@@ -21,6 +22,7 @@ export class MenuScene extends Phaser.Scene {
   constructor() { super('Menu'); }
 
   create(): void {
+    showDeck(this.game, false);
     setupCamera(this);
     this.L = createLayers(this);
     // Las etapas se juegan en orden: el menú ofrece la más avanzada desbloqueada y deja volver a las ya ganadas
@@ -43,6 +45,7 @@ export class MenuScene extends Phaser.Scene {
 
   // Con ?popurri en la dirección se puede escuchar la música de los créditos antes de que exista la escena (ADR 0048).
   private medleyBtn: HTMLElement | null = null;
+  private paintPlay: () => void = () => {};
   private setupMedley(): void {
     if (typeof location === 'undefined' || !new URLSearchParams(location.search).has('popurri')) return;
     const b = this.medleyBtn = document.getElementById('toMedley')!;
@@ -121,16 +124,28 @@ export class MenuScene extends Phaser.Scene {
     hintsBtn.onclick = () => { forgetHints(this.stageId); hintsBtn.textContent = 'Las ayudas vuelven a salir'; };
     $('menuPowers').innerHTML = Object.values(cfg.powers)
       .map((P) => `<span><i style="background:${P.col}">${P.L}</i>${P.label}</span>`).join('');
-    const diffs = $('menuDiffs'); diffs.innerHTML = '';
-    (Object.keys(cfg.difficulties) as DiffKey[]).forEach((dk) => {
+    // dificultad: se elige aparte y no arranca nada; "Jugar" queda fijo abajo con lo elegido (ADR 0054)
+    const diffs = $('diffSel'), keys = Object.keys(cfg.difficulties) as DiffKey[];
+    diffs.querySelectorAll('[data-diff]').forEach((b) => b.remove());
+    const dk = (): DiffKey => { const d = getSettings().dk; return d && keys.includes(d) ? d : 'normal'; };
+    for (const k of keys) {
       const b = document.createElement('button');
-      b.className = 'pick' + (dk === 'normal' ? '' : ' alt'); b.dataset.diff = dk; b.id = 'd-' + dk; b.textContent = cfg.difficulties[dk].label;
-      b.addEventListener('click', () => {
-        Sfx.init(); $('menu').hidden = true; setSettings({ dk });
-        this.scene.start('Stage', { stageId: this.stageId, dk });
-      });
+      b.type = 'button'; b.className = 'seg'; b.setAttribute('role', 'radio'); b.dataset.diff = k; b.id = 'd-' + k; b.textContent = cfg.difficulties[k].label;
+      b.onclick = () => { setSettings({ dk: k }); this.paintPlay(); };
       diffs.appendChild(b);
-    });
+    }
+    const play = $('playBtn') as HTMLButtonElement;
+    play.onclick = () => {
+      Sfx.init(); $('menu').hidden = true;
+      this.scene.start('Stage', { stageId: this.stageId, dk: dk() });
+    };
+    this.paintPlay = () => {
+      diffs.querySelectorAll<HTMLButtonElement>('[data-diff]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.diff === dk())));
+      play.textContent = cfg.secret ? `Jugar · ${cfg.district}` : `Jugar etapa ${cfg.number}`;
+      const m = getSettings().fireMode === 'acelerar' ? 'Acelerar es atacar' : 'Por toque';
+      $('playInfo').textContent = cfg.weapons.cone.mode !== undefined ? `${cfg.difficulties[dk()].label} · ${m}` : cfg.difficulties[dk()].label;
+    };
+    this.paintPlay();
     this.setupFireSelector(cfg.weapons.cone.mode !== undefined, !!cfg.route);
     ($('toGarage') as HTMLButtonElement).onclick = () => {
       $('menu').hidden = true; this.scene.start('Garage', { stageId: this.stageId, dk: getSettings().dk ?? 'normal' });
@@ -160,7 +175,7 @@ export class MenuScene extends Phaser.Scene {
     const paint = () => {
       const m = current();
       box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.fire === m)));
-      tip.textContent = TIPS[m]; setDeckMode(m);
+      tip.textContent = TIPS[m]; setDeckMode(m); this.paintPlay();
     };
     box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => {
       b.onclick = () => { setSettings({ fireMode: b.dataset.fire as FireMode }); paint(); };

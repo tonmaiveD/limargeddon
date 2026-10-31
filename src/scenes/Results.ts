@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { showDeck } from '../core/layout';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import type { Summary } from '../core/world';
@@ -41,6 +42,7 @@ export class ResultsScene extends Phaser.Scene {
   constructor() { super('Results'); }
 
   create(data: ResultsData): void {
+    showDeck(this.game, false);
     const { summary: s, stageId, dk, earned, replay, wallet, score, medals } = data, cfg = STAGES[stageId].cfg, R = cfg.rewards;
     const $ = (id: string) => document.getElementById(id)!;
     const detail = score ? scoreDetail(cfg, score) : null;
