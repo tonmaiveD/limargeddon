@@ -68,7 +68,8 @@ export function fightEvent(r: Omit<FightRecord, 'at'>, c: Ctx): FightEvent {
   let frames: FightEvent['frames'];
   if (r.frames) { const { device: _d, ...rest } = r.frames; frames = rest; }
   return {
-    ...base(c), kind: 'pelea', stage: r.stage, dk: r.dk, win: r.win, t: Math.floor(r.t * 10) / 10, // truncado como el registro local fireMode: r.fireMode, bestCombo: r.bestCombo,
+    // el tiempo va truncado como en el registro local
+    ...base(c), kind: 'pelea', stage: r.stage, dk: r.dk, win: r.win, t: Math.floor(r.t * 10) / 10, fireMode: r.fireMode, bestCombo: r.bestCombo,
     upgrades: r.upgrades, bossPct: r.bossPct, gross: r.gross, fines: r.fines, earned: r.earned, replay: r.replay, tolls: r.tolls,
     points: r.points, lastHit: r.lastHit, dmgBy: r.dmgBy, frames,
   };
@@ -87,6 +88,8 @@ function writeQueue(q: DataEvent[]): void {
 export const queued = (): DataEvent[] => readQueue();
 
 export function enqueue(e: DataEvent): void { writeQueue([...readQueue(), e]); }
+// Borra lo que esperaba en el teléfono (al apagar el envío no sale nada de lo pendiente).
+export function clearQueue(): void { writeQueue([]); }
 
 let sending = false;
 const MAX_ROUNDS = 5; // grupos por llamada, para no quedarse enviando sin fin
@@ -95,12 +98,15 @@ const MAX_ROUNDS = 5; // grupos por llamada, para no quedarse enviando sin fin
  * respondió bien; si no, queda para después. Lo que se anota mientras sale un grupo va en el siguiente. Devuelve cuántos
  * registros salieron.
  */
-export async function flush(url = TELEMETRY_URL, post: typeof fetch = globalThis.fetch): Promise<number> {
-  if (!url || sending || !post) return 0;
+// allowed se consulta antes de cada grupo: si el jugador apaga el envío a mitad de camino, no sale ningún grupo más
+// (un grupo que ya salió no se puede retirar).
+export async function flush(url = TELEMETRY_URL, post: typeof fetch = globalThis.fetch, allowed: () => boolean = () => true): Promise<number> {
+  if (!url || sending || !post || !allowed()) return 0;
   sending = true;
   let total = 0;
   try {
     for (let round = 0; round < MAX_ROUNDS; round++) {
+      if (!allowed()) break;
       const batch = readQueue().slice(0, BATCH);
       if (!batch.length) break;
       // text/plain evita la consulta previa del navegador; el receptor lee el cuerpo como JSON
@@ -116,8 +122,8 @@ export async function flush(url = TELEMETRY_URL, post: typeof fetch = globalThis
 
 // Al cerrar o esconder la app: un último intento que el navegador completa aunque la página se vaya. El receptor ignora
 // los repetidos, así que la cola no se toca.
-export function flushOnLeave(url = TELEMETRY_URL): void {
-  if (!url) return;
+export function flushOnLeave(url = TELEMETRY_URL, allowed: () => boolean = () => true): void {
+  if (!url || !allowed()) return;
   const batch = readQueue().slice(0, BATCH);
   if (!batch.length) return;
   try { globalThis.navigator?.sendBeacon?.(url, new Blob([JSON.stringify({ v: SCHEMA, events: batch })], { type: 'text/plain' })); } catch { /* sin envío */ }

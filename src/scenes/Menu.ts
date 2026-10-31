@@ -9,6 +9,7 @@ import { DEFAULT_NAME, creditsSeen, forgetHints, getMedals, getPlayerName, getSe
 import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
+import { setSharing } from '../core/share';
 import type { CreditsData } from './Credits';
 import { DEFAULT_STAGE, STAGES, STAGE_ORDER, TEST_MODE, stageForUnlocked, stageNumber, track } from '../stages';
 
@@ -74,7 +75,7 @@ export class MenuScene extends Phaser.Scene {
     // datos anónimos de partidas (ADR 0051): aviso la primera vez e interruptor; el modo prueba nunca envía
     const share = document.getElementById('toShare')!, note = document.getElementById('dataNote')!;
     const paintShare = () => { const on = getSettings().share !== false; share.textContent = on ? 'Datos anónimos activados' : 'Datos anónimos desactivados'; share.setAttribute('aria-pressed', String(on)); };
-    share.onclick = () => { setSettings({ share: getSettings().share === false, dataNotice: true }); note.hidden = true; paintShare(); };
+    share.onclick = () => { setSharing(getSettings().share === false); note.hidden = true; paintShare(); };
     paintShare();
     note.hidden = TEST_MODE || getSettings().dataNotice === true;
     document.getElementById('dataOk')!.onclick = () => { setSettings({ dataNotice: true }); note.hidden = true; };

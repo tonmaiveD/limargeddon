@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { abandonEvent, buyEvent, cleanTester, coarseDevice, enqueue, fightEvent, flush, queued } from '../src/core/telemetry';
-import { readTester, sharing, track } from '../src/core/share';
+import { leave, readTester, setSharing, sharing, track } from '../src/core/share';
+import { toRow } from '../server/src/validate';
 import { getSettings, setSettings, type FightRecord } from '../src/core/save';
 
 /* Datos anónimos de partidas (ADR 0051). */
@@ -108,5 +109,55 @@ describe('Datos anónimos de partidas', () => {
     const q = queued();
     expect(q).toHaveLength(200);
     expect((q[0] as { t: number }).t).toBe(30);
+  });
+
+  // novena auditoría, V02: el modo y la racha llegaban vacíos al receptor
+  it.each([['toque', 26], ['acelerar', 0]] as const)('el modo %s y la racha %i llegan intactos hasta la fila del receptor', (fireMode, bestCombo) => {
+    const e = fightEvent({ ...fight(), fireMode, bestCombo }, CTX);
+    expect(e.fireMode).toBe(fireMode); expect(e.bestCombo).toBe(bestCombo);
+    const row = toRow(JSON.parse(JSON.stringify(e)))!;
+    expect(JSON.parse(row.payload)).toMatchObject({ fireMode, bestCombo });
+  });
+
+  // novena auditoría, V01: apagar el envío tiene que cortar todo lo que falta
+  it('apagar el envío borra lo pendiente en el teléfono', () => {
+    for (let i = 0; i < 3; i++) enqueue(fightEvent(fight(), CTX));
+    setSharing(false);
+    expect(queued()).toHaveLength(0);
+    expect(getSettings().share).toBe(false);
+  });
+
+  it('con el envío apagado, cerrar o esconder la app no manda nada', () => {
+    const sendBeacon = vi.fn(() => true);
+    vi.stubGlobal('navigator', { sendBeacon });
+    try {
+      enqueue(fightEvent(fight(), CTX));
+      setSettings({ share: false }); // apagado después de abrir el juego, con algo en la cola
+      leave(false)();
+      expect(sendBeacon).not.toHaveBeenCalled();
+      setSettings({ share: true });
+      leave(false)();
+      expect(sendBeacon).toHaveBeenCalledTimes(1);
+      leave(true)(); // el modo prueba nunca
+      expect(sendBeacon).toHaveBeenCalledTimes(1);
+    } finally { vi.unstubAllGlobals(); }
+  });
+
+  it('si se apaga a mitad de un envío, no sale ningún grupo más', async () => {
+    for (let i = 0; i < 60; i++) enqueue(fightEvent(fight(), CTX));
+    let calls = 0;
+    const post = (async () => { calls++; setSettings({ share: false }); return { ok: true }; }) as unknown as typeof fetch;
+    expect(await flush('https://receptor.test', post, () => sharing(false))).toBe(50);
+    expect(calls).toBe(1);
+  });
+
+  it('apagado y vuelto a prender, sigue enviando lo nuevo', () => {
+    setSharing(false);
+    track(false, (c) => fightEvent(fight(), c));
+    expect(queued()).toHaveLength(0);
+    setSharing(true);
+    expect(sharing(false)).toBe(true);
+    track(false, (c) => fightEvent(fight(), c));
+    expect(queued()).toHaveLength(1); // anotado; sale en el próximo envío
   });
 });
