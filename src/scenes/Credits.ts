@@ -12,7 +12,7 @@ import { ART_SCALE } from '../core/art/vehicles';
 import { C, clamp, hash } from '../core/util';
 import { creditsSeen, getGarage, markCreditsSeen } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { CREDITS_SECONDS, POST_START, TEXT, advance, canSkip, castFor, isSkipInput, newClock, partAt, skipTo, wrap, type Clock, type Part, type SkipInput } from '../core/credits';
+import { CREDITS_SECONDS, POST_START, RETURN_GUARD_MS, TEXT, advance, canSkip, castFor, isSkipInput, isTap, newClock, partAt, skipTo, wrap, type Clock, type Part, type Press } from '../core/credits';
 import { frameMs } from '../core/frames';
 import { STAGES, TEST_MODE } from '../stages';
 
@@ -67,13 +67,18 @@ export class CreditsScene extends Phaser.Scene {
     Object.assign(keys, newKeys());
     Sfx.init(); Sfx.engine(0); if (this.d.at === undefined) Sfx.music(true, 'creditos');
     this.paused = false; this.clock = newClock();
-    addEventListener('pointerdown', this.onSkip); addEventListener('keydown', this.onSkip);
+    this.press = null; this.guardUntil = 0;
+    addEventListener('pointerdown', this.onDown); addEventListener('pointerup', this.onUp); addEventListener('pointercancel', this.onCancel);
+    addEventListener('keydown', this.onKey);
     // al salir de la app, imagen y música se detienen juntas y siguen juntas al volver (U02). Solo cuenta salir de verdad
     // (la página oculta): perder el foco no pausa, porque en iPad muchas veces no avisa al recuperarlo (ADR 0052)
     document.addEventListener('visibilitychange', this.onVisibility);
+    addEventListener('focus', this.onReturn); addEventListener('pageshow', this.onReturn);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
+      removeEventListener('pointerdown', this.onDown); removeEventListener('pointerup', this.onUp); removeEventListener('pointercancel', this.onCancel);
+      removeEventListener('keydown', this.onKey);
       document.removeEventListener('visibilitychange', this.onVisibility);
+      removeEventListener('focus', this.onReturn); removeEventListener('pageshow', this.onReturn);
       Sfx.hold(false); Sfx.music(false);
     });
   }
@@ -85,20 +90,37 @@ export class CreditsScene extends Phaser.Scene {
     this.paused = v; Sfx.hold(v);
     if (v) Object.assign(keys, newKeys()); // sin controles pegados al volver
   }
-  private onVisibility = () => this.setPaused(document.hidden);
+  private onVisibility = () => { if (!document.hidden) this.onReturn(); this.setPaused(document.hidden); };
+  // al volver la pantalla al juego, los toques del momento son del sistema (cerrar el centro de control), no para saltar
+  private press: Press | null = null;
+  private guardUntil = 0;
+  private onReturn = () => { this.guardUntil = performance.now() + RETURN_GUARD_MS; this.press = null; };
 
-  // un toque en la pantalla o Enter salta, si se puede; los controles de manejo y el claxon no (U01). El primer medio
-  // segundo no cuenta: es el toque que cerró la escena anterior.
-  private onSkip = (e: Event) => {
-    // en pausa, cualquier toque o tecla la levanta (y no salta nada)
+  // El primer medio segundo no cuenta para saltar: es el toque que cerró la escena anterior.
+  private canSkipNow(): boolean { return this.skippable && this.t >= 0.5; }
+
+  // en pausa, cualquier toque la levanta (y no salta nada); si no, se anota dónde bajó el dedo
+  private onDown = (e: PointerEvent) => {
+    if (this.paused) { if (!document.hidden) this.setPaused(false); this.press = null; return; }
+    const onControls = !!(e.target as Element | null)?.closest?.('#deck, button, a, input, dialog, form');
+    this.press = isSkipInput({ kind: 'pointer', onControls }) ? { x: e.clientX, y: e.clientY, at: performance.now() } : null;
+  };
+  // un toque completo en la pantalla salta, si se puede; los controles de manejo y el claxon no (U01, ADR 0053)
+  private onUp = (e: PointerEvent) => {
+    const down = this.press; this.press = null;
+    if (this.paused || !this.canSkipNow()) return;
+    if (isTap(down, { x: e.clientX, y: e.clientY, at: performance.now() }, this.guardUntil)) this.skip();
+  };
+  private onCancel = () => { this.press = null; }; // el sistema se llevó el gesto
+  // Enter salta; cualquier tecla levanta la pausa
+  private onKey = (e: KeyboardEvent) => {
     if (this.paused) { if (!document.hidden) this.setPaused(false); return; }
-    if (!this.skippable || this.t < 0.5) return;
-    const input: SkipInput = e instanceof KeyboardEvent ? { kind: 'key', key: e.key }
-      : { kind: 'pointer', onControls: !!(e.target as Element | null)?.closest?.('#deck, button, a, input, dialog, form') };
-    if (!isSkipInput(input)) return;
+    if (this.canSkipNow() && isSkipInput({ kind: 'key', key: e.key })) this.skip();
+  };
+  private skip(): void {
     this.t = skipTo(this.t); this.clock = newClock(this.t);
     if (this.t >= CREDITS_SECONDS) this.finish(); else Sfx.music(false);
-  };
+  }
 
   private finish(): void {
     if (this.finished) return;

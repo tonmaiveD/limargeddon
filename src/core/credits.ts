@@ -58,6 +58,17 @@ export type SkipInput = { kind: 'pointer'; onControls: boolean } | { kind: 'key'
 export const isSkipInput = (e: SkipInput): boolean => (e.kind === 'pointer' ? !e.onControls : e.key === 'Enter');
 
 /*
+ * Un toque que salta (ADR 0053): tiene que ser un toque completo sobre el juego, el dedo baja y sube en el mismo lugar
+ * en menos de medio segundo, y no justo después de que el teléfono devuelve la pantalla. Así no saltan los gestos del
+ * sistema (cerrar el centro de control o una notificación, deslizar desde un borde), que a veces llegan a la página a
+ * medias o justo al volver.
+ */
+export const TAP_MS = 500, TAP_MOVE = 20, RETURN_GUARD_MS = 700;
+export interface Press { x: number; y: number; at: number }
+export const isTap = (down: Press | null, up: Press, guardUntil: number): boolean =>
+  !!down && up.at - down.at <= TAP_MS && Math.hypot(up.x - down.x, up.y - down.y) <= TAP_MOVE && down.at >= guardUntil;
+
+/*
  * Reloj de la narración (octava auditoría, U02, y ADR 0052). Mientras suena el popurrí, la imagen sigue al reloj de la
  * música, así las partes coinciden con sus secciones aunque el teléfono dibuje pocos cuadros. Sin música (sin audio, o
  * ya en el poscrédito) avanza con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo; solo un salto de

@@ -56,3 +56,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0050](0050-creditos-entrada-y-reloj.md) | Créditos: saltar sin chocar con el manejo, y un solo reloj con la música | Aceptada |
 | [0051](0051-datos-anonimos-de-partidas.md) | Datos anónimos de partidas | Aceptada |
 | [0052](0052-creditos-sin-congelarse.md) | Créditos que no se congelan en iPad | Aceptada |
+| [0053](0053-gestos-del-sistema-no-saltan.md) | Los gestos del sistema no saltan los créditos | Aceptada |
