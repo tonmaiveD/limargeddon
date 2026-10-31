@@ -79,3 +79,14 @@ En el navegador:
   - Un abandono y una pelea llegaron con la etiqueta de probador y el tipo de equipo.
   - Una pelea que quedó pendiente salió al volver a abrir el juego.
 - Los registros de prueba se borraron de la base.
+
+## Corrección tras la novena auditoría, V01 y V02 (30 de octubre de 2026)
+- **V02:** al agregar un comentario sobre el truncado del tiempo, `fireMode` y `bestCombo` quedaron dentro del comentario y no se enviaban. Están de vuelta.
+  - Una prueba los sigue de punta a punta, del registro de pelea a la fila del receptor, para los dos modos y para rachas de 0 y 26.
+  - Las peleas que llegaron antes, del 30 de octubre hasta esta corrección, no traen modo ni racha. El informe las marcará como "modo desconocido" y no supondrá ninguno.
+- **V01:** el interruptor se consulta en cada envío, no solo al abrir el juego.
+  - Los envíos al esconder o cerrar la app miran la preferencia en ese momento, y sus manejadores quedan instalados siempre.
+  - El envío en grupos revisa la preferencia antes de cada grupo, así que apagarlo a mitad de camino no deja salir ninguno más.
+  - Apagar el envío borra lo que esperaba en el teléfono (`setSharing`).
+  - Un grupo que ya salió no se puede retirar. La página de privacidad lo dice.
+- **Privacidad:** la página explica la etiqueta voluntaria del equipo de pruebas y qué pasa con lo pendiente al apagar.
