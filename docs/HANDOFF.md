@@ -1,5 +1,7 @@
 # Traspaso a Claude Code
 
+> Documento histórico del 22 de octubre de 2026. El estado vigente, los pendientes y la deuda técnica están en `docs/estado.md`.
+
 ## Estado al 22 de octubre de 2026
 - Concepto aprobado (`docs/concepto.md`).
 - Prototipo v3 jugable de la Etapa 2, San Isidro (`prototipo/san-isidro-v3.html`): un solo HTML con canvas 2D, sin dependencias salvo Google Fonts.
