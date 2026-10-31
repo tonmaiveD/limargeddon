@@ -90,3 +90,16 @@ En el navegador:
   - Apagar el envío borra lo que esperaba en el teléfono (`setSharing`).
   - Un grupo que ya salió no se puede retirar. La página de privacidad lo dice.
 - **Privacidad:** la página explica la etiqueta voluntaria del equipo de pruebas y qué pasa con lo pendiente al apagar.
+
+## Receptor estricto, novena auditoría V03 (30 de octubre de 2026)
+- `server/src/validate.ts` revisa cada registro contra un esquema por tipo, con su tipo y rango en cada campo.
+- El registro se rehace solo con los campos permitidos, también por dentro: `frames` se reconstruye con `warm`, `play`, `stalls`, `stallCount`, `stallsCut` y `anomalies`, y `warm` y `play` con sus siete números.
+- Lo que sobra adentro se descarta, y un tipo equivocado invalida el registro:
+  - `fireMode` debe ser `toque`, `acelerar` o `mantener`.
+  - `replay` debe ser verdadero o falso.
+  - `lastHit` y las claves de `dmgBy` deben ser textos sin caracteres de código ni de control. Los rótulos reales como "DESVÍO · SANEAMIENTO" pasan.
+- Los límites de 64 KB por envío y 8 KB por registro se miden en bytes UTF-8, no en letras.
+- **Publicado** en Cloudflare el 30 de octubre. Probado en vivo:
+  - Un registro legítimo con `device` y `playerName` agregados dentro de `frames` se guardó sin ellos, con su modo y racha.
+  - Otro con un objeto en `fireMode` y texto en `replay` se descartó.
+  - El registro de prueba se borró de la base.

@@ -106,7 +106,7 @@ Hechos:
    - **Datos anónimos de partidas:** salió de la pausa el 30 de octubre. Va en el punto 5e.
 5e. **Datos anónimos de partidas** (ADR 0051, plan aprobado el 30 de octubre de 2026): recopilación automática de todos los jugadores.
    - PR A, el envío desde el juego, la cola, el aviso, el interruptor y la página de privacidad: hecho.
-   - Novena auditoría (`docs/auditorias/2026-10-30-novena-auditoria.md`): V01 y V02 corregidos (ADR 0051). Pendientes V03, el validador completo del receptor, y V04, un salto chico al reanudar los créditos.
+   - Novena auditoría (`docs/auditorias/2026-10-30-novena-auditoria.md`): V01, V02 y V03 corregidos (ADR 0051), y el receptor estricto ya está publicado. Pendiente V04, un salto chico al reanudar los créditos.
    - Auditoría UX en iPhone 15 (`docs/auditorias/2026-10-30-ux-iphone-15.md`): la iteración 1 va después de V03. Incluye controles solo en combate, "Jugar" visible, taller ampliado y aviso en horizontal.
    - PR B, el receptor en Cloudflare Workers con D1 (`server/`), publicado en `limargeddon-datos.limargeddon-datos.workers.dev`: hecho. No guarda la IP y retiene 12 meses.
    - PR C: el informe con `npm run datos`.
