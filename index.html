@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css">
 </head>
-<body>
+<body class="sin-deck">
   <div id="app">
     <div id="stage">
       <button id="pauseBtn" hidden aria-label="Pausa (P)" title="Pausa (P)">II</button>
@@ -29,22 +29,29 @@
         <p class="eyebrow" id="menuEyebrow"></p>
         <p class="boss">Te espera <b id="menuBoss"></b></p>
         <p class="tip" id="menuTip"></p>
-        <div class="medals" id="menuMedals" aria-label="Medallas de la etapa"></div>
         <button class="link" id="toHints" type="button" hidden>Ver ayudas otra vez</button>
-        <div class="powers" id="menuPowers" aria-label="Bonus"></div>
         <div class="setting" id="fireSel" role="radiogroup" aria-labelledby="fireLabel">
           <span id="fireLabel">Disparo</span>
           <button class="seg" type="button" role="radio" data-fire="toque">Por toque</button>
           <button class="seg" type="button" role="radio" data-fire="acelerar">Acelerar es atacar</button>
         </div>
         <p class="tip small" id="fireTip"></p>
+        <div class="setting" id="diffSel" role="radiogroup" aria-labelledby="diffLabel"><span id="diffLabel">Dificultad</span></div>
+        <details class="stage-more" id="menuMore"><summary>Medallas y bonus de la etapa</summary>
+          <div class="medals" id="menuMedals" aria-label="Medallas de la etapa"></div>
+          <div class="powers" id="menuPowers" aria-label="Bonus"></div>
+        </details>
         <p class="tip small data-note" id="dataNote" hidden>Este juego envía datos anónimos de tus partidas para mejorarlo. Puedes apagarlo abajo. <button class="link" id="dataOk" type="button">Entendido</button></p>
-        <div class="row" id="menuDiffs"></div>
         <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="link" id="toRanking" type="button">Ranking</button><button class="link" id="toCredits" type="button" hidden>Ver créditos</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button></div>
         <div class="row"><button class="link" id="toHintsOnOff" type="button" aria-pressed="true">Ayudas activadas</button><button class="link" id="toName" type="button">Jugador</button><button class="link" id="toReset" type="button">Empezar de nuevo</button></div>
         <div class="row"><button class="link" id="toShare" type="button" aria-pressed="true">Datos anónimos activados</button><a class="link" href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></div>
         <div class="row"><button class="link" id="toMedley" type="button" hidden>Escuchar popurrí</button></div>
         <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
+        <!-- siempre a la vista, aunque el menú se desplace (auditoría UX en iPhone 15, ADR 0054) -->
+        <div class="menu-play">
+          <button class="pick play" id="playBtn" type="button">Jugar</button>
+          <p class="tip small" id="playInfo"></p>
+        </div>
       </div>
       <div class="overlay garage" id="garage" hidden>
         <div class="wallet"><span>Billetera</span><b id="gWallet">S/ 0</b></div>

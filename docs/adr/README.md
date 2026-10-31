@@ -57,3 +57,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0051](0051-datos-anonimos-de-partidas.md) | Datos anónimos de partidas | Aceptada |
 | [0052](0052-creditos-sin-congelarse.md) | Créditos que no se congelan en iPad | Aceptada |
 | [0053](0053-gestos-del-sistema-no-saltan.md) | Los gestos del sistema no saltan los créditos | Aceptada |
+| [0054](0054-ux-vertical.md) | UX vertical: controles solo en combate, "Jugar" fijo y taller para comparar | Aceptada |

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
 import { W } from '../core/constants';
@@ -36,6 +37,7 @@ export class GarageScene extends Phaser.Scene {
   init(data: GarageData): void { this.data0 = data; }
 
   create(): void {
+    showDeck(this.game, false);
     setupCamera(this);
     this.L = createLayers(this);
     this.garage = getGarage();
@@ -116,19 +118,21 @@ export class GarageScene extends Phaser.Scene {
   }
 
   update(_t: number, delta: number): void {
+    setupCamera(this); // la vista cambia de ancho al ocultar o mostrar los controles
     this.t += Math.min(0.05, delta / 1000);
     const g = this.L.world;
     beginLayers(this.L);
     // piso del taller con franjas de seguridad
     g.fillStyle = '#1b1526'; g.fillRect(-100, 0, W + 200, 640);
-    g.fillStyle = '#2a2238'; for (let x = -100; x < W + 100; x += 40) g.fillRect(x, 0, 2, 230);
-    g.fillStyle = C.yellow; for (let x = -100; x < W + 100; x += 24) g.fillRect(x, 222, 12, 4);
+    g.fillStyle = '#2a2238'; for (let x = -100; x < W + 100; x += 40) g.fillRect(x, 0, 2, 150);
+    g.fillStyle = C.yellow; for (let x = -100; x < W + 100; x += 24) g.fillRect(x, 144, 12, 4);
     g.fillStyle = C.pink; g.font = FONT(14); g.textAlign = 'center'; g.fillText('TALLER DE LA VICTORIA', W / 2, 26);
-    // el Tico en grande, girando apenas, con las piezas compradas (imagen horneada a su tamaño, ADR 0042)
-    const look = this.look, s = 2.6, wob = Math.sin(this.t * 1.5) * 0.06, art = ticoArt(look);
+    // el Tico, girando apenas, con las piezas compradas (imagen horneada a su tamaño, ADR 0042); más chico desde la
+    // ADR 0054 para que el catálogo tenga espacio y se puedan comparar mejoras
+    const look = this.look, s = 1.8, wob = Math.sin(this.t * 1.5) * 0.06, art = ticoArt(look);
     const key = `tico-taller-${!!look?.bumper}-${!!look?.plates}`;
     if (!this.textures.exists(key)) this.textures.addCanvas(key, bakeCar(art, 0, 7, s * ART_SCALE));
-    this.L.cars.image(key, W / 2, 128, 1 / ART_SCALE, wob);
+    this.L.cars.image(key, W / 2, 84, 1 / ART_SCALE, wob);
     endLayers(this.L);
   }
 }

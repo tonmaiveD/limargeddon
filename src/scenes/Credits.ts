@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import { H, W, view } from '../core/constants';
 import { BODY, FONT, type Gfx } from '../core/gfx';
@@ -57,6 +58,7 @@ export class CreditsScene extends Phaser.Scene {
   init(d: CreditsData): void { this.d = d; }
 
   create(): void {
+    showDeck(this.game, true);
     setupCamera(this);
     this.L = createLayers(this);
     this.t = 0; this.scroll = 0; this.talk = null; this.finished = false; this.seenMarked = false; this.postMusic = false;

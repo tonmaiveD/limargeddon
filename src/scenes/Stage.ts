@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
@@ -45,6 +46,7 @@ export class StageScene extends Phaser.Scene {
   }
 
   create(): void {
+    showDeck(this.game, true);
     setupCamera(this);
     this.L = createLayers(this);
     this.def = STAGES[this.data0.stageId];
