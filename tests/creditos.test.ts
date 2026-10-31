@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, advance, newClock, AUDIO_STALL_S, partAt, skipTo, timeline, wrap } from '../src/core/credits';
+import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, isTap, RETURN_GUARD_MS, advance, newClock, AUDIO_STALL_S, partAt, skipTo, timeline, wrap } from '../src/core/credits';
 import { CREDITS, medleyClock, medleySeconds, sectionSeconds } from '../src/core/audio/medley';
 import { creditsSeen, markCreditsSeen, resetProgress } from '../src/core/save';
 import { STAGES, STAGE_ORDER } from '../src/stages';
@@ -59,6 +59,17 @@ describe('Créditos', () => {
     expect(isSkipInput({ kind: 'pointer', onControls: true })).toBe(false); // volante, acelerador, claxon del deck
     expect(isSkipInput({ kind: 'key', key: 'Enter' })).toBe(true);
     for (const key of [' ', 'c', 'ArrowLeft', 'ArrowUp', 'Escape']) expect(isSkipInput({ kind: 'key', key }), key).toBe(false);
+  });
+
+  // ADR 0053: los gestos del sistema no saltan los créditos
+  it('salta solo con un toque completo en el mismo lugar, no con gestos ni toques al volver', () => {
+    const down = { x: 100, y: 300, at: 1000 };
+    expect(isTap(down, { x: 103, y: 302, at: 1150 }, 0)).toBe(true); // toque normal
+    expect(isTap(null, { x: 100, y: 300, at: 1150 }, 0)).toBe(false); // solo llegó el final (el sistema tomó el inicio)
+    expect(isTap(down, { x: 100, y: 600, at: 1200 }, 0)).toBe(false); // deslizamiento
+    expect(isTap(down, { x: 100, y: 300, at: 1800 }, 0)).toBe(false); // dedo apoyado mucho tiempo
+    expect(isTap(down, { x: 100, y: 300, at: 1100 }, 1000 + RETURN_GUARD_MS / 2)).toBe(false); // justo al volver
+    expect(isTap({ ...down, at: 2000 }, { x: 100, y: 300, at: 2100 }, 1000 + RETURN_GUARD_MS)).toBe(true); // pasado el margen
   });
 
   // octava auditoría, U02: la narración no se alarga cuando el teléfono dibuja pocos cuadros
