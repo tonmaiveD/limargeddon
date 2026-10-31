@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #56 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #57 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 - Receptor de datos anónimos: https://limargeddon-datos.limargeddon-datos.workers.dev (Cloudflare Workers con D1, en la cuenta del dueño; código en `server/`).
 - Parámetros de la dirección para revisar:
@@ -78,13 +78,10 @@
 Cada punto es un PR. El dueño autoriza cada fusión por separado.
 
 ### Siguiente
-1. **Informe de datos (PR C de la ADR 0051):** `npm run datos` descarga del receptor (clave en `.env.datos`, fuera del repo) y arma un informe.
-   - Victorias y derrotas, tiempos, daño por fuente, salidas al menú, compras y fluidez por tipo de equipo.
-   - Separado por versión del juego, etapa, dificultad y modo, y separando al equipo de pruebas del público.
-   - Las peleas recibidas antes del PR #54 no traen modo: van como "modo desconocido".
-   - "Abandono" significa solo volver al menú a mitad de pelea, no cerrar la app.
-   - No se pueden contar jugadores únicos ni seguir a una persona, por diseño.
-   - Conviene hacerlo cuando haya unos días de partidas.
+1. **Leer el informe de datos** cuando haya unos días de partidas: `npm run datos` (PR C, ADR 0051) deja el informe en `datos/`, fuera del repo.
+   - Al 30 de octubre no hay partidas del público: los 4 registros guardados eran pruebas mías desde el servidor de desarrollo, y el informe los deja fuera.
+   - El juego en desarrollo marca ahora sus registros con la etiqueta `dev`.
+   - Falta el PR D, el cierre de la documentación de la ADR 0051.
 2. **Bloque E · Ajustar con datos reales**, cuando el informe los muestre:
    - Candidatos del análisis de capturas del 30 de octubre:
      - Multas más suaves en Miraflores, la etapa tutorial, donde se llevan más de un tercio del cobro.
@@ -131,7 +128,7 @@ Hechos, con su ADR:
 - Gráficos nivel B (0040 a 0044).
 - Instrumentos de diagnóstico (0045 a 0047).
 - Créditos (0048 a 0050, 0052 y 0053).
-- Datos anónimos (0051, con V01 a V03 de la novena auditoría).
+- Datos anónimos (0051, con V01 a V03 de la novena auditoría y el informe, PR C).
 - UX vertical (0054).
 
 Las auditorías están en `docs/auditorias/`, de la segunda a la novena, más la de UX en iPhone 15 y las capturas consolidadas del 30 de octubre.

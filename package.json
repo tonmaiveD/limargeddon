@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "balance": "BALANCE=1 vitest run scripts/balance.test.ts",
-    "campana": "CAMPANA=1 BALANCE=1 vitest run scripts/campana.test.ts"
+    "campana": "CAMPANA=1 BALANCE=1 vitest run scripts/campana.test.ts",
+    "datos": "node scripts/datos.ts"
   },
   "dependencies": {
     "phaser": "3.90.0"
