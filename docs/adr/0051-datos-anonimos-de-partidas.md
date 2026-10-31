@@ -1,6 +1,6 @@
 # 0051. Datos anónimos de partidas
 
-**Estado:** aceptada (plan aprobado por el dueño, 30 de octubre de 2026). Primera entrega, PR A: el envío desde el juego. El receptor (PR B), el informe (PR C) y el cierre de la documentación (PR D) vienen después.
+**Estado:** aceptada (plan aprobado por el dueño, 30 de octubre de 2026). Entregas: el envío desde el juego (PR A), el receptor (PR B) y el informe (PR C). Falta el cierre de la documentación (PR D).
 
 ## Contexto
 Calibrar el balance dependía de capturas de pantalla: solo victorias, recortadas y sin mejoras, daño por fuente ni fluidez. El dueño eligió la recopilación automática de todos los jugadores, el nivel de menos fricción, frente a compartir el registro a mano o enviarlo a una hoja de Google.
@@ -103,3 +103,25 @@ En el navegador:
   - Un registro legítimo con `device` y `playerName` agregados dentro de `frames` se guardó sin ellos, con su modo y racha.
   - Otro con un objeto en `fireMode` y texto en `replay` se descartó.
   - El registro de prueba se borró de la base.
+
+## PR C · Informe (30 de octubre de 2026)
+- **Cómo se usa:** `npm run datos` descarga del receptor con `DATOS_URL` y `DATOS_TOKEN` de `.env.datos` y escribe en `datos/`, que git ignora:
+  - `crudo-AAAA-MM-DD.json`, la descarga tal cual.
+  - `informe-AAAA-MM-DD.md`, el informe.
+  - Opciones: `--desde AAAA-MM-DD`, `--build <versión>` y `--archivo <descarga.json>` para rehacerlo sin red.
+- **Qué muestra**, con el público y el equipo de pruebas en secciones separadas:
+  - Resumen por tipo de registro y por versión del juego.
+  - Peleas por etapa, dificultad y modo: victorias, tiempo al ganar, vida del jefe al perder y multas sobre el cobro.
+  - Daño recibido por fuente y último golpe en las derrotas.
+  - Salidas al menú (solo volver al menú a mitad de pelea, cerrar la app no se registra), sobre las peleas empezadas.
+  - Compras del taller.
+  - Fluidez por tipo de equipo, contra los objetivos de la ADR 0045.
+- **Reglas:**
+  - Todo se cuenta por partida. No hay jugadores únicos ni seguimiento de una persona.
+  - Las peleas sin modo (antes del PR #54) van como "desconocido".
+  - Con menos de 5 peleas, el grupo se marca "(pocas)".
+  - Las victorias en menos de 10 s son pruebas forzadas y quedan fuera, contadas aparte.
+- **Hallazgo al probarlo:** los 4 registros que había en la base eran pruebas mías desde el servidor de desarrollo, sin etiqueta: victorias de 0 a 2 s, de versiones que solo existieron en local. Por eso:
+  - El juego en desarrollo marca sus registros con la etiqueta `dev` si no tiene otra (`testerTag` en `src/core/share.ts`). Así caen en el equipo de pruebas y no en el público.
+  - El informe deja fuera las victorias forzadas.
+- **Pruebas:** `tests/informe-datos.test.ts` arma registros con las funciones del juego y los pasa por el receptor antes del informe. Cubre la separación por público, el modo desconocido, el orden de etapas, el daño, las multas, "(pocas)", los filtros, la fluidez, las victorias forzadas y que un rótulo no rompa la tabla. `tests/datos.test.ts` cubre la etiqueta `dev`.

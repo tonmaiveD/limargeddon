@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { abandonEvent, buyEvent, cleanTester, coarseDevice, enqueue, fightEvent, flush, queued } from '../src/core/telemetry';
-import { leave, readTester, setSharing, sharing, track } from '../src/core/share';
+import { DEV_TESTER, leave, readTester, setSharing, sharing, testerTag, track } from '../src/core/share';
 import { toRow } from '../server/src/validate';
 import { getSettings, setSettings, type FightRecord } from '../src/core/save';
 
@@ -159,5 +159,12 @@ describe('Datos anónimos de partidas', () => {
     expect(sharing(false)).toBe(true);
     track(false, (c) => fightEvent(fight(), c));
     expect(queued()).toHaveLength(1); // anotado; sale en el próximo envío
+  });
+
+  it('lo jugado en el servidor de desarrollo va como equipo de pruebas, salvo que tenga su propia etiqueta', () => {
+    expect(testerTag(undefined, true)).toBe(DEV_TESTER);
+    expect(testerTag('noam', true)).toBe('noam');
+    expect(testerTag(undefined, false)).toBeUndefined();
+    expect(testerTag('noam', false)).toBe('noam');
   });
 });

@@ -8,7 +8,11 @@ import { TELEMETRY_URL, cleanTester, clearQueue, enqueue, flush, flushOnLeave, t
  */
 
 export const sharing = (test: boolean): boolean => !test && getSettings().share !== false;
-const ctx = (): Ctx => ({ build: __BUILD__, tester: getSettings().tester });
+// Lo que se juega en el servidor de desarrollo va marcado como equipo de pruebas aunque no tenga etiqueta, para que las
+// pruebas de quien programa no se mezclen con el público en el informe.
+export const DEV_TESTER = 'dev';
+export const testerTag = (tester: string | undefined, dev: boolean): string | undefined => tester ?? (dev ? DEV_TESTER : undefined);
+const ctx = (): Ctx => ({ build: __BUILD__, tester: testerTag(getSettings().tester, import.meta.env.DEV) });
 
 // Anota un registro y prueba mandar lo pendiente.
 export function track(test: boolean, make: (c: Ctx) => DataEvent): void {
