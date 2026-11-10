@@ -2,7 +2,8 @@ import { originOk, parseBatch } from './validate';
 
 /*
  * Receptor de datos anónimos de partidas (ADR 0051), en Cloudflare Workers con una base D1.
- * - POST /v1/events: recibe un grupo de registros del juego y guarda los válidos. No lee ni guarda la IP.
+ * - POST /v1/events: recibe un grupo de registros del juego y guarda los válidos. Responde cuántos guardó, cuántos eran
+ *   repetidos y cuántos descartó. No lee ni guarda la IP.
  * - GET /v1/export?desde=AAAA-MM-DD: descarga los registros para el informe, solo con la clave EXPORT_TOKEN.
  * - Todos los días borra lo que tiene más de 12 meses.
  */
@@ -15,14 +16,19 @@ const today = () => new Date().toISOString().slice(0, 10);
 async function receive(req: Request, env: Env): Promise<Response> {
   const origin = req.headers.get('Origin');
   if (!originOk(origin)) return new Response('origen no permitido', { status: 403 });
-  const rows = parseBatch(await req.text());
+  const text = await req.text(), rows = parseBatch(text);
   if (!rows) return new Response('envío inválido', { status: 400, headers: cors(origin!) });
+  const sent = (JSON.parse(text) as { events: unknown[] }).events.length;
+  let saved = 0;
   if (rows.length) {
     const stmt = env.DB.prepare('INSERT OR IGNORE INTO events (id, v, kind, build, day, device, tester, stage, payload, received) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     const day = today();
-    await env.DB.batch(rows.map((r) => stmt.bind(r.id, r.v, r.kind, r.build, r.day, r.device, r.tester, r.stage, r.payload, day)));
+    const res = await env.DB.batch(rows.map((r) => stmt.bind(r.id, r.v, r.kind, r.build, r.day, r.device, r.tester, r.stage, r.payload, day)));
+    saved = res.reduce((s, r) => s + (r.meta?.changes ?? 0), 0);
   }
-  return new Response(null, { status: 204, headers: cors(origin!) });
+  // cuántos llegaron, cuántos se guardaron, cuántos eran repetidos y cuántos no calzaron con el contrato
+  const body = { recibidos: sent, guardados: saved, repetidos: rows.length - saved, descartados: sent - rows.length };
+  return new Response(JSON.stringify(body), { status: 200, headers: { ...cors(origin!), 'Content-Type': 'application/json' } });
 }
 
 async function exportRows(req: Request, env: Env): Promise<Response> {

@@ -18,7 +18,7 @@ import { FrameMeter, frameMs } from '../core/frames';
 import type { CreditsData } from './Credits';
 import { track as trackData } from '../core/share';
 import { abandonEvent, fightEvent } from '../core/telemetry';
-import { applyUpgrades } from '../garage/upgrades';
+import { applyUpgrades, cheapestNext } from '../garage/upgrades';
 import { DEFAULT_STAGE, STAGES, TEST_MODE, stageNumber, track, wonItems, type StageDef } from '../stages';
 
 export interface StageData { stageId?: string; dk?: DiffKey }
@@ -117,11 +117,13 @@ export class StageScene extends Phaser.Scene {
       track.scroll += (G.mode === 'play' ? G.speed : this.def.cfg.road.idleScroll) * dt;
       if (G.mode === 'play') {
         if (update(G, dt)) {
-          const summary = summarize(G), points = scoreFight(G), stageId = this.data0.stageId, upgrades = getGarage().levels;
+          const summary = summarize(G), points = scoreFight(G), stageId = this.data0.stageId, garage = getGarage(), upgrades = garage.levels;
+          // la billetera antes de cobrar es la del comienzo: en la pelea no se compra
+          const cheapest = cheapestNext(upgrades, unlockedStage(stageNumber));
           const record = { stage: stageId, dk: this.data0.dk, win: summary.win, t: summary.seconds, fireMode: G.fireMode, bestCombo: G.combo.best,
             build: __BUILD__, test: TEST_MODE || undefined, upgrades, bossPct: summary.bossPct, gross: summary.gross, fines: summary.fines, tolls: summary.tolls || undefined,
             points: points || undefined, scoreV: points ? SCORE_VERSION : undefined, lastHit: G.lastHit || undefined, dmgBy: Object.keys(G.stats.dmgBy).length ? G.stats.dmgBy : undefined,
-            frames: this.meter.summary() };
+            frames: this.meter.summary(), walletStart: garage.wallet, cheapest: cheapest ?? undefined };
           const { earned, replay, wallet } = settleFight(record, G.cfg.number, summary.pay, stageNumber);
           trackData(TEST_MODE, (c) => fightEvent({ ...record, earned, replay }, c)); // datos anónimos (ADR 0051)
           this.saveHints();

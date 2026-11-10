@@ -24,7 +24,8 @@ interface Base { id: string; v: number; build: string; day: string; device: stri
 export interface FightEvent extends Base {
   kind: 'pelea'; stage: string; dk: DiffKey; win: boolean; t: number; fireMode?: FireMode; bestCombo?: number;
   upgrades?: Record<string, number>; bossPct?: number; gross?: number; fines?: number; earned?: number; replay?: boolean;
-  tolls?: number; points?: number; lastHit?: string; dmgBy?: Record<string, number>; frames?: Omit<FrameSummary, 'device'>;
+  tolls?: number; points?: number; scoreV?: number; lastHit?: string; dmgBy?: Record<string, number>; frames?: Omit<FrameSummary, 'device'>;
+  walletStart?: number; cheapest?: number;
 }
 export interface AbandonEvent extends Base {
   kind: 'abandono'; stage: string; dk: DiffKey; fireMode?: FireMode; t: number; phase: number; bossPct: number; hpPct: number;
@@ -71,7 +72,7 @@ export function fightEvent(r: Omit<FightRecord, 'at'>, c: Ctx): FightEvent {
     // el tiempo va truncado como en el registro local
     ...base(c), kind: 'pelea', stage: r.stage, dk: r.dk, win: r.win, t: Math.floor(r.t * 10) / 10, fireMode: r.fireMode, bestCombo: r.bestCombo,
     upgrades: r.upgrades, bossPct: r.bossPct, gross: r.gross, fines: r.fines, earned: r.earned, replay: r.replay, tolls: r.tolls,
-    points: r.points, lastHit: r.lastHit, dmgBy: r.dmgBy, frames,
+    points: r.points, scoreV: r.scoreV, lastHit: r.lastHit, dmgBy: r.dmgBy, frames, walletStart: r.walletStart, cheapest: r.cheapest,
   };
 }
 export const abandonEvent = (a: Omit<AbandonEvent, keyof Base | 'kind'>, c: Ctx): AbandonEvent => ({ ...base(c), kind: 'abandono', ...a });

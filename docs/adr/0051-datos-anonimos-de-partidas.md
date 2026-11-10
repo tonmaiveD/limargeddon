@@ -1,6 +1,6 @@
 # 0051. Datos anónimos de partidas
 
-**Estado:** aceptada (plan aprobado por el dueño, 30 de octubre de 2026). Entregas: el envío desde el juego (PR A), el receptor (PR B) y el informe (PR C). Falta el cierre de la documentación (PR D).
+**Estado:** aceptada (plan aprobado por el dueño, 30 de octubre de 2026). Entregas: el envío desde el juego (PR A), el receptor (PR B), el informe (PR C) y la billetera con el cierre de la documentación (PR D, #59).
 
 ## Contexto
 Calibrar el balance dependía de capturas de pantalla: solo victorias, recortadas y sin mejoras, daño por fuente ni fluidez. El dueño eligió la recopilación automática de todos los jugadores, el nivel de menos fricción, frente a compartir el registro a mano o enviarlo a una hoja de Google.
@@ -125,3 +125,20 @@ En el navegador:
   - El juego en desarrollo marca sus registros con la etiqueta `dev` si no tiene otra (`testerTag` en `src/core/share.ts`). Así caen en el equipo de pruebas y no en el público.
   - El informe deja fuera las victorias forzadas.
 - **Pruebas:** `tests/informe-datos.test.ts` arma registros con las funciones del juego y los pasa por el receptor antes del informe. Cubre la separación por público, el modo desconocido, el orden de etapas, el daño, las multas, "(pocas)", los filtros, la fluidez, las victorias forzadas y que un rótulo no rompa la tabla. `tests/datos.test.ts` cubre la etiqueta `dev`.
+
+## PR D · Billetera, `scoreV` y respuesta del receptor (10 de noviembre de 2026)
+Los primeros datos reales mostraron que quien no compra mejoras pierde siempre en Centro de Lima. No se sabía si le alcanzaba la plata, así que antes de arreglarlo se mide.
+- **Campos nuevos en la pelea**, opcionales, así que los registros anteriores siguen siendo válidos:
+  - `walletStart`: la billetera al empezar. Se lee antes de cobrar, porque en la pelea no se compra.
+  - `cheapest`: el precio de la mejora disponible más barata, alcance o no (`cheapestNext`). No va si ya no queda ninguna.
+  - `scoreV`: la versión de la fórmula de puntaje, que ya se guardaba en el teléfono y no se enviaba.
+- **Receptor:** responde 200 con `recibidos`, `guardados`, `repetidos` y `descartados`, en lugar de 204 sin detalle. El juego solo mira que la respuesta sea correcta.
+- **Informe:** nueva sección "Derrotas y billetera". Dice cuántas derrotas tenían plata para una mejora, y cuántas de esas eran sin ninguna mejora comprada.
+- **Salidas al menú:** en 72 peleas reales no hubo ninguna, así que se verificó de punta a punta desde el juego en desarrollo. Una salida a mitad de pelea llegó al receptor con su etapa, fase y vidas. El cero es real: los jugadores no salen por el menú de pausa.
+- **Privacidad:** la página dice que se envía cuánta plata tenía el jugador al empezar.
+- **Publicado** en Cloudflare el 10 de noviembre. Probado en vivo:
+  - Un registro con los campos nuevos más uno inválido devolvió 1 guardado y 1 descartado. Al repetirlo, 1 repetido.
+  - Desde otro origen, 403.
+  - Una salida al menú y una pelea desde el juego en desarrollo llegaron con la etiqueta `dev` y los campos nuevos.
+  - Los registros de prueba se borraron, y la base volvió a los 119 reales.
+- **Pruebas:** el receptor guarda los campos nuevos y rechaza tipos equivocados. `cheapestNext` respeta niveles y desbloqueos. El informe calcula la sección de billetera.

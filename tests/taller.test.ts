@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { UPGRADES, applyUpgrades, isLocked, nextGoal, recommended } from '../src/garage/upgrades';
+import { UPGRADES, applyUpgrades, cheapestNext, isLocked, nextGoal, recommended } from '../src/garage/upgrades';
 import { addEarnings, buyUpgrade, getGarage, settleFight, unlockedStage } from '../src/core/save';
 import { stageNumber } from '../src/stages';
 import { STAGES } from '../src/stages';
@@ -124,4 +124,11 @@ describe('mejoras de lujo', () => {
     expect(llego).toBe(true);
     expect(hp0 - G.b.hp).toBeGreaterThanOrEqual(80);
   }));
+
+  it('la mejora disponible más barata respeta los niveles comprados y las etapas desbloqueadas', () => {
+    const open = (unlocked: number) => UPGRADES.filter((u) => !isLocked(u, unlocked));
+    expect(cheapestNext({}, 1)).toBe(Math.min(...open(1).map((u) => u.levels[0].price)));
+    const maxed = Object.fromEntries(UPGRADES.map((u) => [u.id, u.levels.length]));
+    expect(cheapestNext(maxed, 99)).toBeNull();
+  });
 });

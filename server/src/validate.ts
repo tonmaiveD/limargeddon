@@ -68,7 +68,8 @@ const SCHEMAS: Record<string, Schema> = {
     ...COMMON, stage: { f: STAGE, required: true }, dk: { f: DK, required: true }, win: { f: bool, required: true }, t: { f: num(0, 3600), required: true },
     fireMode: { f: MODE }, bestCombo: { f: num(0, 1e6) }, upgrades: { f: numMap(40, /^[a-z0-9_-]+$/i) }, bossPct: { f: num(0, 100) },
     gross: { f: num(0, 1e6) }, fines: { f: num(0, 1e6) }, earned: { f: num(0, 1e6) }, replay: { f: bool }, tolls: { f: num(0, 1e6) },
-    points: { f: num(0, 1e6) }, lastHit: { f: str(32, LABEL) }, dmgBy: { f: numMap(40, LABEL) }, frames: { f: obj(FRAMES) },
+    points: { f: num(0, 1e6) }, scoreV: { f: num(1, 100) }, lastHit: { f: str(32, LABEL) }, dmgBy: { f: numMap(40, LABEL) }, frames: { f: obj(FRAMES) },
+    walletStart: { f: num(0, 1e7) }, cheapest: { f: num(0, 1e6) },
   },
   abandono: {
     ...COMMON, stage: { f: STAGE, required: true }, dk: { f: DK, required: true }, fireMode: { f: MODE }, t: { f: num(0, 3600), required: true },

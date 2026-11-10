@@ -15,6 +15,7 @@ export interface Ev {
   kind: 'pelea' | 'abandono' | 'compra'; build: string; day: string; device: string; tester?: string;
   stage?: string; dk?: string; fireMode?: string; win?: boolean; t?: number; bossPct?: number; gross?: number; fines?: number;
   lastHit?: string; dmgBy?: Record<string, number>; frames?: Frames; phase?: number; hpPct?: number;
+  upgrades?: Record<string, number>; walletStart?: number; cheapest?: number;
   upgrade?: string; level?: number; price?: number; wallet?: number;
 }
 export interface Stage { id: string; name: string }
@@ -98,6 +99,18 @@ function buys(ev: Ev[]): string {
   return table(['Mejora', 'Compras', 'Nivel más alto', 'Precio (S/, mediana)', 'Billetera después (S/, mediana)'], rows);
 }
 
+// ¿Al que pierde le alcanzaba para una mejora y no la compró? Solo las peleas que traen la billetera (desde el PR #59).
+function wallet(ev: Ev[], name: (id: string) => string, order: (id: string) => number): string {
+  const lost = ev.filter((e) => e.kind === 'pelea' && !e.win && e.walletStart !== undefined);
+  const rows = [...groupBy(lost, (e) => e.stage ?? '')].sort(([a], [b]) => order(a) - order(b)).map(([stage, g]) => {
+    const bare = g.filter((e) => !Object.keys(e.upgrades ?? {}).length);
+    const could = (xs: Ev[]) => xs.filter((e) => e.cheapest !== undefined && e.walletStart! >= e.cheapest).length;
+    return [name(stage), `${g.length}${few(g.length)}`, fmt(median(g.map((e) => e.walletStart!))), `${could(g)} (${pct(could(g), g.length)})`,
+      `${bare.length}`, `${could(bare)}`];
+  });
+  return table(['Etapa', 'Derrotas', 'Billetera al empezar (S/, mediana)', 'Le alcanzaba para una mejora', 'Sin ninguna mejora', 'Sin mejoras y le alcanzaba'], rows);
+}
+
 function smooth(ev: Ev[]): string {
   const f = ev.filter((e) => e.kind === 'pelea' && e.frames?.play);
   const rows = [...groupBy(f, (e) => e.device)].sort((a, b) => b[1].length - a[1].length).map(([d, g]) => {
@@ -116,7 +129,9 @@ function audience(title: string, ev: Ev[], name: (id: string) => string, order: 
   if (!ev.length) return `## ${title}\n\n_Sin datos._`;
   return [`## ${title}`, '', '### Peleas', '', fights(ev, name, order), '', '### Daño recibido', '', damage(ev, name, order), '',
     '### Salidas al menú', '', 'Volver al menú a mitad de pelea. Cerrar la app no se registra.', '', exits(ev, name, order), '',
-    '### Compras del taller', '', buys(ev), '', '### Fluidez por tipo de equipo', '', smooth(ev)].join('\n');
+    '### Compras del taller', '', buys(ev), '',
+    '### Derrotas y billetera', '', '¿Al que perdió le alcanzaba para una mejora? Solo las peleas que traen la billetera al empezar.', '', wallet(ev, name, order), '',
+    '### Fluidez por tipo de equipo', '', smooth(ev)].join('\n');
 }
 
 /* ---------- informe ---------- */
