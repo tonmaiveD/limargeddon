@@ -11,5 +11,7 @@ export default defineConfig({
   define: { __BUILD__: JSON.stringify(build) },
   build: { target: 'es2022', chunkSizeWarningLimit: 1600 },
   // npm run balance usa BALANCE=1 para correr solo el reporte de duración
-  test: { include: process.env.BALANCE ? ['scripts/**/*.test.ts'] : ['tests/**/*.test.ts'] },
+  // las simulaciones tardan menos de 1 s, pero con la máquina cargada (simuladores de iOS) llegan a 25 s: el límite de 5 s
+  // las hacía fallar sin que hubiera error. Una prueba colgada igual se corta, al minuto.
+  test: { include: process.env.BALANCE ? ['scripts/**/*.test.ts'] : ['tests/**/*.test.ts'], testTimeout: 60_000 },
 });
