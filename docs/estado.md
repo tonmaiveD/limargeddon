@@ -85,7 +85,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 - Las multas se llevan el 47 % del cobro en Miraflores normal y superan lo cobrado en difícil.
 
 1. **Medir antes de arreglar** (PR #59, hecho): billetera al empezar, mejora más barata y `scoreV` en cada pelea. El receptor dice cuántos guardó. La salida al menú se verificó de punta a punta.
-2. **Pruebas estables** (deuda, muy chico): subir el límite de tiempo de las pruebas de simulación que fallan con la máquina cargada.
+2. **Pruebas estables** (PR #60, hecho): límite de 60 s por prueba. Con dos simuladores de iOS y carga extra pasan las 269.
 3. **Arreglar Centro de Lima**, con una semana de datos del paso 1 (`npm run datos`, sección "Derrotas y billetera"):
    - Si al que pierde le alcanzaba, un aviso en la derrota con la mejora que puede comprar y un botón al taller.
    - Si no le alcanzaba, una ganancia mínima al perder o multas que no dejen la ganancia en cero.
@@ -118,7 +118,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
 ## Deuda técnica
-- **Pruebas lentas bajo carga:** las simulaciones de `fisica`, `mejoras-etapas`, `centro`, `miraflores` y `motor-comun` pueden pasarse del límite de 5 s si la máquina está cargada (simuladores de iOS encendidos). No son fallas de lógica. Opciones: subir `testTimeout` para esos archivos o apagar los simuladores antes de `npm test`.
+- **Pruebas lentas bajo carga** (resuelto en el PR #60): con la máquina cargada, las simulaciones llegaban a 25 s y el límite de 5 s las hacía fallar sin error real. El límite ahora es de 60 s en `vite.config.ts`, y ya no hace falta apagar los simuladores antes de `npm test`.
 - **Sin pruebas de integración de escenas:** el paso Stage → créditos → resultados, el menú y el taller se verifican a mano (simulador de iOS, Chrome sin ventana con el protocolo de DevTools). Las pruebas cubren la lógica pura (`credits.ts`, `telemetry.ts`, `validate.ts`, `frames.ts`).
 - **Receptor de datos:**
   - No tiene límite de frecuencia propio, solo origen permitido y validación estricta.
