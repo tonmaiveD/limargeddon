@@ -39,6 +39,11 @@ export function applyUpgrades(cfg: StageConfig, levels: Levels): StageConfig {
 
 export const nextLevel = (u: Upgrade, levels: Levels): UpgradeLevel | null => u.levels[levels[u.id] ?? 0] ?? null;
 export const isLocked = (u: Upgrade, unlocked: number): boolean => (u.requires ?? 1) > unlocked;
+// Precio de la mejora disponible más barata, alcance o no: para saber si al jugador le alcanzaba algo (ADR 0051). null si no queda ninguna.
+export function cheapestNext(levels: Levels, unlocked: number): number | null {
+  const prices = UPGRADES.filter((u) => !isLocked(u, unlocked)).map((u) => nextLevel(u, levels)?.price).filter((p): p is number => p !== undefined);
+  return prices.length ? Math.min(...prices) : null;
+}
 
 // Recomendación simple: la mejora más barata que alcanza, para que siempre haya un premio a mano.
 export function recommended(levels: Levels, wallet: number, unlocked = Infinity): string | null {

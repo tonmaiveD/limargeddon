@@ -4,7 +4,7 @@
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #57 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #58 fusionados.
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 - Receptor de datos anónimos: https://limargeddon-datos.limargeddon-datos.workers.dev (Cloudflare Workers con D1, en la cuenta del dueño; código en `server/`).
 - Parámetros de la dirección para revisar:
@@ -78,23 +78,33 @@
 Cada punto es un PR. El dueño autoriza cada fusión por separado.
 
 ### Siguiente
-1. **Leer el informe de datos** cuando haya unos días de partidas: `npm run datos` (PR C, ADR 0051) deja el informe en `datos/`, fuera del repo.
-   - Al 30 de octubre no hay partidas del público: los 4 registros guardados eran pruebas mías desde el servidor de desarrollo, y el informe los deja fuera.
-   - El juego en desarrollo marca ahora sus registros con la etiqueta `dev`.
-   - Falta el PR D, el cierre de la documentación de la ADR 0051.
-2. **Bloque E · Ajustar con datos reales**, cuando el informe los muestre:
-   - Candidatos del análisis de capturas del 30 de octubre:
-     - Multas más suaves en Miraflores, la etapa tutorial, donde se llevan más de un tercio del cobro.
-     - Revisar si el final (Callao y Línea Amarilla) queda fácil, sin endurecerlo solo por pocas partidas.
-     - Mostrar "1 falta perdonada" en resultados, porque "Sin faltas" apagada junto a cero papeletas confunde.
-   - De auditorías anteriores: la vida del jefe en el modo por toque, el aviso del enrosque (1,0 o 1,2 s) solo si no se ve la salida, y explicar en el taller que las mejoras de aguante alargan la pelea.
+Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus amigos entre el 2 y el 9 de noviembre.
+- Centro de Lima es la traba. Sin mejoras se pierde 8 de 8, con mejoras se gana 3 de 5.
+- De Javier Prado en adelante se gana 13 de 15 en normal.
+- La embestida es el 43 % del daño en San Isidro.
+- Las multas se llevan el 47 % del cobro en Miraflores normal y superan lo cobrado en difícil.
+
+1. **Medir antes de arreglar** (PR #59, hecho): billetera al empezar, mejora más barata y `scoreV` en cada pelea. El receptor dice cuántos guardó. La salida al menú se verificó de punta a punta.
+2. **Pruebas estables** (deuda, muy chico): subir el límite de tiempo de las pruebas de simulación que fallan con la máquina cargada.
+3. **Arreglar Centro de Lima**, con una semana de datos del paso 1 (`npm run datos`, sección "Derrotas y billetera"):
+   - Si al que pierde le alcanzaba, un aviso en la derrota con la mejora que puede comprar y un botón al taller.
+   - Si no le alcanzaba, una ganancia mínima al perder o multas que no dejen la ganancia en cero.
+   - Decide el dueño según los datos.
+4. **Pruebas de escenas** (deuda, mediano): el paso de la pelea a los resultados y al taller, antes de tocar esas pantallas.
+5. **Bloque E · Balance con datos**, con unas 150 peleas o más:
+   - Multas más suaves en Miraflores, sobre todo en difícil.
+   - Endurecer un poco el final, desde Javier Prado.
+   - Mostrar "1 falta perdonada" en resultados.
+   - De auditorías anteriores: la vida del jefe en el modo por toque, el aviso del enrosque y explicar en el taller que las mejoras de aguante alargan la pelea.
    - Mantener la fórmula de puntaje v2 y el ranking local.
-3. **V04 de la novena auditoría (baja):** al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s. Hay que guardar el instante efectivo al pausar y retomar desde ahí.
-4. **Iteraciones 2 a 4 de la auditoría UX en iPhone 15**, solo en vertical. Necesitan decisiones del dueño y una prueba con 5 jugadores nuevos:
+6. **Iteraciones 2 a 4 de la auditoría UX en iPhone 15**, solo en vertical. Necesitan decisiones del dueño y una prueba con jugadores nuevos (Noam y sus amigos sirven):
    - Introducción opcional de tres pasos: mover, atacar por la derecha y soltar ante una embestida.
    - Poder jugar como JUGADOR y ponerse nombre después.
    - Textos esenciales más grandes (hoy de 10 a 13 px) y una señal de punto ciego más clara.
    - Derrota resumida, con "Ver detalle".
+7. **Cuando haya hueco:**
+   - V04 de la novena auditoría: al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s.
+   - El tamaño del paquete, si más teléfonos como el primer Samsung (p95 de 25 ms) confirman que va lento.
 
 ### En pausa por decisión del dueño
 - **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre): falta decidir quién produce el arte. Debe mostrar una mejora visible sobre el nivel B actual, y el esfuerzo de 25 a 45 jornadas se vuelve a estimar al cerrar el piloto.
@@ -103,7 +113,7 @@ Cada punto es un PR. El dueño autoriza cada fusión por separado.
 - **Modo horizontal:** no se hace. El juego es vertical.
 
 ### En paralelo (dueño y tester, sin código)
-- Partidas reales en el teléfono, con `?tester=pablo` y `?tester=noam` abiertos una vez.
+- Partidas reales en el teléfono, con `?tester=pablo` y `?tester=noam` abiertos una vez. Hasta el 10 de noviembre Noam jugó sin etiqueta, así que sus partidas cuentan como público.
 - Confirmar en el iPad que los créditos llegan hasta "CONTINUARÁ" (ADR 0052).
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
@@ -111,11 +121,10 @@ Cada punto es un PR. El dueño autoriza cada fusión por separado.
 - **Pruebas lentas bajo carga:** las simulaciones de `fisica`, `mejoras-etapas`, `centro`, `miraflores` y `motor-comun` pueden pasarse del límite de 5 s si la máquina está cargada (simuladores de iOS encendidos). No son fallas de lógica. Opciones: subir `testTimeout` para esos archivos o apagar los simuladores antes de `npm test`.
 - **Sin pruebas de integración de escenas:** el paso Stage → créditos → resultados, el menú y el taller se verifican a mano (simulador de iOS, Chrome sin ventana con el protocolo de DevTools). Las pruebas cubren la lógica pura (`credits.ts`, `telemetry.ts`, `validate.ts`, `frames.ts`).
 - **Receptor de datos:**
-  - Responde 204 por lote sin decir cuántos registros guardó.
   - No tiene límite de frecuencia propio, solo origen permitido y validación estricta.
   - La cola del teléfono se divide por cantidad (50), no por bytes.
   - Se publica a mano con `npx wrangler deploy` desde `server/`, con la sesión de Wrangler del dueño, que vence.
-- **Contrato de datos:** `scoreV` no se envía, así que el informe debe asociar la versión del puntaje con el build. Cualquier cambio de campos va junto en `telemetry.ts` y `server/src/validate.ts`, con su prueba de punta a punta.
+- **Contrato de datos:** cualquier cambio de campos va junto en `telemetry.ts` y `server/src/validate.ts`, con su prueba de punta a punta.
 - **Un solo paquete de JavaScript de unos 1,46 MB:** no se separa en partes. Revisar si la carga inicial en teléfonos lentos lo pide.
 - **`docs/HANDOFF.md` es histórico**, del 22 de octubre. Este documento es la referencia vigente.
 - **Mantener:** la prueba de paridad con el prototipo (`tests/fixtures/`) y `prototipo/` no se tocan.

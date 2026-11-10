@@ -80,4 +80,14 @@ describe('Informe de datos', () => {
     expect(md).toContain('| Total | 2 | 0 | 0 |');
     expect(md).toContain(`2 victorias en menos de ${MIN_WIN_S} s quedan fuera`);
   });
+
+  it('dice si al que perdió le alcanzaba para una mejora', () => {
+    const md = report(stored([
+      pelea({ stage: 'callao', win: false, walletStart: 900, cheapest: 250 }),
+      pelea({ stage: 'callao', win: false, walletStart: 100, cheapest: 250, upgrades: { motor: 1 } }),
+      pelea({ stage: 'callao', win: false }), // sin billetera: llegó antes del PR #59
+      pelea({ stage: 'callao', walletStart: 900, cheapest: 250 }),
+    ]), { stages: STAGES });
+    expect(md).toContain('| Callao | 2 (pocas) | 500 | 1 (50 %) | 1 | 1 |');
+  });
 });

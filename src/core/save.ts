@@ -20,6 +20,8 @@ export interface FightRecord {
   points?: number; scoreV?: number; lastHit?: string; dmgBy?: Record<string, number>;
   // tiempo entre cuadros en milisegundos y equipo (ADR 0045)
   frames?: FrameSummary;
+  // billetera al empezar y precio de la mejora disponible más barata: ¿le alcanzaba para algo? (ADR 0051)
+  walletStart?: number; cheapest?: number;
 }
 // Contexto de un récord (ADR 0037): con qué se hizo y cuánto aportó cada parte, para explicarlo aunque cambie el balance.
 export interface ScoreCtx {

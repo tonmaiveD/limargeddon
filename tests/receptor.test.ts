@@ -91,4 +91,11 @@ describe('Receptor de datos', () => {
     const row = toRow(big);
     if (row) expect(new TextEncoder().encode(row.payload).length).toBeLessThanOrEqual(MAX_ROW);
   });
+
+  it('guarda la billetera al empezar, la mejora más barata y la versión del puntaje', () => {
+    const e = fightEvent({ stage: 'centro', dk: 'normal', win: false, t: 80, points: 0, scoreV: 2, walletStart: 650, cheapest: 250 }, CTX);
+    expect(JSON.parse(toRow(e)!.payload)).toMatchObject({ scoreV: 2, walletStart: 650, cheapest: 250 });
+    expect(toRow({ ...e, walletStart: 'mucha' })).toBeNull();
+    expect(toRow({ ...e, scoreV: 0 })).toBeNull();
+  });
 });
