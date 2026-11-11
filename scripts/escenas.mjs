@@ -20,8 +20,10 @@ const PORT = 4179, DEBUG = 9339, ORIGIN = `http://localhost:${PORT}`;
 const CHROMES = [process.env.CHROME, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// en GitHub la máquina es varias veces más lenta: los plazos se estiran, las condiciones no cambian
+const SLOW = process.env.CI ? 4 : 1;
 async function until(check, ms, what) {
-  const end = Date.now() + ms;
+  const end = Date.now() + ms * SLOW;
   for (;;) { try { const v = await check(); if (v) return v; } catch { /* todavía no */ } if (Date.now() > end) throw new Error(`no llegó a tiempo: ${what}`); await sleep(150); }
 }
 
@@ -136,7 +138,7 @@ const TOURS = {
     await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
     await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos tras ganar la Línea Amarilla');
     ok(await p.page('return __t.deck()'), 'los créditos muestran los controles táctiles');
-    await sleep(1200);
+    await run(p, 'game.scene.getScene("Credits").t >= 1', 20000, 'los créditos corren');
     await p.page('__t.enter(); return true');
     await sleep(300);
     ok((await scenes(p)).includes('Credits'), 'la primera vez los créditos no se saltan');
@@ -147,9 +149,8 @@ const TOURS = {
     await play(p);
     await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
     await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
-    await sleep(1200);
-    await p.page('__t.enter(); return true');
-    await run(p, '!__t.scenes().includes("Credits") && __t.visible("end")', 20000, 'saltar los créditos lleva a los resultados');
+    await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
+    await run(p, '(__t.enter(), !__t.scenes().includes("Credits") && __t.visible("end"))', 20000, 'saltar los créditos lleva a los resultados');
     ok(true, 'saltar los créditos lleva a los resultados');
   },
 
@@ -158,9 +159,8 @@ const TOURS = {
     ok(await p.page('return __t.visible("toCredits")'), 'el menú ofrece "Ver créditos" si ya se vieron');
     await p.page('__t.click("toCredits"); return true');
     await waitScene(p, 'Credits');
-    await sleep(1200);
-    await p.page('__t.enter(); return true');
-    await run(p, '__t.scenes().includes("Menu") && !__t.scenes().includes("Credits")', 20000, 'los créditos vuelven al menú');
+    await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
+    await run(p, '(__t.enter(), __t.scenes().includes("Menu") && !__t.scenes().includes("Credits"))', 20000, 'los créditos vuelven al menú');
     ok(await p.page('return __t.visible("menu") && !__t.deck()'), 'al salir de los créditos el menú no muestra los controles');
   },
 };
