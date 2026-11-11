@@ -1,0 +1,25 @@
+name: Pruebas de cada PR
+
+# Pruebas de lógica y recorrido de escenas en Chrome sin ventana, antes de fusionar. El deploy de main no depende de esto.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run escenas
+        env:
+          CHROME: /usr/bin/google-chrome
