@@ -1,6 +1,6 @@
 # 0056. Aparecer en Google y en los enlaces compartidos
 
-**Estado:** aceptada (plan aprobado por el dueño, 10 de noviembre de 2026). Falta la etiqueta de Search Console.
+**Estado:** aceptada (plan aprobado por el dueño, 10 de noviembre de 2026).
 
 ## Contexto
 La página solo tenía el título "Limargeddon". El juego se dibuja en un canvas, que Google no puede leer, así que no había texto para entender de qué trata. Tampoco había descripción, imagen para compartir ni mapa del sitio.
@@ -23,7 +23,7 @@ La página solo tenía el título "Limargeddon". El juego se dibuja en un canvas
 - **Sin Google Analytics.** Search Console no agrega nada al juego ni sigue a los jugadores, y la página de privacidad sigue siendo cierta.
 
 ## Pasos del dueño
-1. Search Console, propiedad "Prefijo de URL" con la dirección del juego, y verificación por etiqueta HTML. La etiqueta se agrega a `index.html`.
+1. Search Console, propiedad "Prefijo de URL" con la dirección del juego, y verificación por etiqueta HTML. La etiqueta `google-site-verification` ya está en `index.html` y no se debe quitar, o la verificación se pierde.
 2. Después del deploy, tocar "Verificar", enviar `sitemap.xml` y pedir la indexación de la página del juego y de la de "Acerca del juego".
 3. Opcional: Bing Webmaster Tools, que importa todo desde Search Console.
 
