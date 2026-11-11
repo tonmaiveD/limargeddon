@@ -4,7 +4,40 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#0e0a16">
-  <title>Limargeddon</title>
+  <title>Limargeddon · Arcade de taxi y combate por Lima</title>
+  <!-- Buscadores y enlaces compartidos (ADR 0056). La dirección oficial es la de GitHub Pages. -->
+  <meta name="description" content="Juego arcade gratis para el celular. Maneja un Tico por diez distritos de Lima, esquiva combis y vence a jefes satíricos como la Loca del Q8 y el Rochabús.">
+  <link rel="canonical" href="https://tonmaived.github.io/limargeddon/">
+  <meta name="google-site-verification" content="JfzP9V-eefg1x6x7FdwV8zIzFG-pUIyoJWahPYbrKY4">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Limargeddon">
+  <meta property="og:locale" content="es_PE">
+  <meta property="og:url" content="https://tonmaived.github.io/limargeddon/">
+  <meta property="og:title" content="Limargeddon · Arcade de taxi y combate por Lima">
+  <meta property="og:description" content="Maneja un Tico por diez distritos de Lima y vence a jefes satíricos. Gratis, en el navegador del celular.">
+  <meta property="og:image" content="https://tonmaived.github.io/limargeddon/compartir.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="El Tico de Limargeddon en plena pelea por las calles de Lima">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Limargeddon",
+    "url": "https://tonmaived.github.io/limargeddon/",
+    "description": "Arcade de acción vehicular con vista cenital. Un taxista informal con un Tico mejorable atraviesa diez distritos de Lima enfrentando combis, micros, serenazgo y jefes satíricos.",
+    "image": "https://tonmaived.github.io/limargeddon/compartir.png",
+    "inLanguage": "es",
+    "genre": ["Arcade", "Acción", "Conducción"],
+    "gamePlatform": "Navegador web",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Cualquier sistema con navegador",
+    "playMode": "SinglePlayer",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "PEN" }
+  }
+  </script>
   <!-- Instalable en la pantalla de inicio: se abre a pantalla completa, sin barras del navegador -->
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -44,7 +77,7 @@
         <p class="tip small data-note" id="dataNote" hidden>Este juego envía datos anónimos de tus partidas para mejorarlo. Puedes apagarlo abajo. <button class="link" id="dataOk" type="button">Entendido</button></p>
         <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="link" id="toRanking" type="button">Ranking</button><button class="link" id="toCredits" type="button" hidden>Ver créditos</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button></div>
         <div class="row"><button class="link" id="toHintsOnOff" type="button" aria-pressed="true">Ayudas activadas</button><button class="link" id="toName" type="button">Jugador</button><button class="link" id="toReset" type="button">Empezar de nuevo</button></div>
-        <div class="row"><button class="link" id="toShare" type="button" aria-pressed="true">Datos anónimos activados</button><a class="link" href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></div>
+        <div class="row"><button class="link" id="toShare" type="button" aria-pressed="true">Datos anónimos activados</button><a class="link" href="privacidad.html" target="_blank" rel="noopener">Privacidad</a><a class="link" href="acerca.html" target="_blank" rel="noopener">Acerca del juego</a></div>
         <div class="row"><button class="link" id="toMedley" type="button" hidden>Escuchar popurrí</button></div>
         <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
         <!-- siempre a la vista, aunque el menú se desplace (auditoría UX en iPhone 15, ADR 0054) -->

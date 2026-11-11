@@ -98,6 +98,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
    - Decide el dueño según los datos. Las pruebas de escenas cubren resultados y taller, así que el cambio queda protegido.
 
 **Mientras tanto, lo que no depende de los datos:**
+- **Aparecer en Google** (ADR 0056, PR #63): título, descripción, imagen para compartir, datos estructurados, `acerca.html` y `sitemap.xml`. Con la etiqueta de verificación de Search Console. Después del deploy se verifica, se envía el mapa del sitio y se pide la indexación.
 2. **V04 de la novena auditoría (chico):** al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s. Hay que guardar el instante efectivo al pausar y retomar desde ahí.
 3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
 
@@ -117,7 +118,6 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 ### En pausa por decisión del dueño
 - **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre): falta decidir quién produce el arte. Debe mostrar una mejora visible sobre el nivel B actual, y el esfuerzo de 25 a 45 jornadas se vuelve a estimar al cerrar el piloto.
-- **Indexación en Google:** un PR chico mío (descripción, imagen para compartir, dirección canónica, mapa del sitio y datos estructurados) más la verificación del dueño en Search Console. En `tonmaived.github.io/limargeddon` no se puede poner `robots.txt`, y un dominio propio es opcional.
 - **Ranking compartido:** opcional. Necesita servicio externo, validación de puntajes y moderación de nombres.
 - **Modo horizontal:** no se hace. El juego es vertical.
 

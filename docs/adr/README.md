@@ -59,3 +59,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0053](0053-gestos-del-sistema-no-saltan.md) | Los gestos del sistema no saltan los créditos | Aceptada |
 | [0054](0054-ux-vertical.md) | UX vertical: controles solo en combate, "Jugar" fijo y taller para comparar | Aceptada |
 | [0055](0055-pruebas-de-escenas.md) | Pruebas de escenas en Chrome sin ventana | Aceptada |
+| [0056](0056-aparecer-en-buscadores.md) | Aparecer en Google y en los enlaces compartidos | Aceptada |
