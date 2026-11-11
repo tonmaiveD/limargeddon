@@ -90,7 +90,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
    - Si al que pierde le alcanzaba, un aviso en la derrota con la mejora que puede comprar y un botón al taller.
    - Si no le alcanzaba, una ganancia mínima al perder o multas que no dejen la ganancia en cero.
    - Decide el dueño según los datos.
-4. **Pruebas de escenas** (deuda, mediano): el paso de la pelea a los resultados y al taller, antes de tocar esas pantallas.
+4. **Pruebas de escenas** (PR #61, hecho): `npm run escenas`, también en cada PR.
 5. **Bloque E · Balance con datos**, con unas 150 peleas o más:
    - Multas más suaves en Miraflores, sobre todo en difícil.
    - Endurecer un poco el final, desde Javier Prado.
@@ -119,7 +119,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 ## Deuda técnica
 - **Pruebas lentas bajo carga** (resuelto en el PR #60): con la máquina cargada, las simulaciones llegaban a 25 s y el límite de 5 s las hacía fallar sin error real. El límite ahora es de 60 s en `vite.config.ts`, y ya no hace falta apagar los simuladores antes de `npm test`.
-- **Sin pruebas de integración de escenas:** el paso Stage → créditos → resultados, el menú y el taller se verifican a mano (simulador de iOS, Chrome sin ventana con el protocolo de DevTools). Las pruebas cubren la lógica pura (`credits.ts`, `telemetry.ts`, `validate.ts`, `frames.ts`).
+- **Pruebas de escenas** (resuelto en el PR #61): `npm run escenas` recorre el juego en Chrome sin ventana, como un teléfono en vertical. Cubre menú, pelea, resultados, taller, derrota, revancha, pausa, créditos y "Ver créditos", con 20 revisiones en 5 recorridos y alrededor de un minuto. Corre en cada PR (`.github/workflows/pruebas.yml`). No reemplaza probar en un teléfono real antes de cerrar un hito.
 - **Receptor de datos:**
   - No tiene límite de frecuencia propio, solo origen permitido y validación estricta.
   - La cola del teléfono se divide por cantidad (50), no por bytes.

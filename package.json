@@ -11,7 +11,8 @@
     "test": "vitest run",
     "balance": "BALANCE=1 vitest run scripts/balance.test.ts",
     "campana": "CAMPANA=1 BALANCE=1 vitest run scripts/campana.test.ts",
-    "datos": "node scripts/datos.ts"
+    "datos": "node scripts/datos.ts",
+    "escenas": "node scripts/escenas.mjs"
   },
   "dependencies": {
     "phaser": "3.90.0"
