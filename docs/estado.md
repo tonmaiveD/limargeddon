@@ -1,10 +1,10 @@
 # Estado del proyecto
 
-**Al 30 de octubre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
+**Al 10 de noviembre de 2026.** Este documento resume qué está hecho, cómo se trabaja y qué sigue. El detalle de cada decisión está en `docs/adr/`, y el plan de etapas en `docs/plan-etapas.md`.
 
 ## Publicado
 - Juego: https://tonmaived.github.io/limargeddon/ (GitHub Pages, deploy automático en cada push a `main`).
-- Repo público: `tonmaiveD/limargeddon`. PR #1 a #58 fusionados.
+- Repo público: `tonmaiveD/limargeddon`. PR #1 a #61 fusionados. Cada PR corre `npm test` y `npm run escenas` en GitHub antes de fusionar (ADR 0055).
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 - Receptor de datos anónimos: https://limargeddon-datos.limargeddon-datos.workers.dev (Cloudflare Workers con D1, en la cuenta del dueño; código en `server/`).
 - Parámetros de la dirección para revisar:
@@ -84,27 +84,36 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 - La embestida es el 43 % del daño en San Isidro.
 - Las multas se llevan el 47 % del cobro en Miraflores normal y superan lo cobrado en difícil.
 
-1. **Medir antes de arreglar** (PR #59, hecho): billetera al empezar, mejora más barata y `scoreV` en cada pelea. El receptor dice cuántos guardó. La salida al menú se verificó de punta a punta.
-2. **Pruebas estables** (PR #60, hecho): límite de 60 s por prueba. Con dos simuladores de iOS y carga extra pasan las 269.
-3. **Arreglar Centro de Lima**, con una semana de datos del paso 1 (`npm run datos`, sección "Derrotas y billetera"):
-   - Si al que pierde le alcanzaba, un aviso en la derrota con la mejora que puede comprar y un botón al taller.
+**Hecho del plan:**
+- Paso 1, medir antes de arreglar (PR #59): billetera al empezar, mejora más barata y `scoreV` en cada pelea. El receptor dice cuántos guardó, y la salida al menú se verificó de punta a punta.
+- Paso 2, pruebas estables (PR #60): límite de 60 s por prueba.
+- Paso 4, pruebas de escenas (PR #61, ADR 0055): `npm run escenas`, también en cada PR.
+
+**Próximo, desde el 17 de noviembre de 2026:**
+1. **Arreglar Centro de Lima** (paso 3). Para entonces habrá una semana de partidas con la billetera, publicada el 10 de noviembre.
+   - Correr `npm run datos` y leer la sección "Derrotas y billetera" del informe.
+   - Si al que pierde le alcanzaba para una mejora, un aviso en la derrota con la mejora que puede comprar y un botón al taller.
    - Si no le alcanzaba, una ganancia mínima al perder o multas que no dejen la ganancia en cero.
-   - Decide el dueño según los datos.
-4. **Pruebas de escenas** (PR #61, hecho): `npm run escenas`, también en cada PR.
-5. **Bloque E · Balance con datos**, con unas 150 peleas o más:
+   - Si hay pocas derrotas con billetera, esperar unos días más antes de decidir.
+   - Decide el dueño según los datos. Las pruebas de escenas cubren resultados y taller, así que el cambio queda protegido.
+
+**Mientras tanto, lo que no depende de los datos:**
+2. **V04 de la novena auditoría (chico):** al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s. Hay que guardar el instante efectivo al pausar y retomar desde ahí.
+3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
+
+**Después:**
+4. **Bloque E · Balance con datos**, con unas 150 peleas o más (al 10 de noviembre van 72):
    - Multas más suaves en Miraflores, sobre todo en difícil.
    - Endurecer un poco el final, desde Javier Prado.
    - Mostrar "1 falta perdonada" en resultados.
    - De auditorías anteriores: la vida del jefe en el modo por toque, el aviso del enrosque y explicar en el taller que las mejoras de aguante alargan la pelea.
    - Mantener la fórmula de puntaje v2 y el ranking local.
-6. **Iteraciones 2 a 4 de la auditoría UX en iPhone 15**, solo en vertical. Necesitan decisiones del dueño y una prueba con jugadores nuevos (Noam y sus amigos sirven):
-   - Introducción opcional de tres pasos: mover, atacar por la derecha y soltar ante una embestida.
+5. **Iteraciones 2 a 4 de la auditoría UX en iPhone 15**, solo en vertical. Necesitan decisiones del dueño y una prueba con jugadores nuevos (Noam y sus amigos sirven):
+   - Introducción opcional de tres pasos: mover, atacar por la derecha y soltar ante una embestida, que es el 43 % del daño en San Isidro.
    - Poder jugar como JUGADOR y ponerse nombre después.
    - Textos esenciales más grandes (hoy de 10 a 13 px) y una señal de punto ciego más clara.
    - Derrota resumida, con "Ver detalle".
-7. **Cuando haya hueco:**
-   - V04 de la novena auditoría: al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s.
-   - El tamaño del paquete, si más teléfonos como el primer Samsung (p95 de 25 ms) confirman que va lento.
+6. **Cuando haya hueco:** el tamaño del paquete, si más teléfonos como el primer Samsung (p95 de 25 ms) confirman que va lento.
 
 ### En pausa por decisión del dueño
 - **Piloto de arte de Costa Verde** (especificación de mejora gráfica, 25 de octubre): falta decidir quién produce el arte. Debe mostrar una mejora visible sobre el nivel B actual, y el esfuerzo de 25 a 45 jornadas se vuelve a estimar al cerrar el piloto.
@@ -137,7 +146,8 @@ Hechos, con su ADR:
 - Gráficos nivel B (0040 a 0044).
 - Instrumentos de diagnóstico (0045 a 0047).
 - Créditos (0048 a 0050, 0052 y 0053).
-- Datos anónimos (0051, con V01 a V03 de la novena auditoría y el informe, PR C).
+- Datos anónimos (0051, con V01 a V03 de la novena auditoría, el informe y la billetera).
+- Pruebas de escenas (0055).
 - UX vertical (0054).
 
 Las auditorías están en `docs/auditorias/`, de la segunda a la novena, más la de UX en iPhone 15 y las capturas consolidadas del 30 de octubre.
