@@ -1,6 +1,6 @@
 # 0050. Créditos: saltar sin chocar con el manejo, y un solo reloj con la música
 
-**Estado:** aceptada (29 de octubre de 2026). Hallazgos U01 y U02 de la octava auditoría (`docs/auditorias/2026-10-29-octava-auditoria.md`) sobre la ADR 0049.
+**Estado:** aceptada (29 de octubre de 2026), con el reloj ajustado por la ADR 0057. Hallazgos U01 y U02 de la octava auditoría (`docs/auditorias/2026-10-29-octava-auditoria.md`) sobre la ADR 0049.
 
 ## Contexto
 - **U01:** al volver a ver los créditos, cualquier toque los saltaba, también los del deck táctil (volante, acelerador, claxon), y la barra espaciadora era a la vez claxon y salto. Querer manejar en el desfile podía mandar al poscrédito. Poder saltar al volver a verlos es una decisión de diseño del dueño y se mantiene. Lo que se corrige es que una acción de manejo no salte.

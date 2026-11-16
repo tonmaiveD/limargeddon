@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, isTap, RETURN_GUARD_MS, advance, newClock, AUDIO_STALL_S, partAt, skipTo, timeline, wrap } from '../src/core/credits';
-import { CREDITS, medleyClock, medleySeconds, sectionSeconds } from '../src/core/audio/medley';
+import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, isTap, RETURN_GUARD_MS, advance, newClock, partAt, resumed, skipTo, timeline, wrap, type Clock } from '../src/core/credits';
+import { CREDITS, medleyClock, medleyPosition, medleySeconds, sectionSeconds, sectionSteps } from '../src/core/audio/medley';
 import { creditsSeen, markCreditsSeen, resetProgress } from '../src/core/save';
 import { STAGES, STAGE_ORDER } from '../src/stages';
 
@@ -96,12 +96,72 @@ describe('Créditos', () => {
     for (let i = 0; i < 60; i++) c = advance(c, 1000 / 60, i / 60); // un segundo con la música andando
     const t1 = c.t;
     for (let i = 0; i < 120; i++) c = advance(c, 1000 / 60, 1); // el audio se queda en 1 s durante 2 s
-    expect(c.t).toBeGreaterThan(t1 + 2 - AUDIO_STALL_S - 0.05);
-    expect(c.t).toBeLessThan(t1 + 2.01);
+    expect(c.t).toBeCloseTo(t1 + 2, 6);
+  });
+
+  /*
+   * Auditoría del 16 de noviembre, C01: tras un corte del audio con la página visible, la imagen esperaba a que la
+   * música la alcanzara, tanto como duró el corte. Simula la escena a 60 cuadros por segundo: el audio corre con el
+   * tiempo real, se corta y vuelve desde donde quedó, y cuando el reloj pide reubicar la música (resync) salta a la
+   * imagen, como hace Sfx.seek.
+   */
+  function run(cuts: [number, number][], kind: 'nulo' | 'quieto') {
+    const fps = 60, frame = 1 / fps, ends = new Map<number, number>();
+    let c: Clock = newClock(), audio = 0, wall = 0, still = 0, maxStill = 0;
+    while (c.t < CREDITS_SECONDS && wall < 300) {
+      // el corte empieza cuando la imagen llega al instante pedido y dura d segundos de tiempo real
+      for (const [at, d] of cuts) if (!ends.has(at) && c.t >= at) ends.set(at, wall + d);
+      const cut = [...ends.values()].some((end) => wall < end);
+      if (!cut) audio += frame;
+      const prev = c.t;
+      c = advance(c, 1000 / fps, cut && kind === 'nulo' ? null : audio);
+      if (c.resync) audio = c.t;
+      wall += frame;
+      if (c.t <= prev) { still += frame; maxStill = Math.max(maxStill, still); } else still = 0;
+      expect(c.t).toBeGreaterThanOrEqual(prev);
+    }
+    return { maxStill, total: wall };
+  }
+
+  it.each(['nulo', 'quieto'] as const)('con cortes de audio de 5, 20 y 60 s (reloj %s), la imagen no espera a la música', (kind) => {
+    const { maxStill, total } = run([[10, 5], [35, 20], [65, 60]], kind);
+    expect(maxStill).toBeLessThanOrEqual(0.25);
+    expect(total).toBeLessThanOrEqual(84.5);
+  });
+
+  // novena auditoría, V04: al volver de una pausa la imagen saltaba entre 0,2 y 0,3 s
+  it.each([10, 35, 65])('al volver de una pausa de 30 s en el segundo %i, la imagen sigue desde el mismo instante', (at) => {
+    let c = newClock();
+    while (c.t < at) c = advance(c, 1000 / 60, c.t);
+    const paused = c.t;
+    c = resumed(c); // la escena retoma: el primer cuadro mide toda la pausa
+    c = advance(c, 30000, paused); // y la música se reubicó en el mismo instante
+    expect(Math.abs(c.t - paused)).toBeLessThanOrEqual(0.15);
+    const next = advance(c, 1000 / 60, paused + 1 / 60);
+    expect(next.t - paused).toBeLessThanOrEqual(0.15);
+  });
+
+  it('la música se reubica en el paso que sigue, sin volver a tocar uno que ya sonó', () => {
+    for (const s of [0, 3.3, 10, 35.71, 65, POST_START - 0.2]) {
+      const p = medleyPosition(CREDITS, s)!;
+      expect(p.step).toBeLessThan(sectionSteps(CREDITS.sections[p.sec]));
+      expect(p.wait).toBeGreaterThanOrEqual(0);
+      // el paso agendado cae justo en s más la espera: nada anterior a s
+      expect(medleyClock(CREDITS, p.sec, p.step, 100 + p.wait, 100)).toBeCloseTo(s, 9);
+    }
+    // después del último paso del cierre ya no queda nada por sonar
+    expect(medleyPosition(CREDITS, POST_START - 0.01)).toBeNull();
+    expect(medleyPosition(CREDITS, POST_START + 1)).toBeNull();
   });
 
   it('un salto largo (el juego estuvo detenido) no se come los créditos', () => {
     expect(advance(newClock(10), 5000, null).t).toBeCloseTo(10.25, 9);
+  });
+
+  it('si la música va adelantada (el teléfono dibujó pocos cuadros), la imagen la alcanza', () => {
+    const c = advance(advance(newClock(), 16, 0), 1000, 1); // un cuadro de un segundo, con el audio en 1 s
+    expect(c.t).toBeCloseTo(1, 6);
+    expect(c.resync).toBe(false);
   });
 
   it('el reloj de la música sale de la sección y el paso agendados', () => {

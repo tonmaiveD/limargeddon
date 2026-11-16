@@ -69,23 +69,30 @@ export const isTap = (down: Press | null, up: Press, guardUntil: number): boolea
   !!down && up.at - down.at <= TAP_MS && Math.hypot(up.x - down.x, up.y - down.y) <= TAP_MOVE && down.at >= guardUntil;
 
 /*
- * Reloj de la narración (octava auditoría, U02, y ADR 0052). Mientras suena el popurrí, la imagen sigue al reloj de la
- * música, así las partes coinciden con sus secciones aunque el teléfono dibuje pocos cuadros. Sin música (sin audio, o
- * ya en el poscrédito) avanza con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo; solo un salto de
- * más de un cuarto de segundo se recorta, porque ahí el juego estuvo detenido. Si el reloj del audio deja de avanzar
- * (hay navegadores que lo dan por activo sin que corra), a los 0,4 s la imagen sigue con el tiempo real: nunca se
- * queda esperando a una música que no suena.
+ * Reloj de la narración (octava auditoría U02, ADR 0052 y ADR 0057). La imagen nunca espera a la música: siempre avanza
+ * con el tiempo real del cuadro, sin el tope de 50 ms que usa el manejo. Solo un salto de más de un cuarto de segundo se
+ * recorta, porque ahí el juego estuvo detenido.
+ * - Mientras suena el popurrí, la imagen se acomoda suavemente al reloj de la música (entre la mitad y una vez y media de
+ *   la velocidad normal), así las partes coinciden con sus secciones sin detenerse nunca.
+ * - Si la música va más de medio segundo adelante (el teléfono dibujó pocos cuadros), la imagen salta hasta ella.
+ * - Si va más de medio segundo atrás (el audio se cortó y volvió desde donde quedó), la imagen sigue y pide reubicar la
+ *   música en su instante (`resync`, que la escena resuelve con Sfx.seek). Antes la imagen esperaba tanto como había
+ *   durado el corte (auditoría del 16 de noviembre, C01).
+ * - Sin música, o con su reloj quieto (hay navegadores que lo dan por activo sin que corra), solo cuenta el tiempo real.
  */
-export const AUDIO_STALL_S = 0.4;
-export interface Clock { t: number; audio: number | null; stall: number }
-export const newClock = (t = 0): Clock => ({ t, audio: null, stall: 0 });
+export const RESYNC_S = 0.5, SLEW = 0.5;
+export interface Clock { t: number; audio: number | null; resync: boolean; fresh: boolean }
+export const newClock = (t = 0): Clock => ({ t, audio: null, resync: false, fresh: false });
+// Al volver de una pausa: el primer cuadro mide toda la pausa y no cuenta, así la imagen sigue desde donde quedó (V04).
+export const resumed = (c: Clock): Clock => ({ ...c, audio: null, resync: false, fresh: true });
 export function advance(c: Clock, rawMs: number, audioT: number | null): Clock {
-  const wall = Math.min(0.25, Math.max(0, rawMs) / 1000);
-  if (audioT === null || c.t >= POST_START) return { t: c.t + wall, audio: null, stall: 0 };
-  const moved = c.audio === null || audioT > c.audio + 1e-6;
-  const stall = moved ? 0 : c.stall + wall;
-  if (stall > AUDIO_STALL_S) return { t: c.t + wall, audio: audioT, stall };
-  return { t: Math.max(c.t, audioT), audio: audioT, stall };
+  const wall = c.fresh ? 0 : Math.min(0.25, Math.max(0, rawMs) / 1000), t = c.t + wall;
+  if (audioT === null || c.t >= POST_START) return { t, audio: null, resync: false, fresh: false };
+  const moved = c.audio === null || audioT > c.audio + 1e-6, drift = audioT - t;
+  if (!moved) return { t, audio: audioT, resync: false, fresh: false };
+  if (drift > RESYNC_S) return { t: audioT, audio: audioT, resync: false, fresh: false };
+  if (drift < -RESYNC_S) return { t, audio: audioT, resync: true, fresh: false };
+  return { t: t + Math.max(-SLEW * wall, Math.min(SLEW * wall, drift)), audio: audioT, resync: false, fresh: false };
 }
 
 // Corta un texto en líneas que caben en el ancho dado, según la función que mide.
