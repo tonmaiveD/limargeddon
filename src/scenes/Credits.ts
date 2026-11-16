@@ -13,7 +13,7 @@ import { ART_SCALE } from '../core/art/vehicles';
 import { C, clamp, hash } from '../core/util';
 import { creditsSeen, getGarage, markCreditsSeen } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
-import { CREDITS_SECONDS, POST_START, RETURN_GUARD_MS, TEXT, advance, canSkip, castFor, isSkipInput, isTap, newClock, partAt, skipTo, wrap, type Clock, type Part, type Press } from '../core/credits';
+import { CREDITS_SECONDS, POST_START, RETURN_GUARD_MS, TEXT, advance, canSkip, castFor, isSkipInput, isTap, newClock, partAt, resumed, skipTo, wrap, type Clock, type Part, type Press } from '../core/credits';
 import { frameMs } from '../core/frames';
 import { STAGES, TEST_MODE } from '../stages';
 
@@ -87,10 +87,14 @@ export class CreditsScene extends Phaser.Scene {
 
   private paused = false;
   private clock: Clock = newClock();
+  private lastSeek = 0;
   private setPaused(v: boolean): void {
     if (v === this.paused || this.finished) return;
     this.paused = v; Sfx.hold(v);
-    if (v) Object.assign(keys, newKeys()); // sin controles pegados al volver
+    if (v) { Object.assign(keys, newKeys()); return; } // sin controles pegados al volver
+    // al seguir, imagen y música retoman desde el mismo instante en que se pausó (V04, ADR 0057)
+    this.clock = resumed(this.clock);
+    if (this.t < POST_START) Sfx.seek(this.t);
   }
   private onVisibility = () => { if (!document.hidden) this.onReturn(); this.setPaused(document.hidden); };
   // al volver la pantalla al juego, los toques del momento son del sistema (cerrar el centro de control), no para saltar
@@ -143,7 +147,12 @@ export class CreditsScene extends Phaser.Scene {
     // el manejo y el avance de la pista usan un paso con tope; la narración, el reloj de la música (U02)
     const frozen = this.d.at !== undefined, paused = this.paused, dt = frozen || paused ? 0 : Math.min(0.05, delta / 1000);
     if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
-    else if (!paused) { Sfx.tick(); this.clock = advance(this.clock, frameMs(this.game.loop), Sfx.medleyTime()); this.t = this.clock.t; }
+    else if (!paused) {
+      Sfx.tick(); this.clock = advance(this.clock, frameMs(this.game.loop), Sfx.medleyTime()); this.t = this.clock.t;
+      // la música quedó atrás tras un corte del audio: se reubica en la imagen, que no la espera (C01, ADR 0057)
+      const now = performance.now();
+      if (this.clock.resync && now - this.lastSeek > 1000) { this.lastSeek = now; Sfx.seek(this.t); }
+    }
     this.scroll += SPEED * dt; this.tico.t = this.t;
     if (this.t >= POST_START && !this.seenMarked && !frozen) { this.seenMarked = true; if (!TEST_MODE) markCreditsSeen(); this.skippable = true; }
     if (this.t >= CREDITS_SECONDS) { this.finish(); return; }

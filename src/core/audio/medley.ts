@@ -191,3 +191,23 @@ export function medleyClock(m: Medley, sec: number, step: number, nextT: number,
   const s = m.sections[Math.min(sec, m.sections.length - 1)].song;
   return t + step * (60 / s.bpm / s.sub) - (nextT - now);
 }
+
+/*
+ * Dónde reubicar el popurrí para que suene desde el segundo s (ADR 0057): la sección, el primer paso que todavía no
+ * empezó y cuánto falta para él. Nunca vuelve a un paso anterior a s, así no se repite una nota que ya sonó. null si s ya
+ * pasó el final del popurrí.
+ */
+export function medleyPosition(m: Medley, s: number): { sec: number; step: number; wait: number } | null {
+  let rem = Math.max(0, s), wait = 0;
+  for (let sec = 0; sec < m.sections.length; sec++) {
+    const S = m.sections[sec], len = sectionSeconds(S);
+    if (rem < len) {
+      const d = 60 / S.song.bpm / S.song.sub, step = Math.ceil(rem / d - 1e-9);
+      if (step < sectionSteps(S)) return { sec, step, wait: wait + step * d - rem };
+      wait += len - rem; rem = 0; // el paso siguiente es el primero de la sección que viene
+      continue;
+    }
+    rem -= len;
+  }
+  return null;
+}

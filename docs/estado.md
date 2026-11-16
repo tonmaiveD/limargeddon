@@ -99,7 +99,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 **Mientras tanto, lo que no depende de los datos:**
 - **Aparecer en Google** (ADR 0056, PR #63): título, descripción, imagen para compartir, datos estructurados, `acerca.html` y `sitemap.xml`. Con la etiqueta de verificación de Search Console. Después del deploy se verifica, se envía el mapa del sitio y se pide la indexación.
-2. **V04 de la novena auditoría (chico):** al volver de una pausa, la imagen de los créditos salta entre 0,2 y 0,3 s. Hay que guardar el instante efectivo al pausar y retomar desde ahí.
+2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, C01 y V04, ADR 0057) va en el PR #64.
 3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
 
 **Después:**
@@ -145,7 +145,7 @@ Hechos, con su ADR:
 - Auditorías 3 y 4: claridad del combate (0032), taller que explica (0033), clímax del jefe final (0034), bloques A a D y F (0035 a 0039).
 - Gráficos nivel B (0040 a 0044).
 - Instrumentos de diagnóstico (0045 a 0047).
-- Créditos (0048 a 0050, 0052 y 0053).
+- Créditos (0048 a 0050, 0052, 0053 y 0057).
 - Datos anónimos (0051, con V01 a V03 de la novena auditoría, el informe y la billetera).
 - Pruebas de escenas (0055).
 - UX vertical (0054).

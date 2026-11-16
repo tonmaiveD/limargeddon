@@ -1,6 +1,6 @@
 # 0052. Créditos que no se congelan en iPad
 
-**Estado:** aceptada (30 de octubre de 2026). Corrige la pausa de los créditos de la ADR 0050.
+**Estado:** aceptada (30 de octubre de 2026). Corrige la pausa de los créditos de la ADR 0050. La espera de 0,4 s con el audio trabado la reemplaza la ADR 0057.
 
 ## Contexto
 El dueño vio que, después de ganar la Línea Amarilla, los créditos y el poscrédito se quedaban congelados en su iPad, con la música cortada. La ADR 0050 pausaba los créditos al perder el foco y los retomaba al recuperarlo. En iPad, Safari muchas veces avisa la pérdida de foco (una notificación, el dock, el centro de control) y no avisa cuando vuelve. La pausa no se levantaba nunca, no se veía en pantalla y un toque no la retomaba, así que parecía congelado. Se reprodujo en Chrome: con la pérdida de foco simulada, los créditos quedaban detenidos y sin música aunque se tocara la pantalla.

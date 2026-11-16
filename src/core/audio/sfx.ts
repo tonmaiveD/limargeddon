@@ -2,7 +2,7 @@
  * distrito (ADR 0038) toca las canciones de songs.ts con el mismo secuenciador, y el popurrí de los créditos (ADR 0048)
  * encadena secciones de medley.ts. */
 import { DEFAULT_SONG, SONGS, type Drum, type Song, type Voice } from './songs';
-import { MEDLEYS, medleyClock, sectionSteps, type Medley } from './medley';
+import { MEDLEYS, medleyClock, medleyPosition, sectionSteps, type Medley } from './medley';
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
@@ -15,6 +15,16 @@ let on = true, playing = false, step = 0, nextT = 0, song: Song = SONGS[DEFAULT_
 // popurrí en curso: sección actual y transposición; al terminar la última sección la música se detiene sola
 let medley: Medley | null = null, sec = 0, shiftN = 0, held = false;
 const stepDur = () => 60 / song.bpm / song.sub;
+
+// Las notas de la música se agendan unos 150 ms antes de sonar. Al pausar o reubicar el popurrí, las ya agendadas que
+// todavía no sonaron se callan cambiando el bus de la música por uno nuevo (ADR 0057), así nada suena dos veces.
+function newBus(): void {
+  if (!ac) return;
+  const old = music;
+  old.gain.setTargetAtTime(0, ac.currentTime, 0.01);
+  setTimeout(() => { try { old.disconnect(); } catch { /* ya desconectado */ } }, 300);
+  music = ac.createGain(); music.gain.value = 0.2; music.connect(master);
+}
 
 function init(): void {
   if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
@@ -118,11 +128,21 @@ export const Sfx = {
   // segundos del popurrí que ya sonaron, según el reloj del audio; null si no hay popurrí sonando o el audio no corre
   // (sin audio, o suspendido por el navegador: ahí la imagen sigue con su propio reloj y no se queda congelada)
   medleyTime(): number | null { return medley && playing && ac && ac.state === 'running' ? medleyClock(medley, sec, step, nextT, ac.currentTime) : null; },
-  // detiene la música donde va y la retoma desde ahí (pausa de los créditos al salir de la app)
+  // detiene la música donde va y la retoma desde ahí (pausa de los créditos al salir de la app); lo agendado se calla
   hold(v: boolean): void {
-    if (v) { held = playing; playing = false; return; }
+    if (v) { held = playing; playing = false; if (held) newBus(); return; }
     if (held && ac) { playing = true; nextT = ac.currentTime + 0.05; }
     held = false;
+  },
+  // reubica el popurrí para que suene desde el segundo s, desde el paso que sigue (ADR 0057); fuera de un popurrí no
+  // hace nada, y pasado su final lo deja terminado
+  seek(s: number): void {
+    if (!ac || !medley) return;
+    const p = medleyPosition(medley, s);
+    newBus(); held = false;
+    if (!p) { playing = false; return; }
+    sec = p.sec; step = p.step; song = medley.sections[sec].song; shiftN = medley.sections[sec].transpose ?? 0;
+    nextT = ac.currentTime + p.wait; playing = true;
   },
   engine(level: number): void {
     if (!ac) return; const t = ac.currentTime;
