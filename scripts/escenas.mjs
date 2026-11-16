@@ -5,6 +5,7 @@
  * - Menú, pelea, resultados, taller y menú otra vez, con la billetera y el avance guardados.
  * - Derrota y revancha, y salir al menú desde la pausa.
  * - Línea Amarilla, créditos y resultados: la primera vez no se saltan, después sí, y "Ver créditos" vuelve al menú.
+ * - Créditos recargados a medias, un error en un cuadro de los créditos y el audio que vuelve solo (ADR 0058).
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
