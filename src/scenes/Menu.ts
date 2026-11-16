@@ -6,7 +6,7 @@ import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../c
 import { roadWarp } from '../core/road';
 import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { FIRE_MODES, type FireMode } from '../core/config';
-import { DEFAULT_NAME, creditsSeen, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
+import { DEFAULT_NAME, creditsOpened, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
 import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
 import { Sfx } from '../core/audio/sfx';
@@ -61,9 +61,9 @@ export class MenuScene extends Phaser.Scene {
     label();
     name.onclick = () => openName(false, () => { label(); this.showStage(); }); // las medallas son del jugador (auditoría R04)
     document.getElementById('toRanking')!.onclick = () => openRanking();
-    // créditos (ADR 0049): el botón aparece cuando ya se vieron completos una vez, y siempre en el modo prueba
+    // créditos (ADR 0049 y 0058): el botón aparece desde que empezaron una vez, y siempre en el modo prueba
     const credits = document.getElementById('toCredits')!;
-    credits.hidden = !(creditsSeen() || TEST_MODE);
+    credits.hidden = !(creditsOpened() || TEST_MODE);
     credits.onclick = () => {
       Sfx.init(); document.getElementById('menu')!.hidden = true;
       const data: CreditsData = { done: (cs) => cs.scene.start('Menu') };

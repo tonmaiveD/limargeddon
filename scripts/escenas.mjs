@@ -47,7 +47,9 @@ async function connect(wsUrl) {
 /* ---------- ayudas dentro de la página ---------- */
 
 // Se cargan en cada página nueva. El juego corre solo; `adelantar` además da pasos extra para no esperar en tiempo real.
+// Guarda el AudioContext del juego en window.__ac, para cortarlo en las pruebas.
 const HELPERS = `
+{ const A = window.AudioContext; if (A) window.AudioContext = class extends A { constructor(...a) { super(...a); window.__ac = this; } }; }
 window.__t = {
   scenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
   visible: (id) => { const e = document.getElementById(id); return !!e && !e.hidden && !e.closest('[hidden]'); },
@@ -152,6 +154,44 @@ const TOURS = {
     await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
     await run(p, '(__t.enter(), !__t.scenes().includes("Credits") && __t.visible("end"))', 20000, 'saltar los créditos lleva a los resultados');
     ok(true, 'saltar los créditos lleva a los resultados');
+  },
+
+  async 'créditos empezados y recargados: el menú ofrece "Ver créditos" y siguen sin saltarse'(p) {
+    await fresh(p, SAVE({ unlocked: 10, settings: { stageId: 'linea-amarilla' } }));
+    await play(p);
+    await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
+    await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
+    await run(p, 'game.scene.getScene("Credits").t >= 10', 30000, 'diez segundos de créditos');
+    await p.send('Page.reload');
+    await sleep(500);
+    await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
+    ok(await p.page('return __t.visible("toCredits")'), 'tras recargar a los 10 s, el menú ofrece "Ver créditos"');
+    await p.page('__t.click("toCredits"); return true');
+    await waitScene(p, 'Credits');
+    await run(p, 'game.scene.getScene("Credits").t >= 1', 20000, 'los créditos corren');
+    await p.page('__t.enter(); return true');
+    await sleep(300);
+    ok((await scenes(p)).includes('Credits'), 'sin haberlos visto completos, siguen sin poder saltarse');
+  },
+
+  async 'un error en el dibujo de los créditos lleva a los resultados'(p) {
+    await fresh(p, SAVE({ unlocked: 10, settings: { stageId: 'linea-amarilla' } }));
+    await play(p);
+    await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
+    await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
+    await p.page('const C = game.scene.getScene("Credits"); const boom = () => { throw new Error("prueba de la red de seguridad") }; C.drawTakeoff = C.drawDistrict = C.drawClosing = C.drawPost = boom; return true');
+    await run(p, '!__t.scenes().includes("Credits") && __t.visible("end")', 20000, 'los resultados tras el error');
+    ok(true, 'un error en un cuadro de los créditos termina la escena y muestra los resultados');
+  },
+
+  async 'el audio cortado se reanuda solo al volver a la página'(p) {
+    await fresh(p, SAVE({ unlocked: 10, credits: true }));
+    await p.page('__t.click("toCredits"); return true');
+    await waitScene(p, 'Credits');
+    await until(() => p.page('return window.__ac?.state === "running"'), 10000, 'el audio suena');
+    await p.page('await __ac.suspend(); dispatchEvent(new PageTransitionEvent("pageshow")); return true');
+    await until(() => p.page('return __ac.state === "running"'), 5000, 'el audio se reanuda al volver');
+    ok(true, 'al volver a la página, el audio suspendido se reanuda sin tocar nada');
   },
 
   async '"Ver créditos" desde el menú vuelve al menú'(p) {
