@@ -6,6 +6,7 @@
  * - Derrota y revancha, y salir al menú desde la pausa.
  * - Línea Amarilla, créditos y resultados: la primera vez no se saltan, después sí, y "Ver créditos" vuelve al menú.
  * - Créditos recargados a medias, un error en un cuadro de los créditos y el audio que vuelve solo (ADR 0058).
+ * - Pausa en los créditos con toques reales, "Continuar" sin saltar y "Ver después" a los resultados (ADR 0059).
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
@@ -61,6 +62,8 @@ window.__t = {
   stage: () => { const S = game.scene.getScene('Stage'); removeEventListener('blur', S.onBlur); S.G.hintsOn = false; return S; },
   adelantar: (n) => { const t0 = performance.now(); for (let i = 0; i < n; i++) game.step(t0 + i * 16.7, 16.7); },
   enter: () => dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })),
+  key: (key) => dispatchEvent(new KeyboardEvent('keydown', { key })),
+  t: () => game.scene.getScene('Credits').t,
 };`;
 
 /* ---------- recorridos ---------- */
@@ -80,6 +83,18 @@ const scenes = (p) => p.page('return __t.scenes()');
 const waitScene = (p, key, ms = 15000) => until(async () => (await scenes(p)).includes(key), ms, `la escena ${key}`);
 // avanza el juego hasta que se cumpla la condición de la página
 const run = (p, cond, ms, what) => until(() => p.page(`__t.adelantar(30); return ${cond}`), ms, what);
+
+// un toque real con el dedo en el centro del elemento, como en el teléfono: pasa por pointerdown, pointerup y click
+async function tap(p, id) {
+  const [x, y] = await p.page(`const e = document.getElementById(${JSON.stringify(id)}); if (!e || e.closest('[hidden]')) throw new Error('no se ve #${id}');
+    const b = e.getBoundingClientRect(); return [b.x + b.width / 2, b.y + b.height / 2]`);
+  await p.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+  await sleep(60);
+  await p.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await sleep(150 * SLOW);
+}
+// la imagen de los créditos: ¿avanza en tiempo real?
+const creditsMove = async (p) => { const a = await p.page('return __t.t()'); await sleep(400 * SLOW); return (await p.page('return __t.t()')) > a; };
 
 async function play(p) {
   await p.page('__t.click("playBtn"); return true');
@@ -145,6 +160,43 @@ const TOURS = {
     await p.page('__t.enter(); return true');
     await sleep(300);
     ok((await scenes(p)).includes('Credits'), 'la primera vez los créditos no se saltan');
+    // la pausa y "Ver después" están también la primera vez, y salir no los da por vistos (ADR 0059)
+    await tap(p, 'pauseBtn');
+    ok(await p.page('return __t.visible("pause") && __t.scenes().includes("Credits")'), 'la primera vez los créditos también se pausan');
+    await tap(p, 'quit');
+    await until(() => p.page('return !__t.scenes().includes("Credits") && __t.visible("end")'), 10000, 'los resultados tras "Ver después"');
+    ok(await p.page('return __t.save().credits !== true && __t.save().creditsOpened === true'), '"Ver después" la primera vez no los da por vistos');
+  },
+
+  async 'pausa en los créditos: continuar sin saltar y "Ver después" a los resultados'(p) {
+    await fresh(p, SAVE({ unlocked: 10, credits: true, settings: { stageId: 'linea-amarilla' } }));
+    await play(p);
+    await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
+    await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
+    // ya vistos, así un toque que contara como salto se notaría
+    await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
+    const box = await p.page(`const b = document.getElementById('pauseBtn').getBoundingClientRect(), c = game.canvas.getBoundingClientRect(), k = c.height / 640;
+      return { w: b.width, h: b.height, top: (b.top - c.top) / k }`);
+    ok(box.w >= 44 && box.h >= 44, `el botón de pausa mide 44 px o más (${box.w}×${box.h})`);
+    ok(box.top > 140, 'el botón de pausa queda lejos de la ficha de reparto, arriba');
+    const before = await p.page('return __t.t()');
+    await tap(p, 'pauseBtn');
+    ok(await p.page(`return __t.visible("pause") && __t.scenes().includes("Credits") && __t.t() - ${before} < 2`), 'el botón pausa los créditos sin saltarlos');
+    ok(!(await creditsMove(p)), 'en pausa la imagen no avanza');
+    ok(await p.page('return document.getElementById("quit").textContent === "Ver después"'), 'el panel ofrece "Ver después"');
+    const t0 = await p.page('return __t.t()');
+    await tap(p, 'resume');
+    ok(await p.page(`return !__t.visible("pause") && __t.scenes().includes("Credits") && __t.t() - ${t0} < 2`), '"Continuar" sigue sin saltar');
+    ok(await creditsMove(p), 'al continuar la imagen avanza');
+    ok(Math.abs((await p.page('return __t.t()')) - t0) < 3, 'al continuar sigue desde el mismo punto');
+    await p.page('__t.key("p"); return true');
+    ok(await p.page('return __t.visible("pause")'), 'P pausa los créditos');
+    await p.page('__t.key("Escape"); return true');
+    ok(await p.page('return !__t.visible("pause")'), 'Escape los sigue');
+    await tap(p, 'pauseBtn');
+    await tap(p, 'quit');
+    await until(() => p.page('return !__t.scenes().includes("Credits") && __t.visible("end")'), 10000, 'los resultados tras "Ver después"');
+    ok(await p.page('return !__t.visible("pauseBtn") && document.getElementById("quit").textContent === "Salir al menú"'), '"Ver después" lleva a los resultados y deja la pausa de la pelea como estaba');
   },
 
   async 'créditos ya vistos: se saltan y llevan a los resultados'(p) {

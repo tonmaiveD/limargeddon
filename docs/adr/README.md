@@ -62,3 +62,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0056](0056-aparecer-en-buscadores.md) | Aparecer en Google y en los enlaces compartidos | Aceptada |
 | [0057](0057-reloj-creditos-sin-esperar.md) | El reloj de los créditos no espera a la música | Aceptada |
 | [0058](0058-creditos-acceso-y-red.md) | Acceso a los créditos y red de seguridad | Aceptada |
+| [0059](0059-pausa-en-creditos.md) | Pausa en los créditos | Aceptada |
