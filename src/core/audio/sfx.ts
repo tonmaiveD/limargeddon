@@ -26,8 +26,15 @@ function newBus(): void {
   music = ac.createGain(); music.gain.value = 0.2; music.connect(master);
 }
 
+// Reanuda el audio si el navegador lo suspendió o lo interrumpió. Safari en iOS usa también el estado "interrupted"
+// (llamadas, Siri), que no figura en los tipos (auditoría del 16 de noviembre, C04).
+function wake(): void {
+  const state = ac?.state as string | undefined;
+  if (ac && state !== 'running' && state !== 'closed') ac.resume().catch(() => { /* lo reintenta el próximo toque */ });
+}
+
 function init(): void {
-  if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+  if (ac) { wake(); return; }
   try {
     const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ac = new Ctor();
@@ -40,6 +47,9 @@ function init(): void {
   engFilt = ac.createBiquadFilter(); engFilt.type = 'lowpass'; engFilt.frequency.value = 320;
   engGain = ac.createGain(); engGain.gain.value = 0;
   eng.connect(engFilt); engFilt.connect(engGain); engGain.connect(master); eng.start();
+  // al volver a la página se reanuda solo, sin esperar a que el jugador toque algo
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+  addEventListener('pageshow', wake);
 }
 
 function tone(f: number, dur: number, type: OscillatorType = 'square', vol = 0.25, slide: number | null = null, when = 0, dest: AudioNode = master): void {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CREDITS_SECONDS, POST_START, TEXT, canSkip, castFor, isSkipInput, isTap, RETURN_GUARD_MS, advance, newClock, partAt, resumed, skipTo, timeline, wrap, type Clock } from '../src/core/credits';
 import { CREDITS, medleyClock, medleyPosition, medleySeconds, sectionSeconds, sectionSteps } from '../src/core/audio/medley';
-import { creditsSeen, markCreditsSeen, resetProgress } from '../src/core/save';
+import { creditsOpened, creditsSeen, markCreditsOpened, markCreditsSeen, resetProgress } from '../src/core/save';
 import { STAGES, STAGE_ORDER } from '../src/stages';
 
 /* Créditos de la Línea Amarilla del Terror (ADR 0049). */
@@ -169,6 +169,17 @@ describe('Créditos', () => {
     // sección 1, paso 4 agendado para dentro de 0,1 s: suenan s0 + 4 pasos - 0,1
     expect(medleyClock(CREDITS, 1, 4, 10.1, 10)).toBeCloseTo(s0 + 4 * step - 0.1, 9);
     expect(medleyClock(CREDITS, 0, 0, 5.05, 5)).toBeCloseTo(-0.05, 9);
+  });
+
+  // auditoría del 16 de noviembre, C02a: quien los dejó a medias puede volver a verlos, pero no saltarlos
+  it('empezados una vez, el menú los ofrece aunque no se hayan visto completos', () => {
+    expect(creditsOpened()).toBe(false);
+    markCreditsOpened();
+    expect(creditsOpened()).toBe(true);
+    expect(creditsSeen()).toBe(false);
+    expect(canSkip(creditsSeen(), false)).toBe(false);
+    resetProgress();
+    expect(creditsOpened()).toBe(true);
   });
 
   it('quedan vistos al guardar, y empezar de nuevo no lo borra', () => {

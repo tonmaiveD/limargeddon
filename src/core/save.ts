@@ -41,10 +41,11 @@ export interface Settings {
 // scoreCtx: contexto de cada récord; medals: medallas de cada jugador por etapa (ADR 0037)
 // hints: ayudas ya leídas, como "etapa|modo|texto" (ADR 0039; reemplaza a `tutorial`, que marcaba la etapa entera)
 // credits: true cuando los créditos se vieron completos una vez (ADR 0049); desde ahí se pueden saltar
+// creditsOpened: true desde que empezaron una vez (ADR 0058); desde ahí el menú ofrece "Ver créditos"
 interface SaveV1 {
   v: 1; fights: FightRecord[]; settings?: Settings; progress?: { unlocked: number }; garage?: { wallet: number; levels: Record<string, number>; goal?: string };
   scores?: Record<string, Record<string, number>>; scoreCtx?: Record<string, Record<string, ScoreCtx>>;
-  medals?: Record<string, Record<string, string[]>>; tutorial?: string[]; hints?: string[]; credits?: boolean;
+  medals?: Record<string, Record<string, string[]>>; tutorial?: string[]; hints?: string[]; credits?: boolean; creditsOpened?: boolean;
 }
 
 function load(): SaveV1 {
@@ -85,6 +86,10 @@ export const exportFights = (): FightRecord[] => load().fights;
 // Créditos vistos completos al menos una vez (ADR 0049). Empezar de nuevo no los borra.
 export const creditsSeen = (): boolean => load().credits === true;
 export function markCreditsSeen(): void { const data = load(); data.credits = true; store(data); }
+// Créditos empezados al menos una vez (ADR 0058): quien los dejó a medias (recargó, cerró o se le colgó) puede volver a
+// verlos desde el menú sin ganar otra vez la etapa secreta. Saltarlos sigue pidiendo haberlos visto completos.
+export const creditsOpened = (): boolean => { const d = load(); return d.credits === true || d.creditsOpened === true; };
+export function markCreditsOpened(): void { const data = load(); data.creditsOpened = true; store(data); }
 
 export function getSettings(): Settings { return load().settings ?? {}; }
 export function setSettings(patch: Settings): void {

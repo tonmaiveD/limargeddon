@@ -11,7 +11,7 @@ import { Sfx } from '../core/audio/sfx';
 import { bakePlane } from '../core/art/bosses';
 import { ART_SCALE } from '../core/art/vehicles';
 import { C, clamp, hash } from '../core/util';
-import { creditsSeen, getGarage, markCreditsSeen } from '../core/save';
+import { creditsSeen, getGarage, markCreditsOpened, markCreditsSeen } from '../core/save';
 import { applyUpgrades } from '../garage/upgrades';
 import { CREDITS_SECONDS, POST_START, RETURN_GUARD_MS, TEXT, advance, canSkip, castFor, isSkipInput, isTap, newClock, partAt, resumed, skipTo, wrap, type Clock, type Part, type Press } from '../core/credits';
 import { frameMs } from '../core/frames';
@@ -64,6 +64,7 @@ export class CreditsScene extends Phaser.Scene {
     this.t = 0; this.scroll = 0; this.talk = null; this.finished = false; this.seenMarked = false; this.postMusic = false;
     this.me = { x: W / 2, y: 500 };
     this.skippable = canSkip(creditsSeen(), TEST_MODE);
+    if (this.d.at === undefined && !TEST_MODE) markCreditsOpened(); // al entrar, no al final (C02a, ADR 0058)
     const la = STAGES['linea-amarilla'];
     this.tico = createGame(applyUpgrades(la.cfg, getGarage().levels), 'normal', newKeys(), la.ai);
     Object.assign(keys, newKeys());
@@ -132,7 +133,7 @@ export class CreditsScene extends Phaser.Scene {
     if (this.finished) return;
     this.finished = true;
     Sfx.music(false);
-    this.d.done(this);
+    try { this.d.done(this); } catch (e) { console.error('Créditos: no se pudo seguir a la escena siguiente', e); this.scene.start('Menu'); }
   }
 
   private gameFor(stage: string): Game {
@@ -141,8 +142,17 @@ export class CreditsScene extends Phaser.Scene {
     return G;
   }
 
+  /*
+   * Red de seguridad (auditoría del 16 de noviembre, C03): si un error escapa de update, Phaser deja de pedir cuadros y
+   * el juego queda quieto para siempre. Ante cualquier error, los créditos terminan y siguen a los resultados o al
+   * menú, y el error queda en la consola.
+   */
   update(_t: number, delta: number): void {
     if (this.finished) return;
+    try { this.frame(delta); } catch (e) { console.error('Créditos: error en un cuadro, se cierran', e); this.finish(); }
+  }
+
+  private frame(delta: number): void {
     // en pausa no avanza nada, pero se sigue dibujando el aviso para tocar y seguir
     // el manejo y el avance de la pista usan un paso con tope; la narración, el reloj de la música (U02)
     const frozen = this.d.at !== undefined, paused = this.paused, dt = frozen || paused ? 0 : Math.min(0.05, delta / 1000);
