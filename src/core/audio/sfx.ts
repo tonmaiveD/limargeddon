@@ -6,7 +6,7 @@ import { MEDLEYS, medleyClock, medleyPosition, sectionSteps, type Medley } from 
 
 export type SfxName =
   | 'cone' | 'kernel' | 'oil' | 'horn' | 'bossHorn' | 'hit' | 'boom' | 'pickup' | 'bump' | 'whistle'
-  | 'block' | 'phase' | 'turbo' | 'combi' | 'picaron' | 'metro' | 'skid' | 'win' | 'lose' | 'say' | 'combo';
+  | 'block' | 'phase' | 'turbo' | 'combi' | 'picaron' | 'metro' | 'skid' | 'win' | 'lose' | 'say' | 'combo' | 'alarm';
 
 let ac: AudioContext | null = null;
 let master: GainNode, music: GainNode, noiseBuf: AudioBuffer;
@@ -184,6 +184,8 @@ export const Sfx = {
       case 'win': [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, 0.16, 'square', 0.14, null, i * 0.13)); break;
       case 'lose': [392, 330, 262, 196].forEach((f, i) => tone(f, 0.22, 'square', 0.14, null, i * 0.18)); break;
       case 'say': tone(880, 0.05, 'triangle', 0.06); tone(990, 0.05, 'triangle', 0.06, null, 0.06); break;
+      // aviso de embestida (ADR 0061): tres pitidos agudos que bajan, distintos de cualquier claxon
+      case 'alarm': [1568, 1318, 1046].forEach((f, i) => tone(f, 0.07, 'triangle', 0.16, null, i * 0.09)); break;
       case 'combo': { const f = 660 * Math.pow(2, (lvl * 2) / 12); tone(f, 0.08, 'square', 0.1); tone(f * 1.5, 0.1, 'triangle', 0.08, null, 0.05); break; }
     }
   },

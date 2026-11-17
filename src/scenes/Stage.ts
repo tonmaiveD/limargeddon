@@ -3,7 +3,7 @@ import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
-import { keys, pauseHook, setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
+import { buzz, keys, pauseHook, setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
 import { beginLayers, createLayers, endLayers, renderEntities, setWarp, type Layers } from '../core/render';
 import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
@@ -116,7 +116,10 @@ export class StageScene extends Phaser.Scene {
     } else {
       track.scroll += (G.mode === 'play' ? G.speed : this.def.cfg.road.idleScroll) * dt;
       if (G.mode === 'play') {
-        if (update(G, dt)) {
+        const was = G.b.state, over = update(G, dt);
+        // aviso de embestida o reversa (ADR 0061): sonido propio y vibración corta al empezar el aviso
+        if (G.b.state !== was && (G.b.state === 'teleRam' || G.b.state === 'teleRev')) { Sfx.play('alarm'); buzz(120); }
+        if (over) {
           const summary = summarize(G), points = scoreFight(G), stageId = this.data0.stageId, garage = getGarage(), upgrades = garage.levels;
           // la billetera antes de cobrar es la del comienzo: en la pelea no se compra
           const cheapest = cheapestNext(upgrades, unlockedStage(stageNumber));

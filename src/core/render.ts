@@ -12,7 +12,7 @@ import { bossCar } from './art/bosses';
 import { drawFoe, drawObstacle, drawPickupB, drawShot } from './art/props';
 import { cobrador } from '../bosses/combi-render';
 import { phaseDef } from '../bosses/phase-machine';
-import { C, clamp } from './util';
+import { C, clamp, reduceMotion } from './util';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
@@ -47,17 +47,45 @@ function drawThrow(g: Gfx, G: Game): void {
   }
 }
 
-// Señal del punto ciego (ADR 0032): hasta que el jugador acierte 3 golpes por la derecha, una flecha verde lo marca.
-// Va en la capa de efectos para seguir la pista curva.
+// Señal del punto ciego (ADR 0032 y 0061, U3): hasta que el jugador acierte 3 golpes por la derecha, una banda verde
+// luminosa pegada al costado derecho del jefe lo marca. Va en la capa de efectos para seguir la pista curva.
 function drawBlindSpot(g: Gfx, G: Game): void {
   const b = G.b;
   if (G.cfg.route || b.state === 'enter' || G.stats.rightHits >= 3 || G.mode !== 'play') return;
-  const a = 0.55 + Math.sin(G.t * 6) * 0.35, x = b.x + b.w / 2 + 8, y = b.y;
+  const a = reduceMotion ? 0.85 : 0.65 + Math.sin(G.t * 6) * 0.3, x = b.x + b.w / 2 + 2, top = b.y - b.h * 0.42, h = b.h * 0.84;
   g.rigid(b.x, b.y, () => { // pegada al jefe también en la pista curva
-    g.globalAlpha = a; g.fillStyle = C.green;
-    g.beginPath(); g.moveTo(x, y); g.lineTo(x + 10, y - 7); g.lineTo(x + 10, y + 7); g.closePath(); g.fill();
-    g.font = FONT(7); g.textAlign = 'left'; g.fillText('PUNTO CIEGO', x + 13, y + 3); g.globalAlpha = 1;
+    g.fillStyle = C.green;
+    g.globalAlpha = a * 0.25; g.fillRect(x, top - 4, 12, h + 8); // halo, para que se lea sobre asfalto oscuro
+    g.globalAlpha = a * 0.5; g.fillRect(x, top - 2, 7, h + 4);
+    g.globalAlpha = a; g.fillRect(x, top, 4, h);
+    g.globalAlpha = 1;
   });
+}
+
+/*
+ * Aviso de embestida (ADR 0061): mientras el jefe avisa la carga, el carril por donde va a pasar se pinta en rojo, cada
+ * vez más fuerte. En la reversa es su carril, recto hacia abajo. En la embestida apunta adonde está el Tico, porque al
+ * terminar el aviso carga hacia ahí, así que la franja lo sigue. Solo lee el estado del jefe; los tiempos no cambian.
+ */
+const CHARGE_TELE = ['teleRam', 'teleRev'];
+function drawChargeLane(g: Gfx, G: Game): void {
+  const b = G.b;
+  if (!CHARGE_TELE.includes(b.state) || G.mode !== 'play') return;
+  const P = phaseDef(G.cfg.boss.phases, b.phase), rev = b.state === 'teleRev';
+  const total = rev && !G.d.tele ? (P.teleOff ?? P.tele) : P.tele, k = clamp(1 - b.st / Math.max(0.01, total), 0, 1);
+  const x0 = rev ? b.tx : b.x, x1 = rev ? b.tx : G.p.x, y0 = b.y + b.h / 2, y1 = (P.maxY ?? (rev ? H - 150 : H - 130)) + b.h / 2;
+  const hw = b.w / 2 + 4, blink = reduceMotion ? 1 : 0.75 + 0.25 * Math.sin(G.t * 18);
+  g.fillStyle = '#ff2b2b'; g.globalAlpha = (0.16 + 0.24 * k) * blink;
+  g.beginPath(); g.moveTo(x0 - hw, y0); g.lineTo(x0 + hw, y0); g.lineTo(x1 + hw, y1); g.lineTo(x1 - hw, y1); g.closePath(); g.fill();
+  // bordes y flechas hacia abajo, para que se lea como "por aquí viene"
+  g.globalAlpha = (0.45 + 0.4 * k) * blink; g.fillStyle = '#ff5a5a';
+  const n = 5;
+  for (let i = 0; i <= n; i++) {
+    const f = i / n, cx = x0 + (x1 - x0) * f, cy = y0 + (y1 - y0) * f;
+    g.fillRect(cx - hw, cy - 6, 3, 12); g.fillRect(cx + hw - 3, cy - 6, 3, 12);
+    if (i > 0 && i < n) { g.beginPath(); g.moveTo(cx - 9, cy - 5); g.lineTo(cx + 9, cy - 5); g.lineTo(cx, cy + 5); g.closePath(); g.fill(); }
+  }
+  g.globalAlpha = 1;
 }
 
 // Marea de la etapa secreta: todos los personajes anteriores apretados detrás del Tico, empujando hacia arriba.
@@ -149,6 +177,21 @@ function drawPlayer(L: Layers, G: Game): void {
 }
 
 
+// Papeletas (ADR 0061, U4): contador fijo desde la primera multa. Con cada una late y, por un momento, dice la causa y
+// cuánto costó; después vuelve al total. En una sola fila, para no chocar con el globo del jefe.
+const FINE_SHOW = 1.8;
+function drawFines(g: Gfx, G: Game): void {
+  if (G.fines <= 0) return;
+  const f = G.lastFine, age = f ? G.t - f.t : 99, beat = age < 0.6 ? 1 - age / 0.6 : 0;
+  const text = f && age < FINE_SHOW ? `${f.why.replace(/[¡!¿?]/g, '')} -S/ ${f.amt}` : `PAPELETAS -S/ ${G.fines}`;
+  const size = reduceMotion ? 10 : 10 + beat * 2;
+  g.font = BODY(800, size);
+  const w = g.measureText(text).width + 16, x = W - 70 - w, y = 60;
+  g.fillStyle = beat > 0 ? C.pink : 'rgba(14,10,22,.85)'; g.roundRect(x, y, w, 18, 9); g.fill();
+  g.strokeStyle = C.sky; g.lineWidth = 1.5; g.roundRect(x, y, w, 18, 9); g.stroke(); g.lineWidth = 1;
+  g.fillStyle = beat > 0 ? '#ffffff' : age < FINE_SHOW ? C.pink : C.sky; g.textAlign = 'center'; g.fillText(text, x + w / 2, y + 13);
+}
+
 function drawHUD(g: Gfx, G: Game): void {
   const b = G.b, p = G.p, cfg = G.cfg, phases = cfg.boss.phases, cur = phases.find((x) => x.id === b.phase) ?? phases[0];
   g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(-view.extra, 0, W + 2 * view.extra, 44);
@@ -170,8 +213,7 @@ function drawHUD(g: Gfx, G: Game): void {
     g.fillStyle = P.col; g.fillRect(8, py + 11, (128 * p.pw[k]) / P.dur, 3);
     g.font = BODY(800, 9); g.textAlign = 'left'; g.fillText(P.name, 12, py + 9); py += 17;
   }
-  // multas
-  if (G.fines > 0) { g.textAlign = 'right'; g.fillStyle = C.sky; g.font = BODY(800, 9); g.fillText('PAPELETAS -S/' + G.fines, W - 70, 62); }
+  drawFines(g, G);
   // jugador
   g.fillStyle = 'rgba(14,10,22,.78)'; g.fillRect(-view.extra, H - 26, W + 2 * view.extra, 26);
   g.textAlign = 'left'; g.fillStyle = C.yellow; g.font = FONT(10); g.fillText('TICO', 10, H - 9);
@@ -217,7 +259,7 @@ function drawBubble(g: Gfx, G: Game): void {
 
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, img: Gfx) => void): void {
   const g = L.ents, f = L.fx, lo = L.low;
-  drawLights(L.world, G); drawObstacles(L.world, G);
+  drawLights(L.world, G); drawObstacles(L.world, G); drawChargeLane(lo, G);
   G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickupB(lo, G, u)));
   // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
   G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));
