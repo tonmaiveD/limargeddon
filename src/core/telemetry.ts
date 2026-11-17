@@ -3,8 +3,8 @@ import type { FightRecord } from './save';
 import type { FrameSummary } from './frames';
 
 /*
- * Datos anónimos de partidas (ADR 0051). El juego envía solo, en grupos, el registro de cada pelea, los abandonos y las
- * compras del taller, para calibrar el balance con partidas reales sin depender de capturas.
+ * Datos anónimos de partidas (ADR 0051). El juego envía solo, en grupos, el registro de cada pelea, los abandonos, las
+ * compras del taller y cómo corrieron los créditos (ADR 0060), para calibrar el balance con partidas reales sin depender de capturas.
  * - Anónimo de verdad: sin nombre del jugador, sin ranking, sin identificador del dispositivo ni del navegador
  *   completo, y el receptor no guarda la IP. Solo el tipo de equipo ("Android · Chrome · mediana") y el día.
  * - Cada registro lleva un número al azar para que el receptor no lo cuente dos veces.
@@ -31,7 +31,15 @@ export interface AbandonEvent extends Base {
   kind: 'abandono'; stage: string; dk: DiffKey; fireMode?: FireMode; t: number; phase: number; bossPct: number; hpPct: number;
 }
 export interface BuyEvent extends Base { kind: 'compra'; upgrade: string; level: number; price: number; wallet: number; unlocked: number }
-export type DataEvent = FightEvent | AbandonEvent | BuyEvent;
+// Créditos (ADR 0060): de dónde se abrieron, si era la primera vez, hasta qué segundo llegaron, el mayor rato con la
+// imagen quieta sin estar en pausa (en segundos), cuántas veces se saltaron y cómo terminaron. "salida" es cerrar o
+// recargar a mitad: llega la próxima vez que se abre el juego.
+export const CREDITS_ENDS = ['completo', 'saltado', 'despues', 'salida', 'error'] as const;
+export type CreditsEnd = typeof CREDITS_ENDS[number];
+export interface CreditsEvent extends Base {
+  kind: 'creditos'; from: 'victoria' | 'menu'; first: boolean; reached: number; maxStall: number; skips: number; end: CreditsEnd;
+}
+export type DataEvent = FightEvent | AbandonEvent | BuyEvent | CreditsEvent;
 
 /* ---------- datos del equipo, sin identificarlo ---------- */
 
@@ -77,6 +85,7 @@ export function fightEvent(r: Omit<FightRecord, 'at'>, c: Ctx): FightEvent {
 }
 export const abandonEvent = (a: Omit<AbandonEvent, keyof Base | 'kind'>, c: Ctx): AbandonEvent => ({ ...base(c), kind: 'abandono', ...a });
 export const buyEvent = (b: Omit<BuyEvent, keyof Base | 'kind'>, c: Ctx): BuyEvent => ({ ...base(c), kind: 'compra', ...b });
+export const creditsEvent = (x: Omit<CreditsEvent, keyof Base | 'kind'>, c: Ctx): CreditsEvent => ({ ...base(c), kind: 'creditos', ...x });
 
 /* ---------- cola y envío ---------- */
 

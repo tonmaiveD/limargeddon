@@ -16,6 +16,8 @@ import { applyUpgrades } from '../garage/upgrades';
 import { CREDITS_SECONDS, POST_START, RETURN_GUARD_MS, TEXT, advance, canSkip, castFor, isSkipInput, isTap, newClock, partAt, resumed, skipTo, wrap, type Clock, type Part, type Press } from '../core/credits';
 import { frameMs } from '../core/frames';
 import { STAGES, TEST_MODE } from '../stages';
+import { creditsEnd, creditsProgress, creditsStart } from '../core/share';
+import type { CreditsEnd, CreditsEvent } from '../core/telemetry';
 
 /*
  * Créditos de la Línea Amarilla del Terror (ADR 0049). Siguen el popurrí (ADR 0048) con su propio reloj:
@@ -32,7 +34,8 @@ import { STAGES, TEST_MODE } from '../stages';
 
 // at: solo para revisar (modo prueba con ?creditos=segundos), deja la escena quieta en ese instante, sin música;
 // talk: además muestra lo que contesta el jefe al claxon
-export interface CreditsData { done: (scene: Phaser.Scene) => void; at?: number; talk?: boolean }
+// from: de dónde se abrieron, para los datos anónimos (ADR 0060)
+export interface CreditsData { done: (scene: Phaser.Scene) => void; at?: number; talk?: boolean; from?: 'victoria' | 'menu' }
 
 const SPEED = 210; // avance de la pista en el desfile
 const PAINT_W = 240; // ancho máximo de un nombre pintado en el asfalto
@@ -66,6 +69,9 @@ export class CreditsScene extends Phaser.Scene {
     this.t = 0; this.scroll = 0; this.talk = null; this.finished = false; this.seenMarked = false; this.postMusic = false;
     this.me = { x: W / 2, y: 500 };
     this.skippable = canSkip(creditsSeen(), TEST_MODE);
+    // datos anónimos (C06, ADR 0060): en la vista quieta no se anota nada
+    this.skips = 0; this.stallMax = 0; this.movedAt = performance.now(); this.savedAt = 0;
+    this.record = this.d.at === undefined ? creditsStart(TEST_MODE, { from: this.d.from ?? 'menu', first: !creditsSeen(), reached: 0, maxStall: 0, skips: 0 }) : null;
     if (this.d.at === undefined && !TEST_MODE) markCreditsOpened(); // al entrar, no al final (C02a, ADR 0058)
     const la = STAGES['linea-amarilla'];
     this.tico = createGame(applyUpgrades(la.cfg, getGarage().levels), 'normal', newKeys(), la.ai);
@@ -88,15 +94,32 @@ export class CreditsScene extends Phaser.Scene {
     // (la página oculta): perder el foco no pausa, porque en iPad muchas veces no avisa al recuperarlo (ADR 0052)
     document.addEventListener('visibilitychange', this.onVisibility);
     addEventListener('focus', this.onReturn); addEventListener('pageshow', this.onReturn);
+    addEventListener('pagehide', this.saveProgress);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       removeEventListener('pointerdown', this.onDown); removeEventListener('pointerup', this.onUp); removeEventListener('pointercancel', this.onCancel);
       removeEventListener('keydown', this.onKey);
       document.removeEventListener('visibilitychange', this.onVisibility);
+      removeEventListener('pagehide', this.saveProgress);
       removeEventListener('focus', this.onReturn); removeEventListener('pageshow', this.onReturn);
       pauseHook.toggle = null; btn.hidden = true; $('pause').hidden = true; quit.textContent = 'Salir al menú';
       document.body.classList.remove('en-creditos');
       Sfx.hold(false); Sfx.music(false);
     });
+  }
+
+  // datos anónimos de los créditos (C06, ADR 0060)
+  private record: CreditsEvent | null = null;
+  private skips = 0;
+  private stallMax = 0; // mayor rato, en ms, con la imagen quieta fuera de la pausa
+  private movedAt = 0;
+  private savedAt = 0;
+  private fields() { return { reached: Math.floor(this.t * 10) / 10, maxStall: Math.round(this.stallMax / 10) / 100, skips: this.skips }; }
+  private saveProgress = () => { this.record = creditsProgress(this.record, this.fields()); };
+  // la imagen avanzó o no: se mide en tiempo real, salvo en pausa
+  private measureStall(prevT: number): void {
+    const now = performance.now();
+    if (this.t > prevT) this.movedAt = now; else this.stallMax = Math.max(this.stallMax, now - this.movedAt);
+    if (now - this.savedAt > 3000) { this.savedAt = now; this.saveProgress(); } // el borrador, por si cierran a mitad
   }
 
   private paused = false;
@@ -111,7 +134,8 @@ export class CreditsScene extends Phaser.Scene {
     if (v === this.paused || this.finished) return;
     this.paused = v; Sfx.hold(v); $('pause').hidden = !v;
     this.press = null; // el toque que abrió o cerró la pausa no salta
-    if (v) { Object.assign(keys, newKeys()); ($('resume') as HTMLButtonElement).focus(); return; } // sin controles pegados al volver
+    if (v) { Object.assign(keys, newKeys()); ($('resume') as HTMLButtonElement).focus(); this.saveProgress(); return; } // sin controles pegados al volver
+    this.movedAt = performance.now(); // la pausa no cuenta como imagen quieta
     // al seguir, imagen y música retoman desde el mismo instante en que se pausó (V04, ADR 0057)
     this.clock = resumed(this.clock);
     if (this.t < POST_START) Sfx.seek(this.t);
@@ -121,7 +145,7 @@ export class CreditsScene extends Phaser.Scene {
     this.onReturn(); if (!this.userPaused) this.setPaused(false);
   };
   // "Ver después": termina aquí y sigue a los resultados o al menú. No marca los créditos como vistos
-  private later(): void { this.finish(); }
+  private later(): void { this.finish('despues'); }
   // al volver la pantalla al juego, los toques del momento son del sistema (cerrar el centro de control), no para saltar
   private press: Press | null = null;
   private guardUntil = 0;
@@ -149,13 +173,14 @@ export class CreditsScene extends Phaser.Scene {
     if (this.canSkipNow() && isSkipInput({ kind: 'key', key: e.key })) this.skip();
   };
   private skip(): void {
-    this.t = skipTo(this.t); this.clock = newClock(this.t);
-    if (this.t >= CREDITS_SECONDS) this.finish(); else Sfx.music(false);
+    this.t = skipTo(this.t); this.clock = newClock(this.t); this.skips++;
+    if (this.t >= CREDITS_SECONDS) this.finish('saltado'); else Sfx.music(false);
   }
 
-  private finish(): void {
+  private finish(end: CreditsEnd): void {
     if (this.finished) return;
     this.finished = true;
+    creditsEnd(TEST_MODE, this.record, end, this.fields()); this.record = null;
     if (this.paused) { this.paused = false; Sfx.hold(false); $('pause').hidden = true; } // "Ver después" desde la pausa
     Sfx.music(false);
     try { this.d.done(this); } catch (e) { console.error('Créditos: no se pudo seguir a la escena siguiente', e); this.scene.start('Menu'); }
@@ -174,7 +199,7 @@ export class CreditsScene extends Phaser.Scene {
    */
   update(_t: number, delta: number): void {
     if (this.finished) return;
-    try { this.frame(delta); } catch (e) { console.error('Créditos: error en un cuadro, se cierran', e); this.finish(); }
+    try { this.frame(delta); } catch (e) { console.error('Créditos: error en un cuadro, se cierran', e); this.finish('error'); }
   }
 
   private frame(delta: number): void {
@@ -183,14 +208,16 @@ export class CreditsScene extends Phaser.Scene {
     const frozen = this.d.at !== undefined, paused = this.paused, dt = frozen || paused ? 0 : Math.min(0.05, delta / 1000);
     if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
     else if (!paused) {
+      const prevT = this.t;
       Sfx.tick(); this.clock = advance(this.clock, frameMs(this.game.loop), Sfx.medleyTime()); this.t = this.clock.t;
+      this.measureStall(prevT);
       // la música quedó atrás tras un corte del audio: se reubica en la imagen, que no la espera (C01, ADR 0057)
       const now = performance.now();
       if (this.clock.resync && now - this.lastSeek > 1000) { this.lastSeek = now; Sfx.seek(this.t); }
     }
     this.scroll += SPEED * dt; this.tico.t = this.t;
     if (this.t >= POST_START && !this.seenMarked && !frozen) { this.seenMarked = true; if (!TEST_MODE) markCreditsSeen(); this.skippable = true; }
-    if (this.t >= CREDITS_SECONDS) { this.finish(); return; }
+    if (this.t >= CREDITS_SECONDS) { this.finish('completo'); return; }
     setupCamera(this);
     const L = this.L, part = partAt(this.t);
     beginLayers(this.L); setWarp(L, null);

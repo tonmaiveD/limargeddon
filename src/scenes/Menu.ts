@@ -66,7 +66,7 @@ export class MenuScene extends Phaser.Scene {
     credits.hidden = !(creditsOpened() || TEST_MODE);
     credits.onclick = () => {
       Sfx.init(); document.getElementById('menu')!.hidden = true;
-      const data: CreditsData = { done: (cs) => cs.scene.start('Menu') };
+      const data: CreditsData = { from: 'menu', done: (cs) => cs.scene.start('Menu') };
       this.scene.start('Credits', data);
     };
     // interruptor de ayudas (ADR 0039): apagadas no sale ninguna; al prenderlas vuelven solo las no leídas

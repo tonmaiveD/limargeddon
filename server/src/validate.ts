@@ -60,7 +60,7 @@ const FRAMES: Schema = {
 };
 const COMMON: Schema = {
   id: { f: str(64, /^[A-Za-z0-9-]+$/), required: true }, v: { f: (x) => (x === 1 ? 1 : INVALID), required: true },
-  kind: { f: oneOf('pelea', 'abandono', 'compra'), required: true }, build: { f: str(40), required: true },
+  kind: { f: oneOf('pelea', 'abandono', 'compra', 'creditos'), required: true }, build: { f: str(40), required: true },
   day: { f: str(10, /^\d{4}-\d{2}-\d{2}$/), required: true }, device: { f: str(80), required: true }, tester: { f: str(16, /^[a-z0-9]+$/) },
 };
 const SCHEMAS: Record<string, Schema> = {
@@ -78,6 +78,12 @@ const SCHEMAS: Record<string, Schema> = {
   compra: {
     ...COMMON, upgrade: { f: str(32, /^[a-z0-9_-]+$/i), required: true }, level: { f: num(0, 20), required: true },
     price: { f: num(0, 1e6), required: true }, wallet: { f: num(0, 1e7), required: true }, unlocked: { f: num(0, 20), required: true },
+  },
+  // créditos (ADR 0060): sin etapa, la fila va con stage nulo
+  creditos: {
+    ...COMMON, from: { f: oneOf('victoria', 'menu'), required: true }, first: { f: bool, required: true }, reached: { f: num(0, 600), required: true },
+    maxStall: { f: num(0, 86400), required: true }, skips: { f: num(0, 10), required: true },
+    end: { f: oneOf('completo', 'saltado', 'despues', 'salida', 'error'), required: true },
   },
 };
 

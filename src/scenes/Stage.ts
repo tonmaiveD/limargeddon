@@ -149,7 +149,7 @@ export class StageScene extends Phaser.Scene {
               if (rolled) return; rolled = true;
               removeEventListener('pointerdown', this.onSkip); removeEventListener('keydown', this.onSkip);
               this.scene.pause();
-              const data: CreditsData = { done: (cs) => { cs.scene.stop(); this.scene.resume(); show(); } };
+              const data: CreditsData = { from: 'victoria', done: (cs) => { cs.scene.stop(); this.scene.resume(); show(); } };
               this.scene.launch('Credits', data); this.scene.bringToTop('Credits');
             };
           }

@@ -1,8 +1,8 @@
--- Datos anónimos de partidas (ADR 0051). Un registro por pelea, abandono o compra. Sin IP ni identificador del equipo.
+-- Datos anónimos de partidas (ADR 0051). Un registro por pelea, abandono, compra o créditos. Sin IP ni identificador del equipo.
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY,          -- número al azar que pone el juego; repetido se ignora
   v INTEGER NOT NULL,           -- versión del contrato de datos
-  kind TEXT NOT NULL,           -- pelea, abandono o compra
+  kind TEXT NOT NULL,           -- pelea, abandono, compra o creditos
   build TEXT NOT NULL,          -- versión del juego
   day TEXT NOT NULL,            -- día de la partida, sin hora
   device TEXT NOT NULL,         -- tipo de equipo, por ejemplo "Android · Chrome · mediana · táctil"
