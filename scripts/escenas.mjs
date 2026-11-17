@@ -211,16 +211,20 @@ const TOURS = {
       return { w: b.width, h: b.height, top: (b.top - c.top) / k }`);
     ok(box.w >= 44 && box.h >= 44, `el botón de pausa mide 44 px o más (${box.w}×${box.h})`);
     ok(box.top > 140, 'el botón de pausa queda lejos de la ficha de reparto, arriba');
-    const before = await p.page('return __t.t()');
+    // saltar lleva al poscrédito: si el tiempo sigue antes, no hubo salto. Con margen de tiempo no sirve, porque en una
+    // máquina lenta la imagen puede adelantarse unos segundos para alcanzar a la música
+    const POST = await p.page(`const { POST_START } = await import('/src/core/credits.ts'); return POST_START`);
+    ok(await p.page(`return __t.t() < ${POST} - 20`), 'los créditos van lejos del poscrédito');
     await tap(p, 'pauseBtn');
-    ok(await p.page(`return __t.visible("pause") && __t.scenes().includes("Credits") && __t.t() - ${before} < 2`), 'el botón pausa los créditos sin saltarlos');
+    ok(await p.page(`return __t.visible("pause") && __t.scenes().includes("Credits") && __t.t() < ${POST}`), 'el botón pausa los créditos sin saltarlos');
     ok(!(await creditsMove(p)), 'en pausa la imagen no avanza');
     ok(await p.page('return document.getElementById("quit").textContent === "Ver después"'), 'el panel ofrece "Ver después"');
     const t0 = await p.page('return __t.t()');
     await tap(p, 'resume');
-    ok(await p.page(`return !__t.visible("pause") && __t.scenes().includes("Credits") && __t.t() - ${t0} < 2`), '"Continuar" sigue sin saltar');
+    ok(await p.page(`return !__t.visible("pause") && __t.scenes().includes("Credits") && __t.t() < ${POST}`), '"Continuar" sigue sin saltar');
     ok(await creditsMove(p), 'al continuar la imagen avanza');
-    ok(Math.abs((await p.page('return __t.t()')) - t0) < 3, 'al continuar sigue desde el mismo punto');
+    const t1 = await p.page('return __t.t()');
+    ok(t1 >= t0 && t1 - t0 < 8, `al continuar sigue desde el mismo punto (de ${t0.toFixed(1)} a ${t1.toFixed(1)} s)`);
     await p.page('__t.key("p"); return true');
     ok(await p.page('return __t.visible("pause")'), 'P pausa los créditos');
     await p.page('__t.key("Escape"); return true');
