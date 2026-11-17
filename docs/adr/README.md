@@ -14,9 +14,9 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0008](0008-controles-acelerador-y-colision-con-el-jefe.md) | Acelerador sin freno y tráfico que se aparta del jefe | Aceptada |
 | [0009](0009-balance-de-duracion-y-registro.md) | Balance de duración, paridad contra la config original y registro de peleas | Aceptada |
 | [0010](0010-layout-movil-y-deck-a-todo-el-ancho.md) | Layout móvil: canvas a todo el ancho y deck rediseñado | Aceptada |
-| [0011](0011-controles-un-pulgar-una-tarea-y-modos-de-disparo.md) | Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar" | Aceptada |
+| [0011](0011-controles-un-pulgar-una-tarea-y-modos-de-disparo.md) | Un pulgar, una tarea; disparo por toque con combo y modo de prueba "acelerar es atacar" | Aceptada; el segundo modo, reemplazado por la 0062 |
 | [0012](0012-vista-de-ancho-variable.md) | Vista de ancho variable: más ciudad a los costados | Aceptada |
-| [0013](0013-dos-modos-de-disparo-permanentes.md) | Dos modos de disparo permanentes | Aceptada |
+| [0013](0013-dos-modos-de-disparo-permanentes.md) | Dos modos de disparo permanentes | Reemplazada por la 0062 |
 | [0014](0014-motor-comun-vehiculos-enjambres-obstaculos.md) | Motor común: vehículos declarativos, enjambres y obstáculos | Aceptada |
 | [0015](0015-jefe-generico-y-etapa-miraflores.md) | Jefe genérico por fases, selector de etapa y Etapa 1 Miraflores | Aceptada (selector reemplazado por la 0017) |
 | [0016](0016-chorro-marchas-y-etapa-centro.md) | Ataque de chorro, obstáculos con vaivén y Etapa 3 Centro | Aceptada |
@@ -65,3 +65,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0059](0059-pausa-en-creditos.md) | Pausa en los créditos | Aceptada |
 | [0060](0060-creditos-pruebas-y-datos.md) | Créditos completos en las pruebas y datos anónimos de los créditos | Aceptada |
 | [0061](0061-lectura-de-amenaza.md) | Lectura de amenaza y de costo | Aceptada |
+| [0062](0062-un-solo-modo-de-disparo.md) | Un solo modo de disparo, por toque | Aceptada |

@@ -30,15 +30,14 @@ describe('tutorial en contexto', () => {
     }
   });
 
-  it('Miraflores enseña los controles en su momento y según el modo de disparo', () => withSeed(1, () => {
-    for (const mode of ['toque', 'acelerar'] as const) {
-      const G = startPort('normal', STAGES.miraflores.cfg); G.fireMode = mode; G.p.pw.soat = 999;
-      const seen: string[] = [];
-      for (let i = 0; i < 60 * 20 && G.mode === 'play'; i++) { stepPort(G, DT); if (G.hint && seen.at(-1) !== G.hint.text) seen.push(G.hint.text); }
-      expect(seen.slice(0, 2)).toEqual(['Gira a los lados para cambiar de carril', 'Suelta el acelerador para esquivar']);
-      expect(seen).toContain(mode === 'toque' ? 'Toca CONOS para lanzar, se recargan' : 'Mientras aceleras, lanzas conos');
-      expect(seen).not.toContain(mode === 'toque' ? 'Mientras aceleras, lanzas conos' : 'Toca CONOS para lanzar, se recargan');
-    }
+  it('Miraflores enseña los controles en su momento, con el disparo por toque', () => withSeed(1, () => {
+    const G = startPort('normal', STAGES.miraflores.cfg); G.fireMode = 'toque'; G.p.pw.soat = 999;
+    const seen: string[] = [];
+    for (let i = 0; i < 60 * 20 && G.mode === 'play'; i++) { stepPort(G, DT); if (G.hint && seen.at(-1) !== G.hint.text) seen.push(G.hint.text); }
+    expect(seen.slice(0, 2)).toEqual(['Gira a los lados para cambiar de carril', 'Suelta el acelerador para esquivar']);
+    expect(seen).toContain('Toca CONOS para lanzar, se recargan');
+    // un solo modo de disparo (ADR 0062): ninguna etapa enseña "acelerar es atacar"
+    for (const id of Object.keys(STAGES)) expect(STAGES[id].cfg.hints?.some((h) => (h.mode as string) === 'acelerar') ?? false).toBe(false);
   }));
 
   it('un aviso de peligro entra al instante, y una ayuda ya leída en este modo no vuelve a salir', () => withSeed(2, () => {
@@ -97,7 +96,7 @@ describe('tutorial en contexto', () => {
     memStorage();
     learnHints('centro', 'toque', ['a', 'b']); learnHints('centro', 'toque', ['a']);
     expect(knownHints('centro', 'toque')).toEqual(['a', 'b']);
-    expect(knownHints('centro', 'acelerar')).toEqual([]); // el otro modo sigue enseñando
+    expect(knownHints('centro', 'mantener')).toEqual([]); // las ayudas se guardan por modo
     learnHints('gamarra', 'toque', ['c']);
     forgetHints('centro');
     expect(knownHints('centro', 'toque')).toEqual([]);

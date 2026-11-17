@@ -5,7 +5,7 @@ import type { Game } from '../src/core/state';
 
 const DT = 1 / 60;
 const cones = (G: Game) => G.shots.filter((s) => s.k === 'cone').length;
-function run(seed: number, fn: (G: Game) => void, mode: 'toque' | 'acelerar' = 'toque'): void {
+function run(seed: number, fn: (G: Game) => void, mode: 'toque' | 'mantener' = 'toque'): void {
   const restore = seedRandom(seed);
   try {
     const G = startPort('normal');
@@ -31,17 +31,6 @@ describe('disparo por toque', () => {
     for (let i = 0; i < 30; i++) stepPort(G, DT); // ~0.5 s más: se recarga uno
     expect(G.p.ammo).toBe(1);
   }));
-});
-
-describe('acelerar es atacar', () => {
-  it('sin acelerar no hay conos; acelerando dispara a cadencia fija', () => run(2, (G) => {
-    G.keys.cone = true;
-    for (let i = 0; i < 60; i++) stepPort(G, DT);
-    expect(cones(G)).toBe(0);
-    G.keys.up = true;
-    for (let i = 0; i < 60; i++) stepPort(G, DT);
-    expect(cones(G)).toBeGreaterThanOrEqual(2);
-  }, 'acelerar'));
 });
 
 describe('combo de punto ciego', () => {

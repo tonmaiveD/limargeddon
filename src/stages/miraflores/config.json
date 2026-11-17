@@ -9,7 +9,6 @@
     {"at": 2.5, "text": "Suelta el acelerador para esquivar"},
     {"on": "obs:peatones", "text": "A la gente no se la toca, es papeleta"},
     {"on": "boss", "after": 3, "mode": "toque", "text": "Toca CONOS para lanzar, se recargan"},
-    {"on": "boss", "after": 3, "mode": "acelerar", "text": "Mientras aceleras, lanzas conos"},
     {"on": "boss", "after": 7, "text": "Pégale por la derecha, duele el doble"},
     {"on": "teleBrake", "text": "Luz de freno, suelta y abre distancia"},
     {"on": "pickup", "text": "Pasa por encima del bonus para usarlo"},

@@ -77,10 +77,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 1,
-        "acelerar": 3
-      }
+      "value": 1
     },
     {
       "id": "llantas",
@@ -121,10 +118,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 1,
-        "acelerar": 3
-      }
+      "value": 1
     },
     {
       "id": "turbo",
@@ -155,10 +149,7 @@
         }
       ],
       "role": "ataque",
-      "value": {
-        "toque": 0,
-        "acelerar": 0
-      }
+      "value": 0
     },
     {
       "id": "conos",
@@ -204,10 +195,7 @@
         }
       ],
       "role": "ataque",
-      "value": {
-        "toque": 0,
-        "acelerar": 4
-      }
+      "value": 0
     },
     {
       "id": "aceite",
@@ -248,10 +236,7 @@
         }
       ],
       "role": "ataque",
-      "value": {
-        "toque": 4,
-        "acelerar": 3
-      }
+      "value": 4
     },
     {
       "id": "claxon",
@@ -292,10 +277,7 @@
         }
       ],
       "role": "ataque",
-      "value": {
-        "toque": 0,
-        "acelerar": 4
-      }
+      "value": 0
     },
     {
       "id": "parachoques",
@@ -341,10 +323,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 0,
-        "acelerar": 1
-      }
+      "value": 0
     },
     {
       "id": "blindaje",
@@ -390,10 +369,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 4,
-        "acelerar": 3
-      }
+      "value": 4
     },
     {
       "id": "reparacion",
@@ -424,10 +400,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 3,
-        "acelerar": 8
-      }
+      "value": 3
     },
     {
       "id": "soat",
@@ -447,10 +420,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 2,
-        "acelerar": 7
-      }
+      "value": 2
     },
     {
       "id": "sticker",
@@ -471,10 +441,7 @@
         }
       ],
       "role": "aguante",
-      "value": {
-        "toque": 0,
-        "acelerar": 0
-      }
+      "value": 0
     },
     {
       "id": "socio-combi",
@@ -500,10 +467,7 @@
         }
       ],
       "role": "ataque",
-      "value": {
-        "toque": 4,
-        "acelerar": 6
-      }
+      "value": 4
     }
   ]
 }

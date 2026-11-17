@@ -3,7 +3,7 @@ import { showDeck } from '../core/layout';
 import { setupCamera } from '../core/camera';
 import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
-import { buzz, keys, pauseHook, setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
+import { buzz, keys, pauseHook, setDeckAmmo, setDeckCooldowns } from '../core/input';
 import { beginLayers, createLayers, endLayers, renderEntities, setWarp, type Layers } from '../core/render';
 import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
@@ -50,7 +50,8 @@ export class StageScene extends Phaser.Scene {
     setupCamera(this);
     this.L = createLayers(this);
     this.def = STAGES[this.data0.stageId];
-    const mode: FireMode | undefined = this.def.cfg.weapons.cone.mode ? getSettings().fireMode : undefined;
+    // un solo modo de disparo, por toque (ADR 0062): un guardado viejo en "acelerar es atacar" también juega por toque
+    const mode: FireMode | undefined = this.def.cfg.weapons.cone.mode ? 'toque' : undefined;
     // las mejoras del taller se aplican sobre una copia de la config de la etapa (ADR 0018)
     const cfg = applyUpgrades(this.def.cfg, getGarage().levels);
     cfg.player.items = wonItems(unlockedStage(stageNumber));
@@ -58,7 +59,6 @@ export class StageScene extends Phaser.Scene {
     this.G.hintKnown = knownHints(this.data0.stageId, this.G.fireMode); // las ya leídas en este modo no salen (ADR 0039)
     this.G.hintsOn = getSettings().hints !== false; // el jugador puede apagarlas en el menú
     this.results = null; this.skip = false;
-    setDeckMode(this.G.fireMode);
     this.paused = false; this.meter = new FrameMeter();
     Sfx.init(); Sfx.music(true, cfg.music);
 

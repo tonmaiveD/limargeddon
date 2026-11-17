@@ -32,15 +32,13 @@ function launchCone(G: Game): void {
   G.shots.push({ k: 'cone', x: p.x, y: p.y - 28, vx: 0, vy: c.vy, r: c.r }); Sfx.play('cone');
 }
 
-// Conos según el modo de disparo elegido (ver FireMode en config.ts).
+// Conos según el modo de disparo (ver FireMode en config.ts): por toque en el juego, sostenido en el prototipo.
 function fireCone(G: Game): void {
   const p = G.p, k = G.keys, c = G.cfg.weapons.cone;
   if (G.fireMode === 'toque') {
     // un cono por toque: solo cuenta el momento de presionar, y se gasta la reserva
     const pressed = k.cone && !p.coneHeld;
     if (pressed && p.ammo >= 1 && p.cd.cone <= 0) { p.ammo--; p.cd.cone = c.tapGap ?? 0.08; launchCone(G); }
-  } else if (G.fireMode === 'acelerar') {
-    if (k.up && p.cd.cone <= 0) { p.cd.cone = c.cd; launchCone(G); }
   } else if (k.cone && p.cd.cone <= 0) { p.cd.cone = c.cd; launchCone(G); }
   p.coneHeld = k.cone;
 }

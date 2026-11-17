@@ -4,8 +4,7 @@ import { setupCamera } from '../core/camera';
 import type { DiffKey } from '../core/config';
 import { beginLayers, createLayers, endLayers, setWarp, type Layers } from '../core/render';
 import { roadWarp } from '../core/road';
-import { setDeckAmmo, setDeckCooldowns, setDeckMode } from '../core/input';
-import { FIRE_MODES, type FireMode } from '../core/config';
+import { setDeckAmmo, setDeckCooldowns } from '../core/input';
 import { DEFAULT_NAME, creditsOpened, forgetHints, getMedals, getPlayerName, getSettings, knownHints, setSettings, unlockedStage } from '../core/save';
 import { medalChips } from './medal-chips';
 import { openName, openRanking, openReset } from './player-dialogs';
@@ -118,8 +117,8 @@ export class MenuScene extends Phaser.Scene {
     $('menuMedals').innerHTML = medalChips(cfg, getMedals(getPlayerName() ?? DEFAULT_NAME, this.stageId));
     // volver a una etapa ya ganada: se avisa que paga la mitad y se ofrece seguir el recorrido
     $('replayNote').hidden = TEST_MODE || this.stageId === this.latest();
-    // "Ver ayudas otra vez" aparece si esta etapa ya enseñó algo, en cualquiera de los dos modos (auditoría R01)
-    const hintsBtn = $('toHints') as HTMLButtonElement, learned = FIRE_MODES.some((m) => knownHints(this.stageId, m).length > 0);
+    // "Ver ayudas otra vez" aparece si esta etapa ya enseñó algo (auditoría R01); las de "acelerar es atacar" ya no salen
+    const hintsBtn = $('toHints') as HTMLButtonElement, learned = knownHints(this.stageId, 'toque').length > 0;
     hintsBtn.hidden = !learned || getSettings().hints === false; hintsBtn.textContent = 'Ver ayudas otra vez';
     hintsBtn.onclick = () => { forgetHints(this.stageId); hintsBtn.textContent = 'Las ayudas vuelven a salir'; };
     $('menuPowers').innerHTML = Object.values(cfg.powers)
@@ -142,11 +141,9 @@ export class MenuScene extends Phaser.Scene {
     this.paintPlay = () => {
       diffs.querySelectorAll<HTMLButtonElement>('[data-diff]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.diff === dk())));
       play.textContent = cfg.secret ? `Jugar · ${cfg.district}` : `Jugar etapa ${cfg.number}`;
-      const m = getSettings().fireMode === 'acelerar' ? 'Acelerar es atacar' : 'Por toque';
-      $('playInfo').textContent = cfg.weapons.cone.mode !== undefined ? `${cfg.difficulties[dk()].label} · ${m}` : cfg.difficulties[dk()].label;
+      $('playInfo').textContent = cfg.difficulties[dk()].label;
     };
     this.paintPlay();
-    this.setupFireSelector(cfg.weapons.cone.mode !== undefined, !!cfg.route);
     ($('toGarage') as HTMLButtonElement).onclick = () => {
       $('menu').hidden = true; this.scene.start('Garage', { stageId: this.stageId, dk: getSettings().dk ?? 'normal' });
     };
@@ -154,33 +151,6 @@ export class MenuScene extends Phaser.Scene {
     Sfx.engine(0);
     setDeckCooldowns({ cone: 0, oil: 0, horn: 0 });
     setDeckAmmo(0, 0);
-  }
-
-  // Selector del modo de disparo (los dos son opciones permanentes, ADR 0013); la elección se guarda en el dispositivo.
-  private setupFireSelector(enabled: boolean, route = false): void {
-    const box = document.getElementById('fireSel')!, tip = document.getElementById('fireTip')!;
-    box.hidden = !enabled; tip.hidden = !enabled;
-    if (!enabled) return;
-    // en la ruta no hay jefe: el texto habla de abrirse paso y llegar al carguero, no de racha ni punto ciego
-    const TIPS: Record<FireMode, string> = route ? {
-      toque: 'Cada toque lanza un cono para abrirte paso. Acelera a fondo, que la marea no espera, y sube a la rampa del carguero.',
-      acelerar: 'Mientras aceleras, el Tico lanza conos solo y te abre paso. No sueltes, que la marea no espera.',
-      mantener: '',
-    } : {
-      toque: 'Cada toque lanza un cono. Tienes 3 y se recargan de a uno, y si pegas seguido por la derecha armas una racha que suma daño, hasta +30%.',
-      acelerar: 'Mientras aceleras, el Tico lanza conos solo. Atacar te obliga a acercarte.',
-      mantener: '',
-    };
-    const current = (): FireMode => { const m = getSettings().fireMode; return m && FIRE_MODES.includes(m) ? m : 'toque'; };
-    const paint = () => {
-      const m = current();
-      box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.fire === m)));
-      tip.textContent = TIPS[m]; setDeckMode(m); this.paintPlay();
-    };
-    box.querySelectorAll<HTMLButtonElement>('[data-fire]').forEach((b) => {
-      b.onclick = () => { setSettings({ fireMode: b.dataset.fire as FireMode }); paint(); };
-    });
-    paint();
   }
 
   update(_t: number, delta: number): void {

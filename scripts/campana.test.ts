@@ -22,9 +22,9 @@ import { evitaCuerpo, rutaBot, semaforoBot } from '../tests/harness/evita';
 export type Politica = 'barata' | 'ataque' | 'aguante';
 const POLITICAS: Politica[] = process.env.POLITICA ? [process.env.POLITICA as Politica] : ['barata', 'ataque', 'aguante'];
 
-function compra(pol: Politica, levels: Levels, wallet: number, unlocked: number, mode: FireMode): string | null {
+function compra(pol: Politica, levels: Levels, wallet: number, unlocked: number): string | null {
   if (pol === 'barata') return recommended(levels, wallet, unlocked);
-  const p = picks(levels, wallet, unlocked, mode === 'toque' ? 'toque' : 'acelerar');
+  const p = picks(levels, wallet, unlocked);
   return pol === 'ataque' ? p.ataque ?? p.aguante ?? null : p.aguante ?? p.ataque ?? null;
 }
 
@@ -61,7 +61,7 @@ export function campana(dk: DiffKey, mode: FireMode, seedBase: number, pol: Poli
     out.push({ stage: id, tries, wonAt: won ? tries : 0, t, spent, wallet: arrival, error });
     if (!won) break;
     // taller: compra según la política mientras alcance
-    for (let id2 = compra(pol, levels, wallet, n + 1, mode); id2; id2 = compra(pol, levels, wallet, n + 1, mode)) {
+    for (let id2 = compra(pol, levels, wallet, n + 1); id2; id2 = compra(pol, levels, wallet, n + 1)) {
       const u = UPGRADES.find((x) => x.id === id2)!, L = nextLevel(u, levels)!;
       wallet -= L.price; spent += L.price; levels[id2] = (levels[id2] ?? 0) + 1;
     }
@@ -70,7 +70,8 @@ export function campana(dk: DiffKey, mode: FireMode, seedBase: number, pol: Poli
 }
 
 it.skipIf(!process.env.CAMPANA)('campaña', () => {
-  for (const pol of POLITICAS) for (const [dk, mode] of [['normal', 'toque'], ['normal', 'acelerar']] as [DiffKey, FireMode][]) {
+  // un solo modo de disparo, por toque (ADR 0062)
+  for (const pol of POLITICAS) for (const [dk, mode] of [['normal', 'toque']] as [DiffKey, FireMode][]) {
     const rows = STAGE_ORDER.map(() => ({ reached: 0, first: 0, tries: 0, ts: [] as number[], spent: 0, errors: 0 }));
     for (let c = 1; c <= CAMPANAS; c++) {
       campana(dk, mode, c, pol).forEach((r, i) => {

@@ -104,7 +104,3 @@ export function setDeckAmmo(n: number, max: number): void {
   if (el) el.innerHTML = Array.from({ length: max }, (_, i) => `<i class="${i < n ? '' : 'off'}"></i>`).join('');
 }
 
-// El deck se adapta al modo de disparo: en "acelerar es atacar" no hay botón de conos.
-export function setDeckMode(mode: string): void {
-  document.getElementById('deck')?.classList.toggle('mode-acelerar', mode === 'acelerar');
-}

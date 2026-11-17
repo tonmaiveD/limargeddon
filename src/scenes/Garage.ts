@@ -8,7 +8,7 @@ import { bakeCar } from '../core/art/bake';
 import { ART_SCALE, ticoArt } from '../core/art/vehicles';
 import { FONT } from '../core/gfx';
 import { beginLayers, createLayers, endLayers, type Layers } from '../core/render';
-import { buyUpgrade, getGarage, getSettings, setGoal, unlockedStage, type Garage } from '../core/save';
+import { buyUpgrade, getGarage, setGoal, unlockedStage, type Garage } from '../core/save';
 import { C } from '../core/util';
 import { CATEGORIES, UPGRADES, applyUpgrades, isLocked, nextGoal, nextLevel, picks } from '../garage/upgrades';
 import { STAGES, TEST_MODE, itemUses, stageNumber, wonItems } from '../stages';
@@ -41,7 +41,7 @@ export class GarageScene extends Phaser.Scene {
     setupCamera(this);
     this.L = createLayers(this);
     this.garage = getGarage();
-    const P = picks(this.garage.levels, this.garage.wallet, unlockedStage(stageNumber), this.mode()), first = P.ataque ?? P.aguante;
+    const P = picks(this.garage.levels, this.garage.wallet, unlockedStage(stageNumber)), first = P.ataque ?? P.aguante;
     if (first) this.cat = UPGRADES.find((u) => u.id === first)!.cat; // abre en la categoría de la primera recomendación
     const cfg = STAGES[this.data0.stageId].cfg;
     const go = $('gGo') as HTMLButtonElement;
@@ -54,8 +54,6 @@ export class GarageScene extends Phaser.Scene {
   }
 
   private close(): void { $('garage').hidden = true; }
-
-  private mode(): 'toque' | 'acelerar' { return getSettings().fireMode === 'acelerar' ? 'acelerar' : 'toque'; }
 
   private paint(bought?: string): void {
     const { wallet, levels } = this.garage;
@@ -70,7 +68,7 @@ export class GarageScene extends Phaser.Scene {
       ? (chosenL.price <= wallet ? `¡Ya te alcanza para tu meta, ${chosen.name}!` : `Ahorrando para ${chosen.name} · te faltan ${money(chosenL.price - wallet)}.`)
       : goal ? `Te faltan ${money(goal.missing)} para ${goal.name}.` : 'Te alcanza para cualquier mejora. ¡Elige bien!';
     // por qué se recomienda lo que se recomienda
-    const P = picks(levels, wallet, unlocked, this.mode()), nameOf = (id?: string) => UPGRADES.find((u) => u.id === id)?.name;
+    const P = picks(levels, wallet, unlocked), nameOf = (id?: string) => UPGRADES.find((u) => u.id === id)?.name;
     const why = [P.ataque && `Para atacar, <b>${nameOf(P.ataque)}</b>.`, P.aguante && `Para aguantar, <b>${nameOf(P.aguante)}</b>.`].filter(Boolean).join(' ');
     $('gWhy').innerHTML = why ? `${why} Elegidas por las pruebas con tu modo de disparo.` : '';
     // objetos de victoria y dónde sirve cada uno
