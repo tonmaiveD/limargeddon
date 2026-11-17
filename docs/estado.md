@@ -27,11 +27,11 @@
   8. Panamericana Norte, con El Comandante (ADR 0025).
   9. Costa Verde (final), con La Doble Fila de Agua Dulce y la carretilla Don Frío (ADR 0026).
   10. **Secreta:** Línea Amarilla del Terror, ruta por tramos hasta el carguero, con el puente provisional y la marea (ADR 0030).
-- **Controles** (ADR 0008, 0011, 0013): acelerador sin freno (soltar es esquivar). El pulgar izquierdo gira y el derecho tiene aceite, claxon, acelerar y conos. Dos modos de disparo elegibles en el menú: "por toque" (reserva de 3 conos y combo de punto ciego) y "acelerar es atacar".
+- **Controles** (ADR 0008, 0011 y 0062): acelerador sin freno (soltar es esquivar). El pulgar izquierdo gira y el derecho tiene aceite, claxon, acelerar y conos. Un solo modo de disparo, por toque: reserva de 3 conos y combo de punto ciego. "Acelerar es atacar" se retiró en la ADR 0062.
 - **Taller entre etapas** (ADR 0018): billetera, diez mejoras y dos de lujo desde la Etapa 3. La primera victoria en una etapa paga completo y repetirla paga la mitad.
 - **Pantalla móvil** (ADR 0010, 0012): canvas a todo el ancho, vista que se ensancha con más ciudad a los costados, pausa automática e instalable en la pantalla de inicio.
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
-- **Tutorial en contexto** (ADR 0037 y 0039): ayudas breves sobre el Tico en las diez etapas, hasta que cada una se alcanza a leer, por modo de disparo. "Ver ayudas otra vez" e interruptor de ayudas en el menú.
+- **Tutorial en contexto** (ADR 0037 y 0039): ayudas breves sobre el Tico en las diez etapas, hasta que cada una se alcanza a leer. "Ver ayudas otra vez" e interruptor de ayudas en el menú.
 - **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
 - **Gráficos nivel B** (ADR 0041 a 0044): tráfico, Tico, jefes, combi aliada, paisaje de los diez distritos, obstáculos, bonus y proyectiles son imágenes horneadas con sombreado; el daño de los vehículos sigue siendo procedural por etapas. La pista suma vereda con cordón, huellas, grietas y manchas.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
@@ -71,7 +71,7 @@
   - Prueba en el navegador en viewport móvil (393×852 o 430×780).
   - ADR si se agregó una pieza al motor.
   - Textos del juego sin guiones largos, dos puntos ni punto y coma.
-- Metas de balance (bot medio, Normal): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
+- Metas de balance (bot medio, Normal, por toque, el único modo desde la ADR 0062): en las etapas 1 a 4, 75 a 85 s, ganando 22 a 27 de 30 (`npm run balance`). Desde la Etapa 5 manda la campaña con compras en el taller (`npm run campana`, ADR 0027, con tres políticas de compra desde la ADR 0036): gana al primer intento entre 65 y 80%. Las personas tardan unas 1.6 veces más que el bot.
 
 ## Pendiente
 
@@ -99,7 +99,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 **Mientras tanto, lo que no depende de los datos:**
 - **Aparecer en Google** (ADR 0056, PR #63): título, descripción, imagen para compartir, datos estructurados, `acerca.html` y `sitemap.xml`. Con la etiqueta de verificación de Search Console. Después del deploy se verifica, se envía el mapa del sitio y se pide la indexación.
-2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) va en el PR #68. Falta probar la pausa con el dedo en un equipo real.
+2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) quedó en el PR #68. La Fase 6 (un solo modo de disparo, ADR 0062) va en el PR #70. Falta probar la pausa con el dedo en un equipo real.
 3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
 
 **Después:**

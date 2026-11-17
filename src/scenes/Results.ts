@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { showDeck } from '../core/layout';
-import type { DiffKey, FireMode } from '../core/config';
+import type { DiffKey } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import type { Summary } from '../core/world';
 import { STAGES, nextStage } from '../stages';
@@ -8,7 +8,6 @@ import { exportFights, fightStats, type ScoreCtx } from '../core/save';
 import { SCORE_VERSION } from '../core/score';
 import { medalChips } from './medal-chips';
 
-const FIRE_LABEL: Record<FireMode, string> = { toque: 'Por toque', acelerar: 'Acelerar es atacar', mantener: 'Mantener' };
 const money = (n: number) => 'S/ ' + n.toLocaleString('es-PE');
 
 interface ResultsData {
@@ -31,7 +30,7 @@ function scoreDetail(cfg: (typeof STAGES)[string]['cfg'], score: NonNullable<Res
   else if (p) {
     const c = p.ctx, n = c ? Object.values(c.upgrades).reduce((a, b) => a + b, 0) : 0;
     record = `Tu récord es ${pts(p.points)}` + (c
-      ? ` (${c.mode ? FIRE_LABEL[c.mode].toLowerCase() + ', ' : ''}${cfg.difficulties[c.dk]?.label ?? c.dk}, ${n} ${n === 1 ? 'mejora' : 'mejoras'}${c.v !== SCORE_VERSION ? ', fórmula anterior' : ''}).`
+      ? ` (${cfg.difficulties[c.dk]?.label ?? c.dk}, ${n} ${n === 1 ? 'mejora' : 'mejoras'}${c.v !== SCORE_VERSION ? ', fórmula anterior' : ''}).`
       : ', de antes de guardar su detalle.');
   }
   return { list, record };
@@ -55,13 +54,13 @@ export class ResultsScene extends Phaser.Scene {
     $('endEyebrow').textContent = s.win ? `${name} completa` : `${name} · fallida`;
     $('endTitle').textContent = cfg.route ? (s.win ? '¡Subiste al carguero!' : 'Te quedaste en tierra')
       : s.win ? `${bossName} cayó` : `Te ganó ${bossName.replace(/^(La|El) /, (m) => m.toLowerCase())}`;
-    $('endStats').innerHTML = `${s.fireMode !== 'mantener' ? `<dt>Disparo</dt><dd>${FIRE_LABEL[s.fireMode]}</dd>` : ''}${score ? `<dt>Puntaje${score.test ? ' (modo prueba)' : ''}</dt><dd style="color:var(--yellow)">${score.points.toLocaleString('es-PE')}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : (cfg.route ? `<dt>Recorrido</dt><dd>${100 - s.bossPct}%</dd>` : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`) + (s.lastHit ? `<dt>Último golpe</dt><dd style="color:var(--pink)">${s.lastHit}</dd>` : '')}${cfg.route
+    $('endStats').innerHTML = `${score ? `<dt>Puntaje${score.test ? ' (modo prueba)' : ''}</dt><dd style="color:var(--yellow)">${score.points.toLocaleString('es-PE')}</dd>` : ''}<dt>Tiempo</dt><dd>${s.time}</dd>${s.win ? '' : (cfg.route ? `<dt>Recorrido</dt><dd>${100 - s.bossPct}%</dd>` : `<dt>Vida que le quedó al jefe</dt><dd>${s.bossPct}%</dd>`) + (s.lastHit ? `<dt>Último golpe</dt><dd style="color:var(--pink)">${s.lastHit}</dd>` : '')}${cfg.route
         // en la ruta no hay jefe: en vez de punto ciego y racha, intentos y marea (auditoría N08)
         ? `<dt>Intentos que sobraron</dt><dd>${s.attemptsLeft} de ${cfg.route.attempts}</dd><dt>Toques de la marea</dt><dd style="color:var(--pink)">${s.tideHits}</dd>`
         : `<dt>Daño por la derecha</dt><dd>${s.rightPct}%</dd>${s.fireMode !== 'mantener' ? `<dt>Mejor racha</dt><dd style="color:var(--green)">${s.bestCombo}</dd>` : ''}`}
       <dt>Bonus recogidos</dt><dd>${s.powers}</dd><dt>Papeletas</dt><dd style="color:var(--pink)">-S/ ${s.fines}</dd>${s.tolls ? `<dt>Peajes</dt><dd style="color:var(--pink)">-S/ ${s.tolls}</dd>` : ''}
       <dt>Cobrado${replay ? ' (etapa repetida: 50%)' : ''}</dt><dd style="color:var(--yellow)">${money(earned)}</dd>
-      <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label, s.fireMode)}`;
+      <dt>Billetera</dt><dd style="color:var(--yellow)">${money(wallet)}</dd>${historyRow(stageId, dk, cfg.difficulties[dk].label)}`;
     $('endBadges').innerHTML = s.win ? `${R.winLine ? `<div class="badge">${R.winLine}</div>` : ''}
       ${score?.record ? `<div class="badge">¡Récord personal en esta etapa! · ${score.points.toLocaleString('es-PE')} puntos</div>` : ''}
       ${cfg.route ? '' : `<div class="badge ${s.blind ? '' : 'off'}">Ni la vio venir · ${R.blindPct}% del daño por la derecha</div>`}
@@ -93,11 +92,10 @@ export class ResultsScene extends Phaser.Scene {
 }
 
 // Mediana de las victorias registradas en este dispositivo, para calibrar el balance con partidas reales.
-function historyRow(stageId: string, dk: DiffKey, label: string, mode: FireMode): string {
-  const h = fightStats(stageId, dk, mode === 'mantener' ? undefined : mode);
+// Un solo modo de disparo desde la ADR 0062: cuentan todas las peleas, también las viejas en "acelerar es atacar".
+function historyRow(stageId: string, dk: DiffKey, label: string): string {
+  const h = fightStats(stageId, dk);
   if (!h.median) return '';
   const m = Math.floor(h.median / 60), sec = String(Math.floor(h.median % 60)).padStart(2, '0');
-  // etiqueta corta para que la fila no se parta en pantallas angostas
-  const modeLabel = mode === 'toque' ? ' (por toque)' : mode === 'acelerar' ? ' (acelerando)' : '';
-  return `<dt>Tus victorias en ${label}${modeLabel}</dt><dd>${h.wins} de ${h.played} · mediana ${m}:${sec}</dd>`;
+  return `<dt>Tus victorias en ${label}</dt><dd>${h.wins} de ${h.played} · mediana ${m}:${sec}</dd>`;
 }

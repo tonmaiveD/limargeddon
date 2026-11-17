@@ -11,6 +11,7 @@
  *   registro anónimo de cómo terminaron (ADR 0060).
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
  * - El aviso de reversa en San Isidro suena y vibra, y sin sonido no vibra (ADR 0061).
+ * - Un guardado viejo en "acelerar es atacar" juega por toque y conserva su récord y medallas (ADR 0062).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
  * Uso: `npm run escenas`. Chrome se busca en CHROME o en las rutas habituales.
@@ -177,6 +178,26 @@ const TOURS = {
     await reverse();
     ok(await p.page('return __vib.length === 0'), 'con el sonido apagado no vibra');
     await p.page(`const { Sfx } = await import('/src/core/audio/sfx.ts'); if (!Sfx.on) Sfx.toggle(); return true`);
+  },
+
+  async 'un guardado viejo en "acelerar es atacar" juega por toque y conserva récord y medallas'(p) {
+    const old = SAVE({ unlocked: 2, settings: { fireMode: 'acelerar' } });
+    old.scores = { PRUEBA: { miraflores: 9100 } };
+    old.scoreCtx = { PRUEBA: { miraflores: { points: 9100, v: 2, mode: 'acelerar', dk: 'normal', upgrades: {}, parts: {} } } };
+    old.medals = { PRUEBA: { miraflores: ['ciego'] } };
+    await fresh(p, old);
+    ok(await p.page('return !document.getElementById("fireSel") && !document.getElementById("fireTip")'), 'el menú ya no tiene selector de disparo');
+    ok(await p.page('return document.getElementById("playInfo").textContent === "Normal"'), 'bajo "Jugar" solo va la dificultad');
+    await p.page('__t.click("toRanking"); return true');
+    ok(await p.page('return __t.visible("rankDlg") && document.getElementById("rankList").textContent.includes("PRUEBA")'), 'el récord hecho acelerando sigue en el ranking');
+    await p.page('__t.click("rankClose"); return true');
+    await play(p);
+    ok(await p.page('return __t.stage().G.fireMode === "toque"'), 'la pelea es por toque');
+    ok(await p.page('const b = document.getElementById("w-cone"); return getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 40'), 'el deck tiene el botón de conos');
+    // acelerar ya no dispara
+    const shots = await p.page('const S = __t.stage(), G = S.G; G.traffic.length = 0; G.keys.up = true; __t.adelantar(60); G.keys.up = false; return G.shots.filter((s) => s.k === "cone").length');
+    ok(shots === 0, `acelerar no lanza conos (${shots})`);
+    ok(await p.page('const s = __t.save(); return s.scores.PRUEBA.miraflores === 9100 && s.medals.PRUEBA.miraflores.includes("ciego")'), 'el récord y las medallas se conservan');
   },
 
   async 'Línea Amarilla: aparecen los créditos y la primera vez no se saltan'(p) {

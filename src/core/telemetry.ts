@@ -1,4 +1,4 @@
-import type { DiffKey, FireMode } from './config';
+import type { DiffKey, SavedFireMode } from './config';
 import type { FightRecord } from './save';
 import type { FrameSummary } from './frames';
 
@@ -22,13 +22,13 @@ const BATCH = 50;
 
 interface Base { id: string; v: number; build: string; day: string; device: string; tester?: string }
 export interface FightEvent extends Base {
-  kind: 'pelea'; stage: string; dk: DiffKey; win: boolean; t: number; fireMode?: FireMode; bestCombo?: number;
+  kind: 'pelea'; stage: string; dk: DiffKey; win: boolean; t: number; fireMode?: SavedFireMode; bestCombo?: number;
   upgrades?: Record<string, number>; bossPct?: number; gross?: number; fines?: number; earned?: number; replay?: boolean;
   tolls?: number; points?: number; scoreV?: number; lastHit?: string; dmgBy?: Record<string, number>; frames?: Omit<FrameSummary, 'device'>;
   walletStart?: number; cheapest?: number;
 }
 export interface AbandonEvent extends Base {
-  kind: 'abandono'; stage: string; dk: DiffKey; fireMode?: FireMode; t: number; phase: number; bossPct: number; hpPct: number;
+  kind: 'abandono'; stage: string; dk: DiffKey; fireMode?: SavedFireMode; t: number; phase: number; bossPct: number; hpPct: number;
 }
 export interface BuyEvent extends Base { kind: 'compra'; upgrade: string; level: number; price: number; wallet: number; unlocked: number }
 // Créditos (ADR 0060): de dónde se abrieron, si era la primera vez, hasta qué segundo llegaron, el mayor rato con la

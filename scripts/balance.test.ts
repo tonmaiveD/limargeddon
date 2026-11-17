@@ -44,31 +44,32 @@ it('duraciones', () => {
   const rows: string[] = [];
   const si = STAGES['san-isidro'].cfg, mf = STAGES.miraflores.cfg, ce = STAGES.centro.cfg, jp = STAGES['javier-prado'].cfg, ga = STAGES.gamarra.cfg, ca = STAGES.callao.cfg, ve = STAGES['via-expresa'].cfg, pa = STAGES.panamericana.cfg, cv = STAGES['costa-verde'].cfg, la = STAGES['linea-amarilla'].cfg;
   const only = process.env.ETAPA; // npm run balance con ETAPA=miraflores (o san-isidro) para correr solo una
+  // un solo modo de disparo, por toque (ADR 0062); el prototipo usa el sostenido
   const variants: [string, StageConfig, FireMode | undefined][] = ([
-    ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'], ['si-acelerar', si, 'acelerar'],
-    ['mf-toque', mf, 'toque'], ['mf-acelerar', mf, 'acelerar'],
-    ['ce-toque', ce, 'toque'], ['ce-acelerar', ce, 'acelerar'],
+    ['prototipo', PROTOTYPE_CFG, undefined], ['si-toque', si, 'toque'],
+    ['mf-toque', mf, 'toque'],
+    ['ce-toque', ce, 'toque'],
     // con las mejoras típicas al llegar al Centro (~S/ 1.300 gastados)
     ['ce-mej-toque', applyUpgrades(ce, { conos: 1, llantas: 1, parachoques: 1, motor: 1 }), 'toque'],
-    ['jp-toque', jp, 'toque'], ['jp-acelerar', jp, 'acelerar'],
+    ['jp-toque', jp, 'toque'],
     // con las mejoras típicas al llegar a la Javier Prado (~S/ 2.600 gastados)
     ['jp-mej-toque', applyUpgrades(jp, { conos: 2, llantas: 1, parachoques: 1, motor: 1, blindaje: 1 }), 'toque'],
-    ['ga-toque', ga, 'toque'], ['ga-acelerar', ga, 'acelerar'],
+    ['ga-toque', ga, 'toque'],
     // con las mejoras típicas al llegar a Gamarra (~S/ 3.700 gastados)
     ['ga-mej-toque', applyUpgrades(ga, { conos: 2, llantas: 2, parachoques: 1, motor: 1, blindaje: 1, aceite: 1 }), 'toque'],
-    ['ca-toque', ca, 'toque'], ['ca-acelerar', ca, 'acelerar'],
+    ['ca-toque', ca, 'toque'],
     // con las mejoras típicas al llegar al Callao (~S/ 5.000 gastados)
     ['ca-mej-toque', applyUpgrades(ca, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 1, aceite: 1 }), 'toque'],
-    ['ve-toque', ve, 'toque'], ['ve-acelerar', ve, 'acelerar'],
+    ['ve-toque', ve, 'toque'],
     // con las mejoras típicas al llegar a la Vía Expresa (~S/ 6.300 gastados)
     ['ve-mej-toque', applyUpgrades(ve, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 1, claxon: 1 }), 'toque'],
-    ['pa-toque', pa, 'toque'], ['pa-acelerar', pa, 'acelerar'],
+    ['pa-toque', pa, 'toque'],
     // con las mejoras típicas al llegar a la Panamericana (~S/ 7.600 gastados)
     ['pa-mej-toque', applyUpgrades(pa, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 1 }), 'toque'],
-    ['cv-toque', cv, 'toque'], ['cv-acelerar', cv, 'acelerar'],
+    ['cv-toque', cv, 'toque'],
     // con las mejoras típicas al llegar a la Costa Verde (~S/ 9.000 gastados)
     ['cv-mej-toque', applyUpgrades(cv, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 2 }), 'toque'],
-    ['la-toque', la, 'toque'], ['la-acelerar', la, 'acelerar'],
+    ['la-toque', la, 'toque'],
     ['la-mej-toque', applyUpgrades(la, { conos: 2, llantas: 2, parachoques: 2, motor: 2, blindaje: 2, aceite: 2, claxon: 2, turbo: 2, reparacion: 1 }), 'toque'],
   ] as [string, StageConfig, FireMode | undefined][]).filter(([l]) => !only || l.startsWith(({ miraflores: 'mf', centro: 'ce', 'san-isidro': 'si', 'javier-prado': 'jp', gamarra: 'ga', callao: 'ca', 'via-expresa': 've', panamericana: 'pa', 'costa-verde': 'cv', 'linea-amarilla': 'la' } as Record<string, string>)[only] ?? only));
   for (const [label, cfg, mode] of variants) {

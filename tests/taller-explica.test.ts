@@ -11,18 +11,17 @@ function memStorage(): void {
 }
 
 describe('taller que explica', () => {
-  it('cada mejora declara para qué sirve y cuánto ayudó en cada modo', () => {
+  it('cada mejora declara para qué sirve y cuánto ayudó', () => {
     for (const u of UPGRADES) {
       expect(['ataque', 'aguante']).toContain(u.role);
-      expect(u.value.toque).toBeGreaterThanOrEqual(0); expect(u.value.acelerar).toBeGreaterThanOrEqual(0);
+      expect(typeof u.value).toBe('number'); expect(u.value).toBeGreaterThanOrEqual(0);
     }
   });
 
-  it('recomienda una para atacar y otra para aguantar, distintas según el modo de disparo', () => {
-    expect(picks({}, 300, 9, 'toque')).toEqual({ ataque: 'aceite', aguante: 'llantas' });
-    expect(picks({}, 500, 9, 'acelerar')).toEqual({ ataque: 'claxon', aguante: 'reparacion' }); // claxon y conos empatan, gana el más barato
-    expect(picks({}, 100, 9, 'toque')).toEqual({ ataque: undefined, aguante: undefined }); // nada alcanza
-    expect(Object.values(picks({}, 99999, 2, 'acelerar'))).not.toContain('socio-combi'); // lujo bloqueado
+  it('recomienda una para atacar y otra para aguantar', () => {
+    expect(picks({}, 300, 9)).toEqual({ ataque: 'aceite', aguante: 'llantas' });
+    expect(picks({}, 100, 9)).toEqual({ ataque: undefined, aguante: undefined }); // nada alcanza
+    expect(Object.values(picks({}, 99999, 2))).not.toContain('socio-combi'); // lujo bloqueado
   });
 
   it('dice en qué etapas sirve cada objeto de victoria, leyendo las configs', () => {

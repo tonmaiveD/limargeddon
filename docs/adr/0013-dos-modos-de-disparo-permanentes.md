@@ -1,6 +1,6 @@
 # 0013. Dos modos de disparo permanentes
 
-**Estado:** aceptada por el dueño del producto, Hito 3. Cierra la prueba abierta en la ADR 0011.
+**Estado:** reemplazada por la ADR 0062 (17 de noviembre de 2026), que deja un solo modo, por toque. Antes, aceptada por el dueño del producto, Hito 3. Cierra la prueba abierta en la ADR 0011.
 
 ## Contexto
 La ADR 0011 dejó un selector temporal para comparar "por toque" y "acelerar es atacar". Tras probarlos en su teléfono, el dueño decidió mantener ambos.

@@ -1,4 +1,4 @@
-import type { DiffKey, FireMode } from './config';
+import type { DiffKey, SavedFireMode } from './config';
 import type { FrameSummary } from './frames';
 
 /*
@@ -12,7 +12,7 @@ const VERSION = 1;
 const MAX_FIGHTS = 300;
 
 export interface FightRecord {
-  stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: FireMode; bestCombo?: number;
+  stage: string; dk: DiffKey; win: boolean; t: number; at: string; fireMode?: SavedFireMode; bestCombo?: number;
   // contexto para comparar peleas (opcionales: los registros viejos no los tienen)
   build?: string; test?: boolean; upgrades?: Record<string, number>; bossPct?: number;
   gross?: number; fines?: number; earned?: number; replay?: boolean; tolls?: number;
@@ -25,14 +25,15 @@ export interface FightRecord {
 }
 // Contexto de un récord (ADR 0037): con qué se hizo y cuánto aportó cada parte, para explicarlo aunque cambie el balance.
 export interface ScoreCtx {
-  points: number; v: number; mode?: FireMode; dk: DiffKey; upgrades: Record<string, number>; build?: string; at?: string;
+  points: number; v: number; mode?: SavedFireMode; dk: DiffKey; upgrades: Record<string, number>; build?: string; at?: string;
   parts: Record<string, number>;
 }
 // hints: false si el jugador apagó las ayudas en el menú (ADR 0039); por defecto salen
 // share: false si el jugador apagó el envío de datos anónimos (ADR 0051); dataNotice: ya vio el aviso; tester: etiqueta
 // del equipo de pruebas puesta con ?tester=nombre
 export interface Settings {
-  fireMode?: FireMode; stageId?: string; dk?: DiffKey; playerName?: string; hints?: boolean; share?: boolean; dataNotice?: boolean; tester?: string;
+  // fireMode ya no se lee: queda en guardados viejos (ADR 0062)
+  fireMode?: SavedFireMode; stageId?: string; dk?: DiffKey; playerName?: string; hints?: boolean; share?: boolean; dataNotice?: boolean; tester?: string;
 }
 // v1 admite `settings` y los campos opcionales de las peleas sin cambiar de versión: los datos viejos siguen siendo válidos
 // progress.unlocked: número de la etapa más avanzada desbloqueada (las etapas se juegan en orden)
@@ -72,7 +73,7 @@ export function recordFight(f: Omit<FightRecord, 'at'>): void {
 export interface FightStats { played: number; wins: number; median: number | null }
 
 // Resumen de las peleas registradas en este dispositivo para una etapa y dificultad (y modo de disparo, si se indica).
-export function fightStats(stage: string, dk: DiffKey, fireMode?: FireMode): FightStats {
+export function fightStats(stage: string, dk: DiffKey, fireMode?: SavedFireMode): FightStats {
   const all = load().fights.filter((f) => f.stage === stage && f.dk === dk && (!fireMode || f.fireMode === fireMode));
   const ts = all.filter((f) => f.win).map((f) => f.t).sort((a, b) => a - b);
   const mid = ts.length >> 1;

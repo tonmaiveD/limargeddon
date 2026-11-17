@@ -2,9 +2,10 @@
 
 export type DiffKey = 'facil' | 'normal' | 'dificil';
 // Cómo se lanzan los conos. 'mantener': mantener el botón dispara a cadencia fija (prototipo v3).
-// 'toque': cada toque lanza un cono, con una reserva que se recarga. 'acelerar': se disparan solos mientras se acelera.
-export type FireMode = 'mantener' | 'toque' | 'acelerar';
-export const FIRE_MODES: readonly FireMode[] = ['toque', 'acelerar'];
+// 'toque': cada toque lanza un cono, con una reserva que se recarga. 'mantener' es el del prototipo y solo lo usa la prueba
+// de paridad. "Acelerar es atacar" se retiró (ADR 0062); los guardados y datos viejos pueden traerlo (ver SavedFireMode).
+export type FireMode = 'mantener' | 'toque';
+export type SavedFireMode = FireMode | 'acelerar';
 
 export type PowerKey = 'turbo' | 'cancha' | 'soat' | 'combi' | 'picaron' | 'metro';
 

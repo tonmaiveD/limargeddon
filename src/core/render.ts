@@ -235,7 +235,7 @@ function drawHUD(g: Gfx, G: Game): void {
       const x = 170 + i * 52;
       // por toque, la barra de los conos muestra la reserva en vez del cooldown
       const f = k === 'cone' && tap ? 1 - p.ammo / maxAmmo : clamp(p.cd[k] / max, 0, 1);
-      const label = k === 'cone' && G.fireMode === 'acelerar' ? '↑ CONOS' : key + ' ' + lab;
+      const label = key + ' ' + lab;
       g.fillStyle = '#2b2238'; g.fillRect(x, H - 19, 46, 12);
       g.fillStyle = col; g.globalAlpha = f > 0 ? 0.35 : 1; g.fillRect(x, H - 19, 46 * (1 - f), 12); g.globalAlpha = 1;
       g.fillStyle = f > 0 ? C.muted : C.bg; g.font = BODY(800, 8); g.textAlign = 'center'; g.fillText(label, x + 23, H - 10);

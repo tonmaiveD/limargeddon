@@ -39,7 +39,6 @@ describe('Mejoras en todas las etapas', () => {
       const all: Levels = Object.fromEntries(UPGRADES.map((u) => [u.id, u.levels.length]));
       for (const u of UPGRADES) run(id, { [u.id]: u.levels.length }, 'toque');
       run(id, all, 'toque');
-      run(id, all, 'acelerar');
     });
   }
 });
