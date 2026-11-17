@@ -7,6 +7,8 @@
  * - Línea Amarilla, créditos y resultados: la primera vez no se saltan, después sí, y "Ver créditos" vuelve al menú.
  * - Créditos recargados a medias, un error en un cuadro de los créditos y el audio que vuelve solo (ADR 0058).
  * - Pausa en los créditos con toques reales, "Continuar" sin saltar y "Ver después" a los resultados (ADR 0059).
+ * - Los créditos completos, con el reloj acelerado, todas las mejoras y el audio cortado a mitad del desfile, y el
+ *   registro anónimo de cómo terminaron (ADR 0060).
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
@@ -52,7 +54,12 @@ async function connect(wsUrl) {
 // Guarda el AudioContext del juego en window.__ac, para cortarlo en las pruebas.
 const HELPERS = `
 { const A = window.AudioContext; if (A) window.AudioContext = class extends A { constructor(...a) { super(...a); window.__ac = this; } }; }
+window.__errors = [];
+{ const e = console.error.bind(console); console.error = (...a) => { __errors.push(a.map(String).join(' ')); e(...a); }; }
+addEventListener('error', (ev) => __errors.push(String(ev.message)));
 window.__t = {
+  // registros de créditos anotados para enviar (el receptor está bloqueado, así que quedan en la cola)
+  creditos: () => JSON.parse(localStorage.getItem('limargeddon.datos') || '[]').filter((e) => e.kind === 'creditos'),
   scenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
   visible: (id) => { const e = document.getElementById(id); return !!e && !e.hidden && !e.closest('[hidden]'); },
   deck: () => !document.body.classList.contains('sin-deck'),
@@ -166,6 +173,9 @@ const TOURS = {
     await tap(p, 'quit');
     await until(() => p.page('return !__t.scenes().includes("Credits") && __t.visible("end")'), 10000, 'los resultados tras "Ver después"');
     ok(await p.page('return __t.save().credits !== true && __t.save().creditsOpened === true'), '"Ver después" la primera vez no los da por vistos');
+    const [c] = await p.page('return __t.creditos()');
+    ok(c && c.from === 'victoria' && c.first === true && c.end === 'despues' && c.reached >= 1 && c.skips === 0, 'el registro anónimo dice que salieron con "Ver después" la primera vez');
+    ok(await p.page('return localStorage.getItem("limargeddon.creditos") === null'), 'al salir no queda borrador de créditos');
   },
 
   async 'pausa en los créditos: continuar sin saltar y "Ver después" a los resultados'(p) {
@@ -207,6 +217,8 @@ const TOURS = {
     await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
     await run(p, '(__t.enter(), !__t.scenes().includes("Credits") && __t.visible("end"))', 20000, 'saltar los créditos lleva a los resultados');
     ok(true, 'saltar los créditos lleva a los resultados');
+    const sk = (await p.page('return __t.creditos()')).at(-1);
+    ok(sk && sk.end === 'saltado' && sk.skips === 2 && sk.first === false, 'el registro anónimo cuenta los dos saltos');
   },
 
   async 'créditos empezados y recargados: el menú ofrece "Ver créditos" y siguen sin saltarse'(p) {
@@ -219,6 +231,8 @@ const TOURS = {
     await sleep(500);
     await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
     ok(await p.page('return __t.visible("toCredits")'), 'tras recargar a los 10 s, el menú ofrece "Ver créditos"');
+    const [gone] = await p.page('return __t.creditos()');
+    ok(gone && gone.end === 'salida' && gone.from === 'victoria' && gone.reached >= 7, `los créditos recargados a mitad llegan como "salida" al abrir otra vez (hasta ${gone?.reached} s)`);
     await p.page('__t.click("toCredits"); return true');
     await waitScene(p, 'Credits');
     await run(p, 'game.scene.getScene("Credits").t >= 1', 20000, 'los créditos corren');
@@ -235,6 +249,36 @@ const TOURS = {
     await p.page('const C = game.scene.getScene("Credits"); const boom = () => { throw new Error("prueba de la red de seguridad") }; C.drawTakeoff = C.drawDistrict = C.drawClosing = C.drawPost = boom; return true');
     await run(p, '!__t.scenes().includes("Credits") && __t.visible("end")', 20000, 'los resultados tras el error');
     ok(true, 'un error en un cuadro de los créditos termina la escena y muestra los resultados');
+    ok((await p.page('return __t.creditos()')).some((c) => c.end === 'error'), 'el registro anónimo anota el error');
+  },
+
+  async 'créditos completos: reloj acelerado, mejoras al máximo y audio cortado a mitad del desfile'(p) {
+    // empezados pero no vistos, así no se pueden saltar y tienen que recorrerse enteros
+    await fresh(p, { ...SAVE({ unlocked: 10 }), creditsOpened: true });
+    await p.page(`const { UPGRADES } = await import('/src/garage/upgrades.ts'), s = __t.save();
+      s.garage.levels = Object.fromEntries(UPGRADES.map((u) => [u.id, u.levels.length])); localStorage.setItem('limargeddon.save', JSON.stringify(s)); return true`);
+    await p.page('__t.click("toCredits"); return true');
+    await waitScene(p, 'Credits');
+    // anota los títulos que se dibujan, para saber si llegó a "CONTINUARÁ"
+    await p.page(`const C = game.scene.getScene('Credits'), T = C.title.bind(C); window.__titles = new Set();
+      C.title = (g, text, ...r) => { __titles.add(text); return T(g, text, ...r); }; return true`);
+    const end = await p.page(`const { TEXT } = await import('/src/core/credits.ts'); return TEXT.post.end`);
+    // el desfile a toda velocidad; en el segundo 30 se corta el audio y vuelve diez segundos de juego después
+    await run(p, '__t.t() >= 30', 60000, 'el desfile hasta el segundo 30');
+    // el corte de la auditoría (C01): el audio se suspende y además su reloj queda quieto, como si figurara activo
+    await p.page(`await __ac.suspend(); const { Sfx } = await import('/src/core/audio/sfx.ts'); window.__mt = Sfx.medleyTime;
+      const v = Sfx.medleyTime() ?? __t.t(); Sfx.medleyTime = () => v; return true`);
+    const moved = await p.page('const a = __t.t(); __t.adelantar(300); return __t.t() - a');
+    ok(moved >= 3, `con el audio cortado la imagen sigue avanzando (${moved.toFixed(1)} s en 5 s de juego)`);
+    await p.page(`const { Sfx } = await import('/src/core/audio/sfx.ts'); Sfx.medleyTime = __mt; await __ac.resume(); return true`);
+    await run(p, '!__t.scenes().includes("Credits")', 120000, 'el final de los créditos');
+    ok(await p.page(`return __titles.has(${JSON.stringify(end)}) && __t.visible("menu")`), `los créditos llegan hasta "${end}" y vuelven al menú`);
+    ok(await p.page('return __t.save().credits === true'), 'al terminarlos quedan vistos');
+    const errs = await p.page('return __errors');
+    ok(!errs.length, `sin errores en la consola${errs.length ? ` (${errs[0]})` : ''}`);
+    const c = (await p.page('return __t.creditos()')).at(-1);
+    ok(c && c.end === 'completo' && c.from === 'menu' && c.first === true && c.reached >= 80, 'el registro anónimo dice que se vieron completos desde el menú');
+    ok(c.maxStall < 1, `el registro no muestra la imagen quieta (mayor rato ${c.maxStall} s)`);
   },
 
   async 'el audio cortado se reanuda solo al volver a la página'(p) {

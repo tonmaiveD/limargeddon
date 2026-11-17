@@ -5,6 +5,7 @@
  *   modo de disparo. Las peleas sin modo (las que llegaron antes del PR #54) van como "desconocido", sin suponer ninguno.
  * - "Salidas al menú" son los abandonos: volver al menú a mitad de pelea. Cerrar la app no se registra.
  * - Las victorias en menos de 10 s son pruebas forzadas y quedan fuera, contadas aparte.
+ * - Créditos (ADR 0060): cómo terminaron y el mayor rato con la imagen quieta, por origen y por si era la primera vez.
  * - No hay jugadores únicos ni seguimiento de una persona, por diseño: todo se cuenta por partida.
  * Opciones: --desde AAAA-MM-DD, --build <versión>, --archivo <descarga.json> (sin red, desde una descarga guardada).
  * La lógica es pura (`report`) para probarla sin red; la descarga y los archivos solo corren al llamarlo desde la consola.
@@ -12,11 +13,12 @@
 
 export interface Frames { play?: { n: number; p95: number; p99: number; over33: number } | null; stallCount?: number; anomalies?: number[] }
 export interface Ev {
-  kind: 'pelea' | 'abandono' | 'compra'; build: string; day: string; device: string; tester?: string;
+  kind: 'pelea' | 'abandono' | 'compra' | 'creditos'; build: string; day: string; device: string; tester?: string;
   stage?: string; dk?: string; fireMode?: string; win?: boolean; t?: number; bossPct?: number; gross?: number; fines?: number;
   lastHit?: string; dmgBy?: Record<string, number>; frames?: Frames; phase?: number; hpPct?: number;
   upgrades?: Record<string, number>; walletStart?: number; cheapest?: number;
   upgrade?: string; level?: number; price?: number; wallet?: number;
+  from?: string; first?: boolean; reached?: number; maxStall?: number; skips?: number; end?: string;
 }
 export interface Stage { id: string; name: string }
 export interface Opts { since?: string; build?: string; stages?: Stage[]; now?: string }
@@ -123,6 +125,22 @@ function smooth(ev: Ev[]): string {
     '', 'Objetivo: p95 de hasta 20 ms y p99 de hasta 33,3 ms (ADR 0045). Una pelea con anomalías (intervalos de más de 5 s) no sirve para aprobar fluidez.'].join('\n');
 }
 
+// Créditos (ADR 0060). Un rato de más de 1 s con la imagen quieta, fuera de la pausa, es un cuelgue que se nota.
+export const STALL_S = 1;
+const ENDS = ['completo', 'saltado', 'despues', 'salida', 'error'];
+function credits(ev: Ev[]): string {
+  const c = ev.filter((e) => e.kind === 'creditos');
+  const rows = [...groupBy(c, (e) => `${e.from}|${e.first ? 'primera' : 'repetida'}`)].sort(([a], [b]) => a.localeCompare(b)).map(([k, g]) => {
+    const [from, vez] = k.split('|');
+    return [from === 'victoria' ? 'Victoria' : 'Menú', vez === 'primera' ? 'Primera' : 'Repetida', `${g.length}${few(g.length)}`,
+      ...ENDS.map((end) => `${g.filter((e) => e.end === end).length}`),
+      fmt(median(g.map((e) => e.reached ?? 0)), 1), fmt(median(g.map((e) => e.maxStall ?? 0)), 2), fmt(g.length ? Math.max(...g.map((e) => e.maxStall ?? 0)) : null, 2),
+      `${g.filter((e) => (e.maxStall ?? 0) > STALL_S).length}`];
+  });
+  return table(['Origen', 'Vez', 'Veces', 'Completos', 'Saltados', 'Ver después', 'Salidas', 'Errores', 'Llegaron hasta (s, mediana)',
+    'Imagen quieta (s, mediana)', 'Imagen quieta (s, máximo)', `Quieta más de ${STALL_S} s`], rows);
+}
+
 const DK = ['facil', 'normal', 'dificil'];
 
 function audience(title: string, ev: Ev[], name: (id: string) => string, order: (id: string) => number): string {
@@ -131,6 +149,7 @@ function audience(title: string, ev: Ev[], name: (id: string) => string, order: 
     '### Salidas al menú', '', 'Volver al menú a mitad de pelea. Cerrar la app no se registra.', '', exits(ev, name, order), '',
     '### Compras del taller', '', buys(ev), '',
     '### Derrotas y billetera', '', '¿Al que perdió le alcanzaba para una mejora? Solo las peleas que traen la billetera al empezar.', '', wallet(ev, name, order), '',
+    '### Créditos', '', 'Duran unos 84 s. "Salidas" son cierres o recargas a mitad, que llegan al abrir el juego otra vez. "Imagen quieta" es el mayor rato sin avanzar fuera de la pausa.', '', credits(ev), '',
     '### Fluidez por tipo de equipo', '', smooth(ev)].join('\n');
 }
 
@@ -143,7 +162,7 @@ export function report(all: Ev[], o: Opts = {}): string {
   const name = (id: string) => names.get(id)?.name ?? id;
   const order = (id: string) => names.get(id)?.i ?? 99;
   const days = ev.map((e) => e.day).sort();
-  const kinds = (xs: Ev[]) => ['pelea', 'abandono', 'compra'].map((k) => xs.filter((e) => e.kind === k).length);
+  const kinds = (xs: Ev[]) => ['pelea', 'abandono', 'compra', 'creditos'].map((k) => xs.filter((e) => e.kind === k).length);
   const pub = ev.filter((e) => !e.tester), team = ev.filter((e) => e.tester);
   const builds = [...groupBy(ev, (e) => e.build)].map(([b, g]) => {
     const d = g.map((e) => e.day).sort();
@@ -151,7 +170,7 @@ export function report(all: Ev[], o: Opts = {}): string {
     return [b, d[0] === d[d.length - 1] ? d[0] : `${d[0]} a ${d[d.length - 1]}`, `${p}`, `${a}`, `${c}`];
   }).sort((x, y) => x[1].localeCompare(y[1]));
   const unknown = ev.filter((e) => e.kind === 'pelea' && !e.fireMode).length;
-  const [p, a, c] = kinds(ev), [pp, pa, pc] = kinds(pub), [tp, ta, tc] = kinds(team);
+  const [p, a, c, r] = kinds(ev), [pp, pa, pc, pr] = kinds(pub), [tp, ta, tc, tr] = kinds(team);
   return [
     '# Informe de datos anónimos', '',
     `Generado el ${o.now ?? new Date().toISOString().slice(0, 10)}. ${days.length ? `Partidas del ${days[0]} al ${days[days.length - 1]}.` : 'Sin partidas.'}` +
@@ -159,7 +178,7 @@ export function report(all: Ev[], o: Opts = {}): string {
     'Todo se cuenta por partida: los datos no permiten saber cuántas personas jugaron ni seguir a una. ' +
       `Los porcentajes con menos de ${FEW} peleas van marcados como "(pocas)".`, '',
     '## Resumen', '',
-    table(['', 'Peleas', 'Salidas al menú', 'Compras'], [['Público', `${pp}`, `${pa}`, `${pc}`], ['Equipo de pruebas', `${tp}`, `${ta}`, `${tc}`], ['Total', `${p}`, `${a}`, `${c}`]]), '',
+    table(['', 'Peleas', 'Salidas al menú', 'Compras', 'Créditos'], [['Público', `${pp}`, `${pa}`, `${pc}`, `${pr}`], ['Equipo de pruebas', `${tp}`, `${ta}`, `${tc}`, `${tr}`], ['Total', `${p}`, `${a}`, `${c}`, `${r}`]]), '',
     ...(dropped ? [`${dropped} ${dropped === 1 ? 'victoria' : 'victorias'} en menos de ${MIN_WIN_S} s quedan fuera, porque son pruebas forzadas y no partidas.`, ''] : []),
     ...(unknown ? [`${unknown} ${unknown === 1 ? 'pelea llegó' : 'peleas llegaron'} sin modo de disparo (antes del PR #54). Van como modo "desconocido".`, ''] : []),
     '### Versiones del juego', '', table(['Versión', 'Días', 'Peleas', 'Salidas', 'Compras'], builds), '',
