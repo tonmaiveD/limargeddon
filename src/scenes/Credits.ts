@@ -6,7 +6,7 @@ import { BODY, FONT, type Gfx } from '../core/gfx';
 import { beginLayers, createLayers, drawMarea, drawTico, endLayers, setWarp, type Layers } from '../core/render';
 import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
-import { keys } from '../core/input';
+import { keys, pauseHook } from '../core/input';
 import { Sfx } from '../core/audio/sfx';
 import { bakePlane } from '../core/art/bosses';
 import { ART_SCALE } from '../core/art/vehicles';
@@ -24,6 +24,7 @@ import { STAGES, TEST_MODE } from '../stages';
  *   jefe. Arriba, la ficha de reparto y lo que pasó después. Los roles y nombres van pintados en el asfalto.
  * - Cierre: de vuelta al avión, "Gracias por manejar" y los agradecimientos especiales.
  * - Poscrédito: el vuelo regresa a Lima, el Tico baja por la rampa a la Vía de Evitamiento y la marea lo espera.
+ * Se pueden pausar desde la primera vez, con "Continuar" y "Ver después" (ADR 0059). Salir no es saltar.
  * La primera vez no se saltan. Después, un toque en la pantalla (o Enter) salta los créditos y otro el poscrédito; los
  * controles de manejo y el claxon no saltan. La narración sigue al reloj de la música y se pausa con ella al salir de la
  * app. No tocan cobro, puntaje, ranking ni medallas.
@@ -37,6 +38,7 @@ const SPEED = 210; // avance de la pista en el desfile
 const PAINT_W = 240; // ancho máximo de un nombre pintado en el asfalto
 const PLANE = STAGES['linea-amarilla'].cfg.route!.plane!;
 const PLANE_KEY = `carguero-${PLANE.w}-${PLANE.h}`;
+const $ = (id: string) => document.getElementById(id)!;
 
 export class CreditsScene extends Phaser.Scene {
   private L!: Layers;
@@ -69,8 +71,17 @@ export class CreditsScene extends Phaser.Scene {
     this.tico = createGame(applyUpgrades(la.cfg, getGarage().levels), 'normal', newKeys(), la.ai);
     Object.assign(keys, newKeys());
     Sfx.init(); Sfx.engine(0); if (this.d.at === undefined) Sfx.music(true, 'creditos');
-    this.paused = false; this.clock = newClock();
+    this.paused = false; this.userPaused = false; this.clock = newClock();
     this.press = null; this.guardUntil = 0;
+    // pausa con el botón de la pelea, P o Escape, desde la primera vez (C02b, ADR 0059). En el panel, "Ver después"
+    // reemplaza a "Salir al menú" y sigue a los resultados o al menú. El botón baja a la esquina inferior derecha para
+    // no tapar la ficha de reparto
+    const btn = $('pauseBtn') as HTMLButtonElement, quit = $('quit') as HTMLButtonElement;
+    if (this.d.at === undefined) { btn.hidden = false; btn.onclick = () => this.pauseByUser(true); }
+    ($('resume') as HTMLButtonElement).onclick = () => this.pauseByUser(false);
+    quit.textContent = 'Ver después'; quit.onclick = () => this.later();
+    pauseHook.toggle = () => this.pauseByUser(!this.paused);
+    document.body.classList.add('en-creditos');
     addEventListener('pointerdown', this.onDown); addEventListener('pointerup', this.onUp); addEventListener('pointercancel', this.onCancel);
     addEventListener('keydown', this.onKey);
     // al salir de la app, imagen y música se detienen juntas y siguen juntas al volver (U02). Solo cuenta salir de verdad
@@ -82,6 +93,8 @@ export class CreditsScene extends Phaser.Scene {
       removeEventListener('keydown', this.onKey);
       document.removeEventListener('visibilitychange', this.onVisibility);
       removeEventListener('focus', this.onReturn); removeEventListener('pageshow', this.onReturn);
+      pauseHook.toggle = null; btn.hidden = true; $('pause').hidden = true; quit.textContent = 'Salir al menú';
+      document.body.classList.remove('en-creditos');
       Sfx.hold(false); Sfx.music(false);
     });
   }
@@ -89,15 +102,26 @@ export class CreditsScene extends Phaser.Scene {
   private paused = false;
   private clock: Clock = newClock();
   private lastSeek = 0;
+  private userPaused = false; // la pausó el jugador: volver a la app no la levanta sola
+  private pauseByUser(v: boolean): void {
+    if (this.d.at !== undefined || this.finished) return;
+    this.userPaused = v; this.setPaused(v);
+  }
   private setPaused(v: boolean): void {
     if (v === this.paused || this.finished) return;
-    this.paused = v; Sfx.hold(v);
-    if (v) { Object.assign(keys, newKeys()); return; } // sin controles pegados al volver
+    this.paused = v; Sfx.hold(v); $('pause').hidden = !v;
+    this.press = null; // el toque que abrió o cerró la pausa no salta
+    if (v) { Object.assign(keys, newKeys()); ($('resume') as HTMLButtonElement).focus(); return; } // sin controles pegados al volver
     // al seguir, imagen y música retoman desde el mismo instante en que se pausó (V04, ADR 0057)
     this.clock = resumed(this.clock);
     if (this.t < POST_START) Sfx.seek(this.t);
   }
-  private onVisibility = () => { if (!document.hidden) this.onReturn(); this.setPaused(document.hidden); };
+  private onVisibility = () => {
+    if (document.hidden) { this.setPaused(true); return; }
+    this.onReturn(); if (!this.userPaused) this.setPaused(false);
+  };
+  // "Ver después": termina aquí y sigue a los resultados o al menú. No marca los créditos como vistos
+  private later(): void { this.finish(); }
   // al volver la pantalla al juego, los toques del momento son del sistema (cerrar el centro de control), no para saltar
   private press: Press | null = null;
   private guardUntil = 0;
@@ -106,9 +130,9 @@ export class CreditsScene extends Phaser.Scene {
   // El primer medio segundo no cuenta para saltar: es el toque que cerró la escena anterior.
   private canSkipNow(): boolean { return this.skippable && this.t >= 0.5; }
 
-  // en pausa, cualquier toque la levanta (y no salta nada); si no, se anota dónde bajó el dedo
+  // en pausa los toques son del panel y no saltan nada; si no, se anota dónde bajó el dedo
   private onDown = (e: PointerEvent) => {
-    if (this.paused) { if (!document.hidden) this.setPaused(false); this.press = null; return; }
+    if (this.paused) { this.press = null; return; }
     const onControls = !!(e.target as Element | null)?.closest?.('#deck, button, a, input, dialog, form');
     this.press = isSkipInput({ kind: 'pointer', onControls }) ? { x: e.clientX, y: e.clientY, at: performance.now() } : null;
   };
@@ -119,9 +143,9 @@ export class CreditsScene extends Phaser.Scene {
     if (isTap(down, { x: e.clientX, y: e.clientY, at: performance.now() }, this.guardUntil)) this.skip();
   };
   private onCancel = () => { this.press = null; }; // el sistema se llevó el gesto
-  // Enter salta; cualquier tecla levanta la pausa
+  // Enter salta; en pausa las teclas son del panel (P y Escape la levantan, Enter pulsa el botón elegido)
   private onKey = (e: KeyboardEvent) => {
-    if (this.paused) { if (!document.hidden) this.setPaused(false); return; }
+    if (this.paused) return;
     if (this.canSkipNow() && isSkipInput({ kind: 'key', key: e.key })) this.skip();
   };
   private skip(): void {
@@ -132,6 +156,7 @@ export class CreditsScene extends Phaser.Scene {
   private finish(): void {
     if (this.finished) return;
     this.finished = true;
+    if (this.paused) { this.paused = false; Sfx.hold(false); $('pause').hidden = true; } // "Ver después" desde la pausa
     Sfx.music(false);
     try { this.d.done(this); } catch (e) { console.error('Créditos: no se pudo seguir a la escena siguiente', e); this.scene.start('Menu'); }
   }
@@ -153,7 +178,7 @@ export class CreditsScene extends Phaser.Scene {
   }
 
   private frame(delta: number): void {
-    // en pausa no avanza nada, pero se sigue dibujando el aviso para tocar y seguir
+    // en pausa no avanza nada y el panel de pausa queda encima
     // el manejo y el avance de la pista usan un paso con tope; la narración, el reloj de la música (U02)
     const frozen = this.d.at !== undefined, paused = this.paused, dt = frozen || paused ? 0 : Math.min(0.05, delta / 1000);
     if (frozen) { this.t = Math.min(this.d.at!, CREDITS_SECONDS - 0.01); this.scroll = this.t * SPEED; }
@@ -173,16 +198,8 @@ export class CreditsScene extends Phaser.Scene {
     else if (part.kind === 'distrito') this.drawDistrict(part, dt);
     else if (part.kind === 'cierre') this.drawClosing(part);
     else this.drawPost(part);
-    if (paused) this.pausedNotice(L.ui);
-    else if (this.skippable && this.t > 0.5) { L.ui.globalAlpha = 0.6; L.ui.fillStyle = '#fff'; L.ui.font = BODY(700, 10); L.ui.textAlign = 'center'; L.ui.fillText('Toca para saltar', W / 2, H - 14); L.ui.globalAlpha = 1; }
+    if (!paused && this.skippable && this.t > 0.5) { L.ui.globalAlpha = 0.6; L.ui.fillStyle = '#fff'; L.ui.font = BODY(700, 10); L.ui.textAlign = 'center'; L.ui.fillText('Toca para saltar', W / 2, H - 14); L.ui.globalAlpha = 1; }
     endLayers(this.L);
-  }
-
-  // aviso de pausa: oscurece la escena y pide un toque para seguir
-  private pausedNotice(g: Gfx): void {
-    g.globalAlpha = 0.6; g.fillStyle = '#000'; g.fillRect(-view.extra - 10, -10, W + 2 * view.extra + 20, H + 20); g.globalAlpha = 1;
-    g.fillStyle = '#ffe14d'; g.font = FONT(16); g.textAlign = 'center'; g.fillText('EN PAUSA', W / 2, H / 2 - 6);
-    g.fillStyle = '#ffffff'; g.font = BODY(700, 12); g.fillText('Toca para seguir', W / 2, H / 2 + 18);
   }
 
   /* ---------- Lima desde el aire ---------- */

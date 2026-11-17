@@ -16,6 +16,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidd
 #stage canvas{display:block;width:100% !important;height:100% !important;margin:0 !important;border-radius:6px;box-shadow:0 0 0 2px var(--pink),0 0 28px rgba(255,46,136,.35);background:#15111d}
 #pauseBtn{position:absolute;top:48px;right:6px;z-index:2;width:44px;height:44px;font:400 13px/1 var(--display);background:rgba(14,10,22,.7);color:var(--yellow);border:0;border-radius:8px;cursor:pointer;touch-action:manipulation}
 #pauseBtn[hidden]{display:none}
+/* en los créditos, abajo a la derecha, lejos de la ficha de reparto (ADR 0059) */
+body.en-creditos #pauseBtn{top:auto;bottom:8px}
 button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#stage canvas{box-shadow:0 0 0 2px var(--pink)}}
 
