@@ -10,6 +10,7 @@
  * - Los créditos completos, con el reloj acelerado, todas las mejoras y el audio cortado a mitad del desfile, y el
  *   registro anónimo de cómo terminaron (ADR 0060).
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
+ * - El aviso de reversa en San Isidro suena y vibra, y sin sonido no vibra (ADR 0061).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
  * Uso: `npm run escenas`. Chrome se busca en CHROME o en las rutas habituales.
@@ -155,6 +156,27 @@ const TOURS = {
     await p.page('__t.click("quit"); return true');
     await waitScene(p, 'Menu');
     ok(await p.page('return __t.visible("menu") && !__t.deck()'), 'salir desde la pausa vuelve al menú sin controles táctiles');
+  },
+
+  async 'aviso de reversa en San Isidro: alarma propia y vibración, que se apaga con el sonido'(p) {
+    await fresh(p, SAVE({ unlocked: 2 }));
+    await play(p);
+    // anota los sonidos y las vibraciones
+    await p.page(`const { Sfx } = await import('/src/core/audio/sfx.ts'); window.__snd = []; const play = Sfx.play.bind(Sfx);
+      Sfx.play = (n, l) => { __snd.push(n); return play(n, l); }; window.__vib = []; navigator.vibrate = (ms) => (__vib.push(ms), true); return true`);
+    // fase 2 (reversa) sin tráfico, y el próximo ataque ya
+    const reverse = async () => {
+      await p.page('const S = __t.stage(), G = S.G; G.traffic.length = 0; G.p.pw.soat = 999; G.b.hp = G.b.max * 0.5; __snd.length = 0; __vib.length = 0; return true');
+      await run(p, '(() => { const b = __t.stage().G.b; if (b.state === "cruise") b.act = 0; return b.state === "teleRev" || b.state === "rev"; })()', 20000, 'el aviso de reversa');
+    };
+    await reverse();
+    ok(await p.page('return __snd.includes("alarm") && !__snd.includes("bossHorn")'), 'el aviso de reversa tiene su propio sonido, distinto del claxon');
+    ok(await p.page('return __vib.length === 1 && __vib[0] > 0 && __vib[0] <= 200'), 'el aviso de reversa vibra una vez, corto');
+    await p.page(`const { Sfx } = await import('/src/core/audio/sfx.ts'); if (Sfx.on) Sfx.toggle(); __t.stage().G.b.state = 'return'; return true`);
+    await run(p, '__t.stage().G.b.state === "cruise"', 20000, 'el jefe vuelve a su lugar');
+    await reverse();
+    ok(await p.page('return __vib.length === 0'), 'con el sonido apagado no vibra');
+    await p.page(`const { Sfx } = await import('/src/core/audio/sfx.ts'); if (!Sfx.on) Sfx.toggle(); return true`);
   },
 
   async 'Línea Amarilla: aparecen los créditos y la primera vez no se saltan'(p) {

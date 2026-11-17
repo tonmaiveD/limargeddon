@@ -18,6 +18,12 @@ function setSnd(): void {
   });
 }
 
+// Vibración corta donde exista (Android; iOS no la tiene). Se apaga con el sonido (ADR 0061).
+export function buzz(ms: number): void {
+  if (!Sfx.on) return;
+  try { globalThis.navigator?.vibrate?.(ms); } catch { /* sin vibración */ }
+}
+
 // La escena activa registra aquí qué hacer con la tecla de pausa (P o Escape).
 export const pauseHook: { toggle: (() => void) | null } = { toggle: null };
 

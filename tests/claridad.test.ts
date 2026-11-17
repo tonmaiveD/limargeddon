@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { startPort, stepPort } from './harness/port';
 import { seedRandom } from './harness/rng';
 import { STAGES } from '../src/stages';
-import { dmgBoss, hurt } from '../src/core/state';
+import { dmgBoss, fine, hurt } from '../src/core/state';
 import { makeCar, summarize } from '../src/core/world';
 import type { Game } from '../src/core/state';
 
@@ -48,4 +48,17 @@ describe('claridad del combate', () => {
     const P = STAGES['san-isidro'].cfg.boss.phases.find((p) => p.attack === 'reverse')!;
     expect(P.teleOff).toBeGreaterThanOrEqual(0.35);
   });
+
+  // U4 (ADR 0061): el HUD sabe cuál fue la última papeleta, su causa y cuánto costó; las perdonadas no cuentan
+  it('anota la última papeleta con su causa y su monto, para el contador del HUD', () => withSeed(5, () => {
+    const G = game('miraflores');
+    G.perks = [];
+    expect(G.lastFine).toBeNull();
+    fine(G, G.p.x, G.p.y, 50, 'CLAXON');
+    expect(G.lastFine).toEqual({ why: 'CLAXON', amt: 50, t: G.t });
+    expect(G.fines).toBe(50);
+    G.cfg = { ...G.cfg, player: { ...G.cfg.player, privilege: true } }; // con el sticker nadie pone papeletas, y el contador no cambia
+    fine(G, G.p.x, G.p.y, 80, 'LUZ ROJA');
+    expect(G.lastFine?.why).toBe('CLAXON');
+  }));
 });

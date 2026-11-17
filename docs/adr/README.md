@@ -64,3 +64,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0058](0058-creditos-acceso-y-red.md) | Acceso a los créditos y red de seguridad | Aceptada |
 | [0059](0059-pausa-en-creditos.md) | Pausa en los créditos | Aceptada |
 | [0060](0060-creditos-pruebas-y-datos.md) | Créditos completos en las pruebas y datos anónimos de los créditos | Aceptada |
+| [0061](0061-lectura-de-amenaza.md) | Lectura de amenaza y de costo | Aceptada |
