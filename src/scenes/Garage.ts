@@ -70,7 +70,7 @@ export class GarageScene extends Phaser.Scene {
     // por qué se recomienda lo que se recomienda
     const P = picks(levels, wallet, unlocked), nameOf = (id?: string) => UPGRADES.find((u) => u.id === id)?.name;
     const why = [P.ataque && `Para atacar, <b>${nameOf(P.ataque)}</b>.`, P.aguante && `Para aguantar, <b>${nameOf(P.aguante)}</b>.`].filter(Boolean).join(' ');
-    $('gWhy').innerHTML = why ? `${why} Elegidas por las pruebas con tu modo de disparo.` : '';
+    $('gWhy').innerHTML = why ? `${why} Elegidas por las pruebas.` : '';
     // objetos de victoria y dónde sirve cada uno
     const items = wonItems(unlocked), it = $('gItems');
     it.hidden = !items.length;
@@ -90,7 +90,9 @@ export class GarageScene extends Phaser.Scene {
       const tag = u.id === P.ataque ? '<em>PARA ATACAR</em>' : u.id === P.aguante ? '<em class="def">PARA AGUANTAR</em>' : '';
       card.className = 'upg' + (tag ? ' rec' : '') + (u.id === bought ? ' flash' : '') + (locked ? ' locked' : '');
       const pips = u.levels.map((_, i) => `<i class="${i < lvl ? 'on' : ''}"></i>`).join('');
-      card.innerHTML = `<h3>${u.name}${tag}</h3><div class="lv">${pips}</div><p>${next ? next.desc : 'Al máximo.'}${locked ? ` <b>Disponible desde la Etapa ${u.requires}.</b>` : ''}</p>`;
+      // U5 (ADR 0063): la que todavía no alcanza dice cuánto falta
+      const short = next && !locked && next.price > wallet ? ` <span class="falta">Te faltan ${money(next.price - wallet)}.</span>` : '';
+      card.innerHTML = `<h3>${u.name}${tag}</h3><div class="lv">${pips}</div><p>${next ? next.desc : 'Al máximo.'}${locked ? ` <b>Disponible desde la Etapa ${u.requires}.</b>` : ''}${short}</p>`;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = locked ? `Etapa ${u.requires}` : next ? money(next.price) : 'MÁX';

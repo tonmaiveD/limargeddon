@@ -66,3 +66,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0060](0060-creditos-pruebas-y-datos.md) | Créditos completos en las pruebas y datos anónimos de los créditos | Aceptada |
 | [0061](0061-lectura-de-amenaza.md) | Lectura de amenaza y de costo | Aceptada |
 | [0062](0062-un-solo-modo-de-disparo.md) | Un solo modo de disparo, por toque | Aceptada |
+| [0063](0063-menu-y-taller.md) | Menú con hoja de ajustes y taller que dice cuánto falta | Aceptada |

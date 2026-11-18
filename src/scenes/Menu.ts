@@ -60,11 +60,19 @@ export class MenuScene extends Phaser.Scene {
     label();
     name.onclick = () => openName(false, () => { label(); this.showStage(); }); // las medallas son del jugador (auditoría R04)
     document.getElementById('toRanking')!.onclick = () => openRanking();
+    // hoja de ajustes (ADR 0063): sonido, ayudas, jugador, créditos, datos, enlaces y "Empezar de nuevo" al fondo.
+    // Jugador y "Empezar de nuevo" abren sus diálogos encima; al salir del menú la hoja se cierra
+    const sheet = document.getElementById('settingsDlg')!, openBtn = document.getElementById('toSettings') as HTMLButtonElement;
+    const closeSheet = () => { sheet.hidden = true; };
+    sheet.hidden = true;
+    openBtn.onclick = () => { sheet.hidden = false; (document.getElementById('settingsClose') as HTMLButtonElement).focus(); };
+    document.getElementById('settingsClose')!.onclick = () => { closeSheet(); openBtn.focus(); };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, closeSheet);
     // créditos (ADR 0049 y 0058): el botón aparece desde que empezaron una vez, y siempre en el modo prueba
     const credits = document.getElementById('toCredits')!;
     credits.hidden = !(creditsOpened() || TEST_MODE);
     credits.onclick = () => {
-      Sfx.init(); document.getElementById('menu')!.hidden = true;
+      Sfx.init(); closeSheet(); document.getElementById('menu')!.hidden = true;
       const data: CreditsData = { from: 'menu', done: (cs) => cs.scene.start('Menu') };
       this.scene.start('Credits', data);
     };
