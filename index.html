@@ -69,9 +69,8 @@
           <div class="powers" id="menuPowers" aria-label="Bonus"></div>
         </details>
         <p class="tip small data-note" id="dataNote" hidden>Este juego envía datos anónimos de tus partidas para mejorarlo. Puedes apagarlo abajo. <button class="link" id="dataOk" type="button">Entendido</button></p>
-        <div class="row"><button class="link" id="toGarage" type="button">Taller</button><button class="link" id="toRanking" type="button">Ranking</button><button class="link" id="toCredits" type="button" hidden>Ver créditos</button><button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button></div>
-        <div class="row"><button class="link" id="toHintsOnOff" type="button" aria-pressed="true">Ayudas activadas</button><button class="link" id="toName" type="button">Jugador</button><button class="link" id="toReset" type="button">Empezar de nuevo</button></div>
-        <div class="row"><button class="link" id="toShare" type="button" aria-pressed="true">Datos anónimos activados</button><a class="link" href="privacidad.html" target="_blank" rel="noopener">Privacidad</a><a class="link" href="acerca.html" target="_blank" rel="noopener">Acerca del juego</a></div>
+        <!-- lo principal como botones; lo demás en la hoja de ajustes (ADR 0063) -->
+        <div class="row menu-main"><button class="pick alt" id="toGarage" type="button">Taller</button><button class="pick alt" id="toRanking" type="button">Ranking</button><button class="pick alt" id="toSettings" type="button" aria-haspopup="dialog">Ajustes</button></div>
         <div class="row"><button class="link" id="toMedley" type="button" hidden>Escuchar popurrí</button></div>
         <p class="keys desk">← → o A D para girar · ↑ o W para acelerar · Z conos · X aceite · C claxon · P pausa · M sonido</p>
         <!-- siempre a la vista, aunque el menú se desplace (auditoría UX en iPhone 15, ADR 0054) -->
@@ -91,6 +90,21 @@
           <button class="pick" id="gGo" type="button">Seguir</button>
           <button class="pick alt" id="gMenu" type="button">Menú</button>
         </div>
+      </div>
+      <!-- ajustes (ADR 0063): sonido, ayudas, jugador, créditos, datos y enlaces; "Empezar de nuevo" al fondo -->
+      <div class="overlay dialog" id="settingsDlg" role="dialog" aria-labelledby="settingsTitle" hidden>
+        <h2 id="settingsTitle">Ajustes</h2>
+        <button class="pick" id="settingsClose" type="button">Volver</button>
+        <div class="settings-list">
+          <button class="set-item snd-toggle" type="button" aria-pressed="true">♪ Sonido activado</button>
+          <button class="set-item" id="toHintsOnOff" type="button" aria-pressed="true">Ayudas activadas</button>
+          <button class="set-item" id="toName" type="button">Jugador</button>
+          <button class="set-item" id="toCredits" type="button" hidden>Ver créditos</button>
+          <button class="set-item" id="toShare" type="button" aria-pressed="true">Datos anónimos activados</button>
+          <a class="set-item" href="privacidad.html" target="_blank" rel="noopener">Privacidad</a>
+          <a class="set-item" href="acerca.html" target="_blank" rel="noopener">Acerca del juego</a>
+        </div>
+        <button class="set-item danger" id="toReset" type="button">Empezar de nuevo</button>
       </div>
       <!-- jugador, ranking y reinicio (ADR 0029): van encima del menú -->
       <form class="overlay dialog" id="nameDlg" hidden>

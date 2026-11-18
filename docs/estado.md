@@ -44,10 +44,11 @@
 - **Datos anónimos de partidas** (ADR 0051 y 0060): peleas, salidas al menú, compras y créditos, sin nombre ni identificador del equipo.
   - Se envían solos a un receptor estricto, salvo que el jugador lo apague en el menú.
   - La página `privacidad.html` explica qué se envía.
-- **UX vertical** (ADR 0054): el juego se diseña para jugar en vertical.
+- **UX vertical** (ADR 0054 y 0063): el juego se diseña para jugar en vertical.
   - Los controles táctiles solo se ven en el combate y los créditos.
-  - El menú tiene "Jugar etapa N" fijo abajo y la dificultad como selector.
-  - El taller deja comparar varias mejoras.
+  - El menú tiene "Jugar etapa N" fijo abajo, opaco y a todo el ancho, y la dificultad como selector.
+  - Taller, Ranking y Ajustes son botones. Lo demás está en la hoja de ajustes, con "Empezar de nuevo" al fondo.
+  - El taller deja comparar varias mejoras, sus categorías entran en el ancho y cada mejora dice cuánto falta.
 - **Vista de colisiones** (ADR 0045): con `?colisiones` en la dirección se ven las zonas de choque sobre el dibujo, con la forma de cada regla (ADR 0046).
 
 ## Motor (resumen)
@@ -99,7 +100,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 **Mientras tanto, lo que no depende de los datos:**
 - **Aparecer en Google** (ADR 0056, PR #63): título, descripción, imagen para compartir, datos estructurados, `acerca.html` y `sitemap.xml`. Con la etiqueta de verificación de Search Console. Después del deploy se verifica, se envía el mapa del sitio y se pide la indexación.
-2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) quedó en el PR #68. La Fase 6 (un solo modo de disparo, ADR 0062) va en el PR #70. Falta probar la pausa con el dedo en un equipo real.
+2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) quedó en el PR #68. La Fase 6 (un solo modo de disparo, ADR 0062) quedó en el PR #70. La Fase 7 (menú con hoja de ajustes y taller que dice cuánto falta, ADR 0063) va en su propio PR. Falta probar la pausa con el dedo en un equipo real.
 3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
 
 **Después:**
@@ -148,6 +149,6 @@ Hechos, con su ADR:
 - Créditos (0048 a 0050, 0052, 0053 y 0057 a 0060).
 - Datos anónimos (0051, con V01 a V03 de la novena auditoría, el informe y la billetera, y 0060 para los créditos).
 - Pruebas de escenas (0055).
-- UX vertical (0054).
+- UX vertical (0054 y 0063).
 
 Las auditorías están en `docs/auditorias/`, de la segunda a la novena, más la de UX en iPhone 15 y las capturas consolidadas del 30 de octubre.

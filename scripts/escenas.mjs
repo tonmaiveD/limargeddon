@@ -12,6 +12,7 @@
  * - Los controles táctiles solo en la pelea y los créditos (ADR 0054).
  * - El aviso de reversa en San Isidro suena y vibra, y sin sonido no vibra (ADR 0061).
  * - Un guardado viejo en "acelerar es atacar" juega por toque y conserva su récord y medallas (ADR 0062).
+ * - Menú con Taller, Ranking y Ajustes, la hoja de ajustes, "Jugar" a la vista y el taller que dice cuánto falta (ADR 0063).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
  * Uso: `npm run escenas`. Chrome se busca en CHROME o en las rutas habituales.
@@ -200,6 +201,43 @@ const TOURS = {
     ok(await p.page('const s = __t.save(); return s.scores.PRUEBA.miraflores === 9100 && s.medals.PRUEBA.miraflores.includes("ciego")'), 'el récord y las medallas se conservan');
   },
 
+  async 'menú con hoja de ajustes, "Jugar" a la vista y taller que dice cuánto falta'(p) {
+    await fresh(p, { ...SAVE({ unlocked: 9, wallet: 450 }), creditsOpened: true });
+    const box = (id) => p.page(`const r = document.getElementById(${JSON.stringify(id)}).getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, bottom: r.bottom, right: r.right }`);
+    // "Jugar" sin desplazar, y la tarjeta tapa lo que se desplaza: en sus bordes y esquinas solo está la tarjeta
+    const play = await box('playBtn');
+    ok(play.y >= 0 && play.bottom <= 852, '"Jugar" se ve sin desplazar');
+    await p.page('const m = document.getElementById("menu"); m.scrollTop = m.scrollHeight / 2; return true');
+    const covered = await p.page(`const card = document.querySelector('.menu-play'), r = card.getBoundingClientRect();
+      const m = document.getElementById('menu').getBoundingClientRect(), mid = r.top + r.height / 2;
+      return [[r.left + 2, r.top + 24], [r.right - 2, r.top + 24], [r.left + 2, r.bottom - 2], [r.right - 2, r.bottom - 2], [r.left + r.width / 2, r.bottom - 2], [m.left + 3, mid], [m.right - 3, mid], [m.left + m.width / 2, m.bottom - 3]]
+        .every(([x, y]) => card.contains(document.elementFromPoint(x, y)))`);
+    ok(covered, 'nada del menú se ve debajo ni alrededor de la tarjeta de "Jugar"');
+    const bg = await p.page(`return getComputedStyle(document.querySelector('.menu-play')).backgroundImage`);
+    ok(/rgb\(14, 10, 22\)\)?/.test(bg), 'la tarjeta es opaca abajo');
+    await p.page('document.getElementById("menu").scrollTop = 0; return true');
+    // Taller, Ranking y Ajustes como botones; lo demás no está en el menú
+    for (const id of ['toGarage', 'toRanking', 'toSettings']) { const b = await box(id); ok(b.w >= 44 && b.h >= 44, `${id} es un botón de 44 px o más (${Math.round(b.w)}×${Math.round(b.h)})`); }
+    ok(await p.page('return ["toName", "toReset", "toShare", "toHintsOnOff", "toCredits"].every((id) => !__t.visible(id))'), 'jugador, datos, ayudas, créditos y reinicio no están en el menú');
+    // la hoja de ajustes, con "Empezar de nuevo" al fondo
+    await p.page('__t.click("toSettings"); return true');
+    ok(await p.page('return __t.visible("settingsDlg") && ["toName", "toShare", "toHintsOnOff", "toCredits", "toReset"].every((id) => __t.visible(id))'), 'la hoja de ajustes tiene jugador, datos, ayudas, créditos y reinicio');
+    ok(await p.page(`const items = [...document.querySelectorAll('#settingsDlg button, #settingsDlg a')].filter((e) => !e.closest('[hidden]'));
+      return items.at(-1).id === 'toReset' && items.every((e) => e.getBoundingClientRect().height >= 44)`), '"Empezar de nuevo" va al fondo y todo mide 44 px o más');
+    ok(await p.page('return [...document.querySelectorAll("#settingsDlg a")].map((a) => a.getAttribute("href")).join() === "privacidad.html,acerca.html"'), 'privacidad y acerca están en los ajustes');
+    // el diálogo del jugador se abre encima de la hoja
+    await p.page('__t.click("toName"); return true');
+    ok(await p.page(`const r = document.getElementById('nameDlg').getBoundingClientRect(); return document.getElementById('nameDlg').contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2))`), 'el diálogo del jugador queda encima de los ajustes');
+    await p.page('__t.click("nameCancel"); __t.click("settingsClose"); return true');
+    ok(await p.page('return !__t.visible("settingsDlg") && __t.visible("menu")'), '"Volver" cierra los ajustes');
+    // el taller: las cinco categorías entran y la mejora que no alcanza dice cuánto falta
+    await p.page('__t.click("toGarage"); return true');
+    await waitScene(p, 'Garage');
+    ok(await p.page('const c = document.getElementById("gCats"); return c.children.length === 5 && c.scrollWidth <= c.clientWidth + 1'), 'las cinco categorías del taller entran en el ancho');
+    ok(await p.page(`for (const b of document.querySelectorAll('#gCats .seg')) { b.click(); if ([...document.querySelectorAll('#gList .upg')].some((c) => c.textContent.includes('Te faltan S/ '))) return true; } return false`), 'una mejora que no alcanza dice cuánto falta');
+    ok(await p.page('return !document.getElementById("garage").textContent.includes("modo de disparo") && !document.getElementById("garage").textContent.includes("Acelerando")'), 'el taller ya no habla del modo de disparo');
+  },
+
   async 'Línea Amarilla: aparecen los créditos y la primera vez no se saltan'(p) {
     await fresh(p, SAVE({ unlocked: 10, settings: { stageId: 'linea-amarilla' } }));
     await play(p);
@@ -277,7 +315,7 @@ const TOURS = {
     await p.send('Page.reload');
     await sleep(500);
     await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
-    ok(await p.page('return __t.visible("toCredits")'), 'tras recargar a los 10 s, el menú ofrece "Ver créditos"');
+    ok(await p.page('__t.click("toSettings"); return __t.visible("toCredits")'), 'tras recargar a los 10 s, los ajustes ofrecen "Ver créditos"');
     const [gone] = await p.page('return __t.creditos()');
     ok(gone && gone.end === 'salida' && gone.from === 'victoria' && gone.reached >= 7, `los créditos recargados a mitad llegan como "salida" al abrir otra vez (hasta ${gone?.reached} s)`);
     await p.page('__t.click("toCredits"); return true');
@@ -340,7 +378,7 @@ const TOURS = {
 
   async '"Ver créditos" desde el menú vuelve al menú'(p) {
     await fresh(p, SAVE({ unlocked: 10, credits: true }));
-    ok(await p.page('return __t.visible("toCredits")'), 'el menú ofrece "Ver créditos" si ya se vieron');
+    ok(await p.page('__t.click("toSettings"); return __t.visible("toCredits")'), 'los ajustes ofrecen "Ver créditos" si ya se vieron');
     await p.page('__t.click("toCredits"); return true');
     await waitScene(p, 'Credits');
     await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');

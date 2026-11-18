@@ -158,7 +158,7 @@
       "levels": [
         {
           "price": 350,
-          "desc": "Por toque, +1 cono en la reserva. Acelerando, 9% más conos por segundo.",
+          "desc": "+1 cono en la reserva.",
           "ops": [
             {
               "path": "weapons.cone.ammo",
@@ -174,7 +174,7 @@
         },
         {
           "price": 750,
-          "desc": "Por toque, +1 cono y recarga 15% más rápida. Acelerando, 9% más conos por segundo.",
+          "desc": "+1 cono y recarga 15% más rápida.",
           "ops": [
             {
               "path": "weapons.cone.ammo",

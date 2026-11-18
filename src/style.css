@@ -160,9 +160,13 @@ button.pick,.seg{min-height:44px}
 a.link{display:inline-flex;align-items:center}
 
 /* menú vertical (ADR 0054): "Jugar" fijo abajo, la dificultad como selector y los detalles plegados */
-.menu-play{position:sticky;bottom:-8px;margin:4px auto -8px;padding:10px 12px 12px;width:min(344px,100%);box-sizing:border-box;border-radius:14px;
-  background:rgba(14,10,22,.96);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
-.menu-play .pick.play{width:100%;font-size:17px;padding:16px 14px;min-height:54px}
+/* U1 (ADR 0063): la tarjeta ocupa todo el ancho y llega al borde de abajo, opaca, con un degradado arriba, así lo que
+   se desplaza no se ve ni debajo ni alrededor */
+.menu-play{position:sticky;bottom:-18px;margin:8px -18px -18px;padding:26px 18px 18px;width:calc(100% + 36px);box-sizing:border-box;border-radius:0;
+  background:linear-gradient(to bottom,rgba(14,10,22,0),var(--bg) 22px);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
+.menu-play>*{width:min(344px,100%)}
+.menu-play .pick.play{font-size:17px;padding:16px 14px;min-height:54px}
+.menu-play .tip.small{text-align:center;max-width:none}
 .menu-play .tip.small{min-height:0}
 .stage-more{width:100%;font-size:12px}
 .stage-more summary{cursor:pointer;color:var(--yellow);font-weight:800;min-height:44px;display:flex;align-items:center;justify-content:center}
@@ -170,9 +174,22 @@ a.link{display:inline-flex;align-items:center}
 .stage-more[open] summary{width:100%}
 
 /* taller vertical (ADR 0054): categorías en una fila que se desliza, tarjetas compactas para comparar */
-#gCats{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;width:100%;scrollbar-width:none;flex:none}
-#gCats::-webkit-scrollbar{display:none}
-#gCats .seg{white-space:nowrap;flex:none}
+/* U5 (ADR 0063): las cinco categorías entran en el ancho, sin cortarse ni desplazarse */
+#gCats{flex-wrap:nowrap;justify-content:center;width:100%;gap:5px;flex:none}
+#gCats .seg{white-space:nowrap;flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11px}
+.upg p .falta{color:var(--yellow);font-weight:800;white-space:nowrap}
 .garage .upg{padding:7px 10px;gap:1px 10px}
 .garage .upg .goal{min-height:40px;padding:8px 6px;font-size:11px}
 .garage .tip.small{min-height:0}
+
+/* menú y ajustes (ADR 0063): Taller, Ranking y Ajustes como botones; lo demás en una hoja, con "Empezar de nuevo" al fondo */
+.menu-main{width:min(344px,100%);flex-wrap:nowrap}
+.menu-main .pick{flex:1 1 0;min-width:0;padding:12px 6px}
+#settingsDlg{justify-content:safe center}
+#settingsDlg>#settingsClose{width:min(320px,100%)}
+.settings-list{display:flex;flex-direction:column;gap:6px;width:min(320px,100%)}
+.set-item{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;box-sizing:border-box;padding:8px 14px;border:0;border-radius:10px;
+  background:var(--panel);color:var(--ink);font:600 14px/1.2 var(--body);text-decoration:none;cursor:pointer}
+.set-item[hidden]{display:none}
+.set-item[aria-pressed="false"]{color:var(--muted)}
+.set-item.danger{width:min(320px,100%);margin-top:22px;background:none;color:var(--pink);box-shadow:inset 0 0 0 2px var(--pink)}
