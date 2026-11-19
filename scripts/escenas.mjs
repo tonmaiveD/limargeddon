@@ -13,6 +13,7 @@
  * - El aviso de reversa en San Isidro suena y vibra, y sin sonido no vibra (ADR 0061).
  * - Un guardado viejo en "acelerar es atacar" juega por toque y conserva su récord y medallas (ADR 0062).
  * - Menú con Taller, Ranking y Ajustes, la hoja de ajustes, "Jugar" a la vista y el taller que dice cuánto falta (ADR 0063).
+ * - La Costa Verde de noche oscurece la pista, deja al jefe y al Tico encima y sobrevive a la revancha (ADR 0065).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
  * Uso: `npm run escenas`. Chrome se busca en CHROME o en las rutas habituales.
@@ -384,6 +385,30 @@ const TOURS = {
     await run(p, 'game.scene.getScene("Credits").canSkipNow()', 20000, 'los créditos ya se pueden saltar');
     await run(p, '(__t.enter(), __t.scenes().includes("Menu") && !__t.scenes().includes("Credits"))', 20000, 'los créditos vuelven al menú');
     ok(await p.page('return __t.visible("menu") && !__t.deck()'), 'al salir de los créditos el menú no muestra los controles');
+  },
+
+  async 'Costa Verde de noche: oscurece la pista, deja al jefe encima y sobrevive a la revancha'(p) {
+    await fresh(p, SAVE({ unlocked: 10 }));
+    await p.page('document.querySelector(\'#stageSel [data-stage="costa-verde"]\').click(); return true');
+    await play(p);
+    // brillo medio de un cuadro, con la noche a la vista o escondida
+    const bright = (show) => p.page(`const S = __t.stage(), N = S.night; N.img.setVisible(${show}); N.heads.g.setVisible(${show}); __t.adelantar(1);
+      const img = await new Promise((ok) => game.renderer.snapshot(ok)); const c = document.createElement('canvas'); c.width = 90; c.height = 160;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0, 90, 160); const d = x.getImageData(0, 0, 90, 140).data; let s = 0;
+      for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4) / 3`);
+    await p.page('const G = __t.stage().G; G.p.pw.soat = 999; G.traffic.length = 0; return true');
+    ok(await p.page(`const S = __t.stage(), N = S.night, L = S.L; return !!N && N.img.visible && N.img.depth > L.carsFx.g.depth && N.img.depth < L.ents.g.depth && N.img.depth < L.bossFx.g.depth && N.img.depth < L.me.g.depth`),
+      'la noche va sobre el tráfico y debajo del jefe, sus avisos y el Tico');
+    const day = await bright(false), night = await bright(true);
+    ok(night < day * 0.8, `la noche oscurece el cuadro (${day.toFixed(0)} de día, ${night.toFixed(0)} de noche)`);
+    await p.page('__t.stage().scene.restart(); return true');
+    await run(p, '(() => { const S = game.scene.getScene("Stage"); return S.G?.mode === "play" && !!S.night && S.night.img.visible; })()', 15000, 'la revancha empieza de noche');
+    await p.page('__t.adelantar(120); return true');
+    ok(await p.page('return __errors.length === 0'), 'la noche no deja errores, tampoco al repetir la pelea');
+    await fresh(p, SAVE({ unlocked: 10 }));
+    await p.page('document.querySelector(\'#stageSel [data-stage="san-isidro"]\').click(); return true');
+    await play(p);
+    ok(await p.page('return __t.stage().night === null'), 'las etapas de día no tienen noche');
   },
 };
 

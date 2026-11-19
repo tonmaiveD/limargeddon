@@ -35,6 +35,7 @@
   - los postes van alternados y bajan con la pista;
   - el Tico, cada auto, cada obstáculo y cada bonus tienen su luz;
   - una pelea en la que se calculan las luces cada cuadro queda igual que sin ellas, con la misma semilla.
+- **Escena nueva** en `npm run escenas`. Comprueba que la noche va sobre el tráfico y debajo del jefe y del Tico, que oscurece el cuadro, que la revancha empieza de noche sin errores y que San Isidro sigue de día. Falla si la noche se crea pero no se dibuja.
 - **`npm run campana`** da exactamente lo mismo que en `main`.
 - **Capturas antes y después** en las tres fases del jefe, a 393 × 852, con el juego detenido en el aviso de cada ataque:
   - El jefe, sus autos, los avisos, el derrumbe, la carretilla y las aves se ven igual que antes.
