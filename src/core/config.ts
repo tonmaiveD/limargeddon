@@ -32,6 +32,8 @@ export interface VehicleLook {
 // brake: frenazos en seco al azar (chance por segundo, duración en s), como los autos de aplicación
 export interface VehicleMove { zigzag?: { amp: number; freq: number }; brake?: { chance: number; dur: number } }
 
+export interface NightDef { dark: number; posts?: number }
+
 // Etapa de ruta (ADR 0030). `len` es el largo del tramo en segundos a velocidad normal (el turbo lo acorta).
 export interface RouteTramo {
   id: string; name: string; col: string; len: number;
@@ -223,6 +225,9 @@ export interface StageConfig {
   rewards: { win: number; clean: number; blindPct: number; item?: ItemDef; defeatTip?: string; winLine?: string; scoreTref?: number };
   // garúa (ADR 0025): oleadas de neblina que tapan la parte de arriba de la pantalla (depth: fracción del alto)
   weather?: { fog?: { first: number; every: [number, number]; dur: [number, number]; depth: number } };
+  // noche (ADR 0065): oscuridad sobre la pista y los costados, con faros del Tico y del tráfico y halos de postes.
+  // dark: opacidad de la oscuridad (0 a 1); posts: distancia entre postes de luz en unidades de pista (sin postes si falta)
+  night?: NightDef;
   // nivel de búsqueda (ADR 0025): cada falta suma una estrella y baja una cada `decay` s sin faltas.
   // Cada estrella trae un `chaser` (tipo de traffic.types) que persigue `chaseLife` s; desde `blockAt` estrellas,
   // un obstáculo `block` (k de obstacles, con first muy alto para que no salga solo) cada `blockEvery` s.

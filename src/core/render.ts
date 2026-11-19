@@ -261,7 +261,8 @@ function drawBubble(g: Gfx, G: Game): void {
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, img: Gfx) => void): void {
   const g = L.ents, f = L.fx, lo = L.low;
   // efectos de contacto y velocidad (ADR 0064) en el asfalto, debajo del aviso de embestida y de todo lo demás
-  drawLights(L.world, G); drawObstacles(L.world, G); drawFx(lo, G); drawChargeLane(lo, G);
+  // de noche (ADR 0065) el aviso de embestida sube sobre la oscuridad, a la capa del jefe, para que nunca quede a oscuras
+  drawLights(L.world, G); drawObstacles(L.world, G); drawFx(lo, G); drawChargeLane(G.cfg.night ? g : lo, G);
   G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickupB(lo, G, u)));
   // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
   G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));

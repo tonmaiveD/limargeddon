@@ -5,6 +5,7 @@ import type { DiffKey, FireMode } from '../core/config';
 import { Sfx } from '../core/audio/sfx';
 import { buzz, keys, pauseHook, setDeckAmmo, setDeckCooldowns } from '../core/input';
 import { beginLayers, createLayers, endLayers, renderEntities, setWarp, type Layers } from '../core/render';
+import { createNight, drawNight, type Night } from '../core/night';
 import { roadWarp } from '../core/road';
 import { createGame, newKeys, type Game } from '../core/state';
 import { clamp, rnd } from '../core/util';
@@ -28,6 +29,7 @@ const $ = (id: string) => document.getElementById(id)!;
 /* Etapa genérica: simula con el motor común y dibuja con el paisaje y el jefe que aporta la etapa. */
 export class StageScene extends Phaser.Scene {
   private L!: Layers;
+  private night: Night | null = null; // oscuridad de las etapas de noche (ADR 0065)
   private def!: StageDef;
   private G!: Game;
   private data0: Required<StageData> = { stageId: DEFAULT_STAGE, dk: 'normal' };
@@ -56,6 +58,7 @@ export class StageScene extends Phaser.Scene {
     const cfg = applyUpgrades(this.def.cfg, getGarage().levels);
     cfg.player.items = wonItems(unlockedStage(stageNumber));
     this.G = createGame(cfg, this.data0.dk, keys, this.def.ai, mode);
+    this.night = cfg.night ? createNight(this) : null;
     this.G.hintKnown = knownHints(this.data0.stageId, this.G.fireMode); // las ya leídas en este modo no salen (ADR 0039)
     this.G.hintsOn = getSettings().hints !== false; // el jugador puede apagarlas en el menú
     this.results = null; this.skip = false;
@@ -172,6 +175,7 @@ export class StageScene extends Phaser.Scene {
     beginLayers(this.L); setWarp(this.L, roadWarp(this.def.cfg, track.scroll));
     this.def.drawWorld(this.L.world, this.def.cfg, track.scroll, G);
     renderEntities(this.L, G, this.def.drawBoss);
+    if (this.night) drawNight(this.night, this.L, G, track.scroll);
     endLayers(this.L);
     const Wp = G.cfg.weapons, cd = G.p.cd, maxAmmo = Wp.cone.ammo ?? 0;
     const coneShade = G.fireMode === 'toque' ? (G.p.ammo > 0 ? 0 : clamp(1 - G.p.reloadT / (Wp.cone.reload ?? 0.5), 0, 1)) : clamp(cd.cone / Wp.cone.cd, 0, 1);

@@ -635,6 +635,7 @@
       "valet": "¡Pase, pase, que el heladero va primero!"
     }
   },
+  "night": {"dark": 0.62, "posts": 240},
   "weather": {
     "fog": {
       "first": 16,
