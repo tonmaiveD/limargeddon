@@ -22,13 +22,24 @@ export class CanvasPainter implements Painter {
   // sombra suave para figuras opacas que no son fondo (el fondo es lo que cubre buena parte del lienzo)
   private shadow(area: number, text = false): void {
     const R = this.relief, a = parseColor(this.fillStyle).a * this.globalAlpha;
-    if (!R || a < 0.5 || area > R.area * 0.45) { this.c.shadowColor = 'transparent'; return; }
+    if (!R || this.grad || a < 0.5 || area > R.area * 0.45) { this.c.shadowColor = 'transparent'; return; }
     this.c.shadowColor = text ? 'rgba(0,0,0,.55)' : 'rgba(0,0,0,.38)';
     this.c.shadowBlur = (text ? 1.2 : 2) * R.scale; this.c.shadowOffsetX = R.scale * (text ? 0.6 : 1); this.c.shadowOffsetY = R.scale * (text ? 0.8 : 1.4);
   }
-  private apply(): void { this.c.fillStyle = this.fillStyle; this.c.strokeStyle = this.strokeStyle; this.c.lineWidth = this.lineWidth; this.c.globalAlpha = this.globalAlpha; }
+  /*
+   * Degradados (ADR 0066): solo existen al hornear. El próximo relleno usa el degradado en vez de fillStyle y después se
+   * olvida. Es el acabado suave de los vehículos, para los costados que no deben verse en escalones ni con trama ruidosa.
+   */
+  private grad: CanvasGradient | null = null;
+  linear(x0: number, y0: number, x1: number, y1: number, stops: [number, string][]): void {
+    const g = this.c.createLinearGradient(x0, y0, x1, y1); for (const [o, col] of stops) g.addColorStop(o, col); this.grad = g;
+  }
+  radial(x: number, y: number, r0: number, r1: number, stops: [number, string][], fx = x, fy = y): void {
+    const g = this.c.createRadialGradient(fx, fy, r0, x, y, r1); for (const [o, col] of stops) g.addColorStop(o, col); this.grad = g;
+  }
+  private apply(): void { this.c.fillStyle = this.grad ?? this.fillStyle; this.c.strokeStyle = this.strokeStyle; this.c.lineWidth = this.lineWidth; this.c.globalAlpha = this.globalAlpha; }
 
-  fillRect(x: number, y: number, w: number, h: number): void { this.apply(); this.shadow(Math.abs(w * h)); this.c.fillRect(x, y, w, h); this.c.shadowColor = 'transparent'; }
+  fillRect(x: number, y: number, w: number, h: number): void { this.apply(); this.shadow(Math.abs(w * h)); this.c.fillRect(x, y, w, h); this.c.shadowColor = 'transparent'; this.grad = null; }
   beginPath(): void { this.c.beginPath(); this.pathArea = 0; }
   moveTo(x: number, y: number): void { this.c.moveTo(x, y); this.track(x, y); }
   lineTo(x: number, y: number): void { this.c.lineTo(x, y); this.track(x, y); }
@@ -36,7 +47,7 @@ export class CanvasPainter implements Painter {
   arc(x: number, y: number, r: number, a0: number, a1: number): void { this.c.arc(x, y, r, a0, a1); this.pathArea += Math.PI * r * r; }
   ellipse(x: number, y: number, rx: number, ry: number, rot: number, a0: number, a1: number): void { this.c.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot, a0, a1); this.pathArea += Math.PI * Math.abs(rx * ry); }
   roundRect(x: number, y: number, w: number, h: number, r: number): void { this.c.beginPath(); this.c.roundRect(x, y, w, h, Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2))); this.pathArea = Math.abs(w * h); }
-  fill(): void { this.apply(); this.shadow(this.pathArea || 1); this.c.fill(); this.c.shadowColor = 'transparent'; }
+  fill(): void { this.apply(); this.shadow(this.pathArea || 1); this.c.fill(); this.c.shadowColor = 'transparent'; this.grad = null; }
   stroke(): void { this.apply(); this.c.shadowColor = 'transparent'; this.c.stroke(); }
   fillText(text: string, x: number, y: number): void {
     this.apply(); this.shadow(1, true);

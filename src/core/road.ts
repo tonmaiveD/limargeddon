@@ -26,21 +26,31 @@ export function roadWarp(cfg: StageConfig, scroll: number): ((y: number) => numb
  * de ruta) para la caché.
  */
 const SEG = 110, MX = 4;
+export const SIDE_SEG = SEG; // alto de cada tramo de costado: el paisaje lo usa para que sus capas sigan de un tramo al otro
 export function drawSides(g: Gfx, cfg: StageConfig, scroll: number, drawSide: SideFn, bg = '#1a1522', key: string = cfg.id): void {
   const b = g.under ?? g, L = cfg.road.left, R = cfg.road.right, ex = view.extra, colW = L - 8, cols = Math.ceil(ex / (colW + 4));
   b.fillStyle = bg; b.fillRect(-ex - 80, 0, W + 2 * ex + 160, H); // margen para la pista curva
-  const base = Math.floor(scroll / SEG), off = scroll % SEG, S = ART_SCALE;
-  const tile = (x0: number, y: number, idx: number, side: number) => {
-    const k = `side|${key}|${colW}|${side}|${idx}`;
-    ensure(b.textures, k, () => bakeSide(drawSide, colW, idx, side, S), true);
-    b.tile(k, x0, y, colW, SEG, MX, S);
-  };
+  const base = Math.floor(scroll / SEG), off = scroll % SEG;
+  const tile = (x0: number, y: number, idx: number, side: number) => sideTile(b, key, drawSide, colW, x0, y, idx, side);
   for (let k = -1; k < H / SEG + 2; k++) {
     const y = off + k * SEG - SEG, idx = base - k;
     tile(0, y, idx, 0); tile(R + 8, y, idx, 1);
     for (let c = 1; c <= cols; c++) { tile(-c * (colW + 4), y, idx + c * 37, 2 * c); tile(R + 8 + c * (colW + 4), y, idx + c * 53, 2 * c + 1); }
   }
   sweep(b.textures);
+}
+
+// Un tramo de costado horneado (una vez por clave) y dibujado como imagen sobre la curva.
+function sideTile(b: Gfx, key: string, drawSide: SideFn, colW: number, x0: number, y: number, idx: number, side: number): void {
+  const k = `side|${key}|${colW}|${side}|${idx}`, S = ART_SCALE;
+  ensure(b.textures, k, () => bakeSide(drawSide, colW, idx, side, S), true);
+  b.tile(k, x0, y, colW, SEG, MX, S);
+}
+
+// Una sola columna de costado en x, para la comparación de ?graficos (ADR 0066). Usa la curva que tenga g.
+export function drawSideColumn(g: Gfx, key: string, drawSide: SideFn, colW: number, x0: number, side: number, scroll: number): void {
+  const base = Math.floor(scroll / SEG), off = scroll % SEG;
+  for (let k = -1; k < H / SEG + 2; k++) sideTile(g, key, drawSide, colW, x0, off + k * SEG - SEG, base - k, side);
 }
 
 // Hornea un tramo de costado: su dibujo de siempre con relieve, grano y la sombra de la vereda junto a la pista.

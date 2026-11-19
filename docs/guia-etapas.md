@@ -58,6 +58,9 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - `drawWorld` debe cubrir `-view.extra .. 360 + view.extra` en x (ADR 0012): las pantallas anchas muestran más ciudad a los costados. Ver el bucle de columnas extra en `san-isidro/scenery.ts`.
 - Usar `drawSides` y `drawRoad` de `src/core/road.ts`; la etapa solo escribe su `drawSide(g, x0, y, w, seg, idx, side)`. Lados: 0 izquierda junto a la pista, 1 derecha, 2c y 2c+1 columnas extra.
 - Dibujar con la API tipo canvas de `Gfx` (ADR 0003). Sin imágenes.
+- Al hornear, `drawSide` recibe un `CanvasPainter`, que además tiene degradados (`linear` y `radial`, ADR 0066), para el acabado suave de los vehículos. Lo que deba seguir de un tramo al otro, como estratos o cables, tiene que depender de la posición en la pista y no del tramo (ver `costa-verde/scenery.ts`).
+- Con pista curva, una línea larga a lo largo de la pista, como una orilla, va en vivo en `drawWorld` y no horneada. Horneada queda en escalones (ver `drawShore` en `costa-verde/scenery.ts`).
+- Para que un tipo de módulo no salga dos veces seguidas, que los tramos pares y los impares elijan de grupos distintos (ver `buildingKind` en `miraflores/scenery.ts`).
 - Los efectos de contacto y velocidad (humo, marcas de frenada, chispas y líneas de Turbo, ADR 0064) los pone el motor en todas las etapas. No hay que declarar nada.
 
 ## Cómo probar
