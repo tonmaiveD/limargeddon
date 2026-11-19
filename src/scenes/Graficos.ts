@@ -8,6 +8,11 @@ import { drawFoe, drawObstacle, drawPickupB, drawShot } from '../core/art/props'
 import { STAGES, STAGE_ORDER } from '../stages';
 import { createGame, newKeys, type Car, type Game } from '../core/state';
 import { update as stepGame } from '../core/world';
+import { drawSideColumn, roadWarp } from '../core/road';
+import { drawShore, drawSide as costaDespues } from '../stages/costa-verde/scenery';
+import { drawSideAntes as costaAntes } from '../stages/costa-verde/scenery-antes';
+import { drawSide as mirafloresDespues } from '../stages/miraflores/scenery';
+import { drawSideAntes as mirafloresAntes } from '../stages/miraflores/scenery-antes';
 
 const BAKE_SCALE = 4;
 
@@ -16,6 +21,8 @@ const BAKE_SCALE = 4;
  * Compara el dibujo actual con el nivel B (vehículos horneados con sombreado) en el Tico, un sedán y una combi,
  * sanos y dañados. Tocar la pantalla alterna entre la vista completa, cada vehículo al doble de tamaño y la galería
  * de todo el tráfico de las diez etapas (sano y dañado), dibujado con el mismo código del juego (ADR 0042).
+ * Las dos últimas páginas comparan los costados de antes y de después del piloto de arte (ADR 0066), en la Costa
+ * Verde sobre su curva y en Miraflores, bajando como en la pelea.
  */
 
 // Un vehículo de cada tipo distinto del tráfico de las diez etapas, con su primer color.
@@ -76,7 +83,7 @@ export class GraficosScene extends Phaser.Scene {
         return this.add.image(0, r.y, key).setDepth(10).setScale(1 / BAKE_SCALE); // la imagen es BAKE_SCALE veces más grande
       });
     });
-    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 9); });
+    this.input.on('pointerdown', () => { this.view = (this.view + 1) % (ROWS.length + 11); });
     // un juego por jefe, avanzado hasta que el jefe entra, para dibujarlo con su propio código (ADR 0043)
     for (const id of STAGE_ORDER) {
       const def = STAGES[id], G = createGame(structuredClone(def.cfg), 'normal', newKeys(), def.ai);
@@ -89,7 +96,8 @@ export class GraficosScene extends Phaser.Scene {
 
   update(): void {
     const cam = this.cameras.main, t0 = this.time.now / 1000;
-    const gal = this.view > ROWS.length, bossView = this.view >= ROWS.length + 3 && this.view <= ROWS.length + 5, propsView = this.view >= ROWS.length + 6;
+    const gal = this.view > ROWS.length, bossView = this.view >= ROWS.length + 3 && this.view <= ROWS.length + 5, propsView = this.view >= ROWS.length + 6 && this.view < ROWS.length + 9;
+    if (this.view >= ROWS.length + 9) { this.drawSidesCompare(this.view - ROWS.length - 9); return; }
     this.cars2.begin(); this.carsFx.begin();
     if (bossView) { // galería de jefes: sanos, dañados y el carguero
       const page = this.view - (ROWS.length + 3);
@@ -187,6 +195,37 @@ export class GraficosScene extends Phaser.Scene {
     for (const x of [COLS.nowHit, COLS.newHit]) u.fillText('DAÑADO', x, 98);
     for (const r of ROWS) { u.fillStyle = '#ffe14d'; u.fillText(r.name.toUpperCase(), W / 2, r.y + 2); }
     u.fillStyle = '#b9b4c4'; u.fillText('TOCA PARA AMPLIAR CADA UNO', W / 2, H - 24);
+    u.end();
+  }
+
+  /*
+   * Costados de antes y de después (ADR 0066). page 0, la Costa Verde sobre su curva, el acantilado y el mar con la
+   * orilla, donde antes se veían los escalones. page 1, Miraflores, la columna junto a la pista y la de más allá.
+   */
+  private drawSidesCompare(page: number): void {
+    const cam = this.cameras.main, t = this.time.now / 1000, scroll = t * 70;
+    cam.setZoom(ZOOM).centerOn(W / 2, H / 2);
+    for (const row of this.imgs) for (const im of row) im.setVisible(false);
+    for (const l of [this.cars2, this.carsFx]) { l.begin(); l.end(); }
+    const id = page === 0 ? 'costa-verde' : 'miraflores', cfg = STAGES[id].cfg, colW = cfg.road.left - 8, warp = roadWarp(cfg, scroll);
+    const g = this.bg, top = this.cars; g.begin(); top.begin();
+    g.fillStyle = '#2b2733'; g.fillRect(-100, 0, W + 200, H);
+    g.warp = warp; top.warp = warp;
+    if (page === 0) {
+      drawSideColumn(g, 'cmp-cv-antes', costaAntes, colW, 30, 0, scroll); drawSideColumn(g, 'cmp-cv-antes', costaAntes, colW, 96, 1, scroll);
+      drawSideColumn(g, 'cmp-cv-despues', costaDespues, colW, 200, 0, scroll); drawSideColumn(g, 'cmp-cv-despues', costaDespues, colW, 266, 1, scroll);
+      drawShore(top, 264, scroll, t);
+    } else {
+      drawSideColumn(g, 'cmp-mf-antes', mirafloresAntes, colW, 30, 1, scroll); drawSideColumn(g, 'cmp-mf-antes', mirafloresAntes, colW, 96, 3, scroll);
+      drawSideColumn(g, 'cmp-mf-despues', mirafloresDespues, colW, 200, 1, scroll); drawSideColumn(g, 'cmp-mf-despues', mirafloresDespues, colW, 266, 3, scroll);
+    }
+    g.warp = null; top.warp = null; g.end(); top.end();
+    const u = this.ui; u.begin(); u.textAlign = 'center';
+    u.fillStyle = 'rgba(21,17,29,.85)'; u.fillRect(0, 0, W, 92); u.fillRect(0, H - 40, W, 40);
+    u.fillStyle = '#ffe14d'; u.font = FONT(11); u.fillText(page === 0 ? 'COSTA VERDE · COSTADOS' : 'MIRAFLORES · EDIFICIOS', W / 2, 40);
+    u.font = FONT(9); u.fillStyle = '#fff'; u.fillText('ANTES', 30 + colW + 3, 74); u.fillText('DESPUÉS', 200 + colW + 3, 74);
+    u.font = FONT(6); u.fillStyle = '#b9b4c4';
+    u.fillText(page === 0 ? 'BORDE DEL MAR EN VIVO, SIN ESCALONES' : 'CUATRO TIPOS SIN REPETIR Y UN HITO POR TRAMO', W / 2, H - 18);
     u.end();
   }
 }
