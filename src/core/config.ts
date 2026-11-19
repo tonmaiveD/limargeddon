@@ -159,6 +159,11 @@ export interface BossConfig {
 }
 
 // Ayuda del tutorial: por tiempo (`at`) o por evento (`on`, ver core/hints.ts), solo en un modo de disparo si se indica.
+// Paleta de la pista por distrito (ADR 0064, G1). asphalt: tono del asfalto. wear: desgaste, de 0 (nuevo, líneas
+// nítidas, sin grietas) a 1.5 (muy gastado); 1 es el de antes. line: color de las líneas entre carriles. edge: color de los
+// bordes. Sin paint la pista queda como era.
+export interface RoadPaint { asphalt: string; wear: number; line: string; edge: string }
+
 export interface HintDef { text: string; at?: number; on?: string; after?: number; mode?: FireMode }
 
 export interface StageConfig {
@@ -174,7 +179,8 @@ export interface StageConfig {
   // exclusive: carril pintado como exclusivo (sátira visual, sin regla para el Tico)
   road: { left: number; right: number; lanes: number; laneWidth: number; speed: number; turboSpeed: number; idleScroll: number;
     exclusive?: { lane: number; label: string; col: string };
-    curve?: { amp: number; len: number } }; // pista curva: amplitud en px y largo de la onda en px de scroll
+    curve?: { amp: number; len: number }; // pista curva: amplitud en px y largo de la onda en px de scroll
+    paint?: RoadPaint };
   player: {
     lane: number; y: number; w: number; h: number; hp: number;
     accelX: number; accelY: number; response: number; minY: number; bottomMargin: number; turboMult: number;

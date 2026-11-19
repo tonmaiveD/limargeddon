@@ -33,6 +33,7 @@
     }
   },
   "road": {
+    "paint": { "asphalt": "#3a3329", "wear": 1.3, "line": "#ece3cc", "edge": "#e8c24a" },
     "left": 50,
     "right": 310,
     "lanes": 4,

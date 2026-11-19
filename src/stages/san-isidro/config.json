@@ -16,6 +16,7 @@
     "dificil": { "label": "Difícil", "hp": 2400, "spd": 290, "freq": 0.77, "tele": false }
   },
   "road": {
+    "paint": { "asphalt": "#1f1f25", "wear": 0.15, "line": "#ffffff", "edge": "#f4f4f8" },
     "left": 50,
     "right": 310,
     "lanes": 4,
