@@ -33,4 +33,11 @@
   - el borde del mar es una curva continua, sin escalones;
   - en Miraflores no se repite el mismo edificio seguido y aparece el Parque Kennedy.
 - **Fluidez** en Chrome con tarjeta de video, en 8 s de pelea en la Costa Verde, con noche y orilla en vivo: p95 de 16,8 ms, igual que en la Fase 9.
-- **Decisión pendiente del dueño:** si el piloto de arte en pausa sigue interno o se encarga afuera.
+
+## Decisión del dueño
+- El 19 de noviembre, con este resultado a la vista, el dueño decidió **encargar el arte afuera**.
+- El piloto interno queda en el juego como base. Quien produzca el arte debe mejorarlo de forma visible.
+- Para el encargo sirven de referencia:
+  - las páginas de comparación de `?graficos`;
+  - la regla de las líneas largas en vivo;
+  - la regla de no repetir el mismo módulo seguido.
