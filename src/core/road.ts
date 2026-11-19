@@ -1,4 +1,4 @@
-import type { StageConfig } from './config';
+import type { RoadPaint, StageConfig } from './config';
 import { H, W, view } from './constants';
 import { FONT, type Gfx, type Painter } from './gfx';
 import type { Game } from './state';
@@ -62,20 +62,28 @@ function bakeSide(drawSide: SideFn, w: number, idx: number, side: number, S: num
  * Detalle del asfalto (nivel B, ADR 0044): huellas oscuras de las llantas en cada carril y, por tramo, grietas y manchas
  * de aceite, siempre en el mismo lugar del tramo para que bajen con la pista. Sin parches: parecían cajas en la pista.
  */
-function asphalt(g: Gfx, cfg: StageConfig, scroll: number): void {
+// La pista de antes: sin paleta en el JSON, todo sale igual que hasta la ADR 0064.
+export const ROAD_PAINT: RoadPaint = { asphalt: '#2a2632', wear: 1, line: '#f7f1ff', edge: C.yellow };
+export const roadPaint = (cfg: StageConfig): RoadPaint => ({ ...ROAD_PAINT, ...cfg.road.paint });
+const rgba = (hex: string, a: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a.toFixed(2)})`;
+};
+
+function asphalt(g: Gfx, cfg: StageConfig, scroll: number, wear: number): void {
   const L = cfg.road.left, LW = cfg.road.laneWidth, base = Math.floor(scroll / SEG), off = scroll % SEG;
-  g.fillStyle = 'rgba(0,0,0,.1)';
+  g.fillStyle = `rgba(0,0,0,${(0.1 * Math.min(wear, 1.5)).toFixed(3)})`; // huellas de llantas, más marcadas cuanto más gastada
   for (let j = 0; j < cfg.road.lanes; j++) { const cx = L + LW * (j + 0.5); g.fillRect(cx - 11, 0, 5, H); g.fillRect(cx + 6, 0, 5, H); }
   for (let k = -1; k < H / SEG + 2; k++) {
     const y = off + k * SEG - SEG, idx = base - k, r = (i: number) => hash(idx * 7.13 + i * 1.91);
     const lane = Math.floor(r(1) * cfg.road.lanes);
-    if (r(7) < 0.5) { // grieta
+    if (r(7) < 0.5 * wear) { // grieta
       g.strokeStyle = 'rgba(14,10,22,.55)'; g.lineWidth = 0.8; g.beginPath();
       let cx = L + LW * Math.floor(r(8) * cfg.road.lanes) + 8 + r(9) * (LW - 16), cy = y + r(10) * 60;
       g.moveTo(cx, cy); for (let i = 0; i < 4; i++) { cx += (r(11 + i) - 0.5) * 12; cy += 6 + r(15 + i) * 10; g.lineTo(cx, cy); }
       g.stroke();
     }
-    if (r(20) < 0.3) { g.fillStyle = 'rgba(8,6,12,.22)'; g.beginPath(); g.ellipse(L + LW * (lane + 0.5) + (r(21) - 0.5) * 20, y + r(22) * SEG, 7 + r(23) * 6, 4 + r(24) * 3, r(25) * 3, 0, 7); g.fill(); } // aceite
+    if (r(20) < 0.3 * wear) { g.fillStyle = 'rgba(8,6,12,.22)'; g.beginPath(); g.ellipse(L + LW * (lane + 0.5) + (r(21) - 0.5) * 20, y + r(22) * SEG, 7 + r(23) * 6, 4 + r(24) * 3, r(25) * 3, 0, 7); g.fill(); } // aceite
   }
 }
 
@@ -92,15 +100,17 @@ export function drawRoad(g: Gfx, cfg: StageConfig, scroll: number, G: Game | nul
     g.fillStyle = 'rgba(255,225,77,.08)'; g.beginPath(); g.arc(L + 6, y, 26, 0, 7); g.fill(); g.beginPath(); g.arc(R - 6, y + 80, 26, 0, 7); g.fill();
     g.fillStyle = '#8c869a'; g.fillRect(L - 6, y - 2, 4, 4); g.fillRect(R + 2, y + 78, 4, 4);
   }
-  g.fillStyle = '#2a2632'; g.fillRect(L, 0, R - L, H);
-  asphalt(g, cfg, scroll);
-  g.fillStyle = C.yellow; g.fillRect(L + 2, 0, 3, H); g.fillRect(R - 5, 0, 3, H);
+  const P = roadPaint(cfg);
+  g.fillStyle = P.asphalt; g.fillRect(L, 0, R - L, H);
+  asphalt(g, cfg, scroll, P.wear);
+  g.fillStyle = P.edge; g.fillRect(L + 2, 0, 3, H); g.fillRect(R - 5, 0, 3, H);
   g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(L + 5, 0, 1, H); g.fillRect(R - 2, 0, 1, H);
   const doff = scroll % 50, dbase = Math.floor(scroll / 50);
   for (let j = 1; j < cfg.road.lanes; j++) {
     const x = L + LW * j - 1.5;
-    for (let y = -50 + doff, n = 0; y < H; y += 50, n++) { // líneas gastadas: cada raya con su desgaste
-      g.fillStyle = `rgba(247,241,255,${(0.4 + hash((dbase - n) * 3.7 + j) * 0.25).toFixed(2)})`; g.fillRect(x, y, 3, 26);
+    for (let y = -50 + doff, n = 0; y < H; y += 50, n++) { // líneas gastadas: cada raya con su desgaste (con wear 1, como antes)
+      const w = Math.min(P.wear, 1.5), a = 0.65 - 0.25 * w + hash((dbase - n) * 3.7 + j) * 0.25 * w;
+      g.fillStyle = rgba(P.line, a); g.fillRect(x, y, 3, 26);
     }
   }
   const ex = cfg.road.exclusive;

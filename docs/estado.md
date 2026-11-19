@@ -33,7 +33,7 @@
 - **Objetos de victoria** (ADR 0020): Silbato, Bolso y Poncho protegen una vez por pelea desde que se ganan.
 - **Tutorial en contexto** (ADR 0037 y 0039): ayudas breves sobre el Tico en las diez etapas, hasta que cada una se alcanza a leer. "Ver ayudas otra vez" e interruptor de ayudas en el menú.
 - **Medallas** (ADR 0037): tres por etapa, sin dinero, visibles en el menú y en resultados.
-- **Gráficos nivel B** (ADR 0041 a 0044): tráfico, Tico, jefes, combi aliada, paisaje de los diez distritos, obstáculos, bonus y proyectiles son imágenes horneadas con sombreado; el daño de los vehículos sigue siendo procedural por etapas. La pista suma vereda con cordón, huellas, grietas y manchas.
+- **Gráficos nivel B** (ADR 0041 a 0044): tráfico, Tico, jefes, combi aliada, paisaje de los diez distritos, obstáculos, bonus y proyectiles son imágenes horneadas con sombreado; el daño de los vehículos sigue siendo procedural por etapas. La pista suma vereda con cordón, huellas, grietas y manchas, y desde la ADR 0064 cada distrito tiene su paleta de asfalto, desgaste y líneas, más humo, marcas de frenada, chispas y líneas de Turbo.
 - **Ambiente** (ADR 0038): música de un género por distrito, cierres animados en la Costa Verde y la Línea Amarilla, y semáforos en ola en la Javier Prado.
 - **Jugador y ranking** (ADR 0029): nombre de hasta 12 caracteres, puntaje de hasta 10.000 por victoria, ranking local de los 12 mejores y opción de empezar de nuevo.
 - **Registro de peleas** en el dispositivo, con el botón "Copiar registro" en resultados (ADR 0009). Desde la ADR 0019 guarda el build, las mejoras, la vida que le quedó al jefe y el cobro. Desde la ADR 0045 guarda también la fluidez (percentiles del tiempo entre cuadros sin suavizar y bloqueos largos, ADR 0046) y el equipo.
@@ -100,7 +100,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 
 **Mientras tanto, lo que no depende de los datos:**
 - **Aparecer en Google** (ADR 0056, PR #63): título, descripción, imagen para compartir, datos estructurados, `acerca.html` y `sitemap.xml`. Con la etiqueta de verificación de Search Console. Después del deploy se verifica, se envía el mapa del sitio y se pide la indexación.
-2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) quedó en el PR #68. La Fase 6 (un solo modo de disparo, ADR 0062) quedó en el PR #70. La Fase 7 (menú con hoja de ajustes y taller que dice cuánto falta, ADR 0063) va en el PR #71. Falta probar la pausa con el dedo en un equipo real.
+2. **Plan por fases del 16 de noviembre** (`docs/plan-fases-2026-11-16.md`, auditoría `docs/auditorias/2026-11-16-graficos-ux-ui-creditos.md`): créditos, UX, UI y gráficos en 10 fases, una por PR. La Fase 1 (reloj de los créditos, ADR 0057) quedó en el PR #64. La Fase 2 (acceso, red de seguridad y audio interrumpido, ADR 0058) quedó en el PR #65. La Fase 3 (pausa en los créditos con "Continuar" y "Ver después", ADR 0059) quedó en el PR #66. La Fase 4 (créditos completos en escenas y datos anónimos de los créditos, ADR 0060) quedó en el PR #67, con el receptor publicado. La Fase 5 (aviso de embestida en la pista, punto ciego y contador de papeletas, ADR 0061) quedó en el PR #68. La Fase 6 (un solo modo de disparo, ADR 0062) quedó en el PR #70. La Fase 7 (menú con hoja de ajustes y taller que dice cuánto falta, ADR 0063) quedó en el PR #71. La Fase 8 (pista por distrito y efectos de contacto, ADR 0064) va en su propio PR. Falta probar la pausa con el dedo en un equipo real.
 3. **Preparar las iteraciones 2 a 4 de UX:** que el dueño decida qué entra antes de programarlo. Las opciones están en el punto 5.
 
 **Después:**
@@ -144,7 +144,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 ## Historial de bloques
 Hechos, con su ADR:
 - Auditorías 3 y 4: claridad del combate (0032, con la banda del punto ciego, el carril de la embestida y las papeletas de 0061), taller que explica (0033), clímax del jefe final (0034), bloques A a D y F (0035 a 0039).
-- Gráficos nivel B (0040 a 0044).
+- Gráficos nivel B (0040 a 0044, y 0064 para la pista por distrito y los efectos).
 - Instrumentos de diagnóstico (0045 a 0047).
 - Créditos (0048 a 0050, 0052, 0053 y 0057 a 0060).
 - Datos anónimos (0051, con V01 a V03 de la novena auditoría, el informe y la billetera, y 0060 para los créditos).

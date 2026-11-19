@@ -67,3 +67,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0061](0061-lectura-de-amenaza.md) | Lectura de amenaza y de costo | Aceptada |
 | [0062](0062-un-solo-modo-de-disparo.md) | Un solo modo de disparo, por toque | Aceptada |
 | [0063](0063-menu-y-taller.md) | Menú con hoja de ajustes y taller que dice cuánto falta | Aceptada |
+| [0064](0064-pista-por-distrito-y-efectos.md) | Pista por distrito y efectos de contacto | Aceptada |

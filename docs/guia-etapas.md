@@ -44,6 +44,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - **Clima** (`weather.fog`): garúa en oleadas que tapa la parte de arriba.
 - **Nivel de búsqueda** (`wanted`): estrellas por faltas, patrulleros que persiguen y bloqueos (ver ADR 0025).
 - **Pista curva** (`road.curve`: `amp`, `len`): solo visual.
+- **Paleta de la pista** (`road.paint`, ADR 0064): `asphalt` (tono del asfalto, oscuro para que todo se lea encima), `wear` (desgaste de 0, nueva y nítida, a 1,5, muy gastada, con más grietas, manchas y líneas borrosas), `line` (color de las líneas entre carriles) y `edge` (color de los bordes). Ejemplo `{ "asphalt": "#283041", "wear": 0.45, "line": "#f7f1ff", "edge": "#ffe14d" }`. Cada etapa usa un tono distinto. Los tramos de una ruta la heredan.
 - **Peligros** (`hazards`): `rockslide` (derrumbes), `birds` (gaviotas que manchan; el claxon las espanta) y `cart` (carretilla protegida con bono). Ver ADR 0026.
 - **Jefe serpiente:** registrar la etapa con `ai: SnakeBoss` y declarar `boss.body` (`count`, `spacing`, `hp`, `w`, `h`, `contactDmg`, `cols`, `bodyDmgShare`, `lean`).
 - **Etapa de ruta** (`route`, IA `RouteAI`): sin jefe; tramos con `len`, `road`, `dark`, `tide`, `plane`, `minY`, `trafficEvery` y `banner`, y `tramos` en tráfico, obstáculos y enjambres. Peajes de pago con `payLanes` y `toll`. Ver la Línea Amarilla y el ADR 0030.
@@ -56,6 +57,7 @@ Para empezar, copiar `src/stages/miraflores/config.json` (el ejemplo más comple
 - `drawWorld` debe cubrir `-view.extra .. 360 + view.extra` en x (ADR 0012): las pantallas anchas muestran más ciudad a los costados. Ver el bucle de columnas extra en `san-isidro/scenery.ts`.
 - Usar `drawSides` y `drawRoad` de `src/core/road.ts`; la etapa solo escribe su `drawSide(g, x0, y, w, seg, idx, side)`. Lados: 0 izquierda junto a la pista, 1 derecha, 2c y 2c+1 columnas extra.
 - Dibujar con la API tipo canvas de `Gfx` (ADR 0003). Sin imágenes.
+- Los efectos de contacto y velocidad (humo, marcas de frenada, chispas y líneas de Turbo, ADR 0064) los pone el motor en todas las etapas. No hay que declarar nada.
 
 ## Cómo probar
 ```

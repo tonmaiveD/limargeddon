@@ -13,6 +13,7 @@ import { drawFoe, drawObstacle, drawPickupB, drawShot } from './art/props';
 import { cobrador } from '../bosses/combi-render';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp, reduceMotion } from './util';
+import { drawFx } from './fx';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
@@ -259,7 +260,8 @@ function drawBubble(g: Gfx, G: Game): void {
 
 export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, img: Gfx) => void): void {
   const g = L.ents, f = L.fx, lo = L.low;
-  drawLights(L.world, G); drawObstacles(L.world, G); drawChargeLane(lo, G);
+  // efectos de contacto y velocidad (ADR 0064) en el asfalto, debajo del aviso de embestida y de todo lo demás
+  drawLights(L.world, G); drawObstacles(L.world, G); drawFx(lo, G); drawChargeLane(lo, G);
   G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickupB(lo, G, u)));
   // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
   G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));
