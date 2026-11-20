@@ -86,6 +86,6 @@ El adaptador del paquete dibuja la orilla fila por fila sobre la curva. Funciona
 
 ## 7. Siguientes pasos, para decidir el dueño
 1. **Procedencia y derechos.** Decidir si se acepta arte generado y en qué condiciones se publica.
-2. **Versión 2.** Si se acepta, pedir al proveedor los ajustes de la sección 4 y la prueba jugable que falta.
+2. **Versión 2.** Si se acepta, pedir al proveedor los ajustes de la sección 4 y la prueba jugable que falta. El pedido completo está en `docs/prompt-arte-costa-verde-v2.md`.
 3. **Integración.** Después de eso, integrar en una rama propia y medir con los criterios del encargo.
 4. **El zip.** Queda fuera del repositorio hasta resolver los derechos. Hoy está en `docs/` sin versionar, y pesa 14 MB.
