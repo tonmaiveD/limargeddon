@@ -62,6 +62,6 @@
 - **Juego intacto:** el paquete del juego no trae nada de la demo, ni sus imágenes ni su código, y su CSS es idéntico. El JavaScript del juego sí cambia, porque lleva los ganchos del motor, que en el juego quedan en `null` y dejan cada dibujo como en `main`. La campaña igual a la de `main` y la escena que confirma que el juego dibuja con su arte lo comprueban.
 
 ## Pendiente
-- **Publicar el receptor** con los dos registros nuevos antes de mandar la demo a las personas. Necesita el OK del dueño. Hasta entonces, el receptor descarta los registros "piloto" sin guardarlos.
+- **Receptor:** publicado el 22 de noviembre de 2026 (versión 99d1533d) con los dos registros nuevos. Un envío de prueba guardó dos partidas y una encuesta sin descartes, y luego se borró.
 - **Hacer la prueba** con 6 a 8 personas, en dos teléfonos, y leer la sección del informe.
 - **Créditos y procedencia:** el arte es de un generador de OpenAI. La pantalla final de la demo avisa que una de las versiones usa un dibujo hecho con un generador de imágenes. El aviso va después de la encuesta para no influir en las respuestas. Si el arte pasa al juego, falta decidir cómo se acredita.
