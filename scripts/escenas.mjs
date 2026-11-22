@@ -465,6 +465,18 @@ const TOURS = {
     await run(p, `${S}.sys.isActive() && ${S}.G?.mode === "play"`, 15000, 'la segunda prueba empieza');
     ok(await p.page(`return ${S}.data0.variant !== ${JSON.stringify(a.variant)}`), 'la prueba siguiente en el mismo aparato empieza por la otra versión');
     ok(await p.page('return __errors.length === 0'), 'la demo no deja errores');
+    // el enlace directo al arte nuevo juega solo esa versión, se repite, no envía datos ni mueve el orden alternado
+    const order = await p.page('return localStorage.getItem("limargeddon.piloto")');
+    await load(p, `${ORIGIN}/piloto-costa-verde/?arte=nuevo`);
+    await until(() => p.page('return !document.getElementById("pStart").disabled'), 20000, 'el arte carga en el enlace directo');
+    const before = await p.page('return localStorage.getItem("limargeddon.datos")');
+    for (let i = 0; i < 2; i++) {
+      const free = await round(i ? 'pFreeAgain' : 'pStart', 'G.p.pw.soat = 0; G.p.hp = 0');
+      ok(free.variant === 'nuevo' && free.tico.startsWith('tico_'), `el enlace directo juega con el arte nuevo (partida ${i + 1})`);
+      await run(p, '!document.getElementById("pFreeEnd").hidden', 30000, 'termina la partida del enlace directo');
+    }
+    ok(await p.page(`return localStorage.getItem("limargeddon.datos") === ${JSON.stringify(before)} && localStorage.getItem("limargeddon.piloto") === ${JSON.stringify(order)}`), 'el enlace directo no anota datos ni mueve el orden de la prueba');
+    ok(await p.page('return document.getElementById("pSurvey").hidden && __errors.length === 0'), 'el enlace directo no pide la encuesta ni deja errores');
     // con la etiqueta del equipo de pruebas en la dirección, la demo tampoco escribe el guardado (auditoría de la demo, F1)
     const saved = JSON.stringify(SAVE({ unlocked: 3, settings: { share: false, tester: 'guardada' } }));
     await p.page(`localStorage.setItem('limargeddon.save', ${JSON.stringify(saved)}); return true`);

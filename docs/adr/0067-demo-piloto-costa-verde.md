@@ -44,6 +44,12 @@
   - Usan el mismo permiso que el juego, y con `?prueba` no se envía nada.
   - `npm run datos` tiene la sección "Prueba de arte de la Costa Verde": partidas por arte, por orden, daño por fuente y encuesta, con quién reconoció la Costa Verde según viva o no en Lima.
 
+- **Enlace directo (agregado el 22 de noviembre de 2026, a pedido del dueño):** `piloto-costa-verde/?arte=nuevo` juega solo el arte nuevo, y `?arte=actual` solo el actual.
+  - Se repite las veces que se quiera, sin encuesta.
+  - No envía datos ni mueve el orden alternado de la prueba, así no se mezcla con sus resultados.
+  - La pantalla de inicio dice que el dibujo nuevo es de un generador de imágenes, porque fuera de la prueba no hay respuestas que influir.
+  - Al terminar ofrece jugar otra vez, la prueba completa o el juego.
+
 ## Verificación
 - **`tests/piloto.test.ts`** comprueba que:
   - el juego no instala arte alterno;
@@ -57,6 +63,7 @@
   - las dos partidas y la encuesta quedan con la misma sesión, y la B se traduce bien;
   - la prueba siguiente empieza por la otra versión;
   - el guardado del juego no cambia, tampoco al abrir la demo con `?tester=`, y no hay errores;
+  - el enlace directo `?arte=nuevo` juega dos veces con el arte nuevo, sin encuesta, sin anotar datos y sin mover el orden;
   - el juego sigue dibujando con su arte.
 - **Campaña:** `npm run campana` da exactamente lo mismo que en `main`.
 - **Juego intacto:** el paquete del juego no trae nada de la demo, ni sus imágenes ni su código, y su CSS es idéntico. El JavaScript del juego sí cambia, porque lleva los ganchos del motor, que en el juego quedan en `null` y dejan cada dibujo como en `main`. La campaña igual a la de `main` y la escena que confirma que el juego dibuja con su arte lo comprueban.
