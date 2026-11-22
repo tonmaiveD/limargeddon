@@ -5,7 +5,7 @@ import { pilotEvent, pilotSurveyEvent } from '../src/core/telemetry';
 import { toRow } from '../server/src/validate';
 import { ART_IDS, CART_LEFT, bossId, cartId, flockId, foeId, obstacleId, pilotSkin, rowId, ticoId, vehicleId } from '../src/piloto/skin';
 import { cliffAt, coastAt, farCliffAt, shoreAt } from '../src/piloto/world';
-import { firstFor, fromLetter, letterFor, nextCount, roundStats, surveyStats, variantFor } from '../src/piloto/flujo';
+import { firstFor, freeVariant, fromLetter, letterFor, nextCount, roundStats, surveyStats, variantFor } from '../src/piloto/flujo';
 import { report, type Ev } from '../scripts/datos';
 import { startPort, stepPort } from './harness/port';
 import { seedRandom } from './harness/rng';
@@ -78,6 +78,12 @@ describe('prueba de arte', () => {
     expect([variantFor(1, 'nuevo'), variantFor(2, 'nuevo')]).toEqual(['nuevo', 'actual']);
     expect([letterFor(1), letterFor(2)]).toEqual(['A', 'B']);
     expect([fromLetter('A', 'nuevo'), fromLetter('B', 'nuevo'), fromLetter('igual', 'nuevo')]).toEqual(['nuevo', 'actual', 'igual']);
+  });
+
+  it('?arte=nuevo abre directo una versión y cualquier otro valor deja la prueba completa', () => {
+    expect(freeVariant('?arte=nuevo')).toBe('nuevo');
+    expect(freeVariant('?prueba&arte=actual')).toBe('actual');
+    for (const q of ['', '?arte=', '?arte=Nuevo', '?arte=otro', '?tester=pablo']) expect(freeVariant(q), q).toBeNull();
   });
 
   it('el receptor guarda la partida y la encuesta tal como las arma la demo, sin nombre', () => {

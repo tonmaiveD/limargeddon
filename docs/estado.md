@@ -7,7 +7,7 @@
 - Repo público: `tonmaiveD/limargeddon`. PR #1 a #61 fusionados. Cada PR corre `npm test` y `npm run escenas` en GitHub antes de fusionar (ADR 0055).
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 - Receptor de datos anónimos: https://limargeddon-datos.limargeddon-datos.workers.dev (Cloudflare Workers con D1, en la cuenta del dueño; código en `server/`).
-- Demo del piloto de arte de la Costa Verde: https://tonmaived.github.io/limargeddon/piloto-costa-verde/ (ADR 0067). Página aparte del juego, con el arte V2.1.1 entregado, dos versiones alternadas, encuesta y datos marcados "piloto". El informe de `npm run datos` trae su sección.
+- Demo del piloto de arte de la Costa Verde: https://tonmaived.github.io/limargeddon/piloto-costa-verde/ (ADR 0067). Página aparte del juego, con el arte V2.1.1 entregado, dos versiones alternadas, encuesta y datos marcados "piloto". El informe de `npm run datos` trae su sección. Enlace directo al arte nuevo, fuera de la prueba y sin datos: https://tonmaived.github.io/limargeddon/piloto-costa-verde/?arte=nuevo
 - Parámetros de la dirección para revisar:
   - `?prueba`: todas las etapas, sin datos ni tutorial gastado.
   - `?graficos`: galería visual.

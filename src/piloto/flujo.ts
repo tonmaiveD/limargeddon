@@ -17,6 +17,13 @@ export const other = (v: PilotVariant): PilotVariant => (v === 'actual' ? 'nuevo
 export const variantFor = (round: number, first: PilotVariant): PilotVariant => (round % 2 === 1 ? first : other(first));
 export const letterFor = (round: number): 'A' | 'B' => (round % 2 === 1 ? 'A' : 'B');
 
+// Enlace directo a una sola versión, fuera de la prueba: ?arte=nuevo (o ?arte=actual). Se juega las veces que se quiera,
+// sin encuesta, sin enviar datos y sin mover el orden alternado. Cualquier otro valor deja la prueba completa.
+export function freeVariant(search: string): PilotVariant | null {
+  const v = new URLSearchParams(search).get('arte');
+  return v === 'nuevo' || v === 'actual' ? v : null;
+}
+
 // Cuántas pruebas empezó este aparato; sin almacenamiento cuenta como la primera.
 export function nextCount(store: Pick<Storage, 'getItem' | 'setItem'> | null): number {
   let n = 0;
