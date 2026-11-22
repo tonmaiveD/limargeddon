@@ -83,12 +83,18 @@ window.__t = {
 const checks = [];
 const ok = (cond, what) => { if (!cond) throw new Error(what); checks.push(what); };
 
+// Navega o recarga y espera el documento nuevo con el juego creado. La marca evita leer la página anterior, que todavía
+// tiene su `game` justo después de pedir la navegación (auditoría de la demo, F3).
+async function load(p, url) {
+  await p.page('window.__old = true; return true').catch(() => {});
+  await (url ? p.send('Page.navigate', { url }) : p.send('Page.reload'));
+  await until(() => p.page('return !window.__old && typeof game !== "undefined"'), 15000, `carga ${url ?? 'otra vez'} la página`);
+}
+
 async function fresh(p, save) {
-  await p.send('Page.navigate', { url: `${ORIGIN}/` });
-  await until(() => p.page('return typeof game !== "undefined"'), 15000, 'el juego carga');
+  await load(p, `${ORIGIN}/`);
   await p.page(`localStorage.clear(); ${save ? `localStorage.setItem('limargeddon.save', ${JSON.stringify(JSON.stringify(save))});` : ''} return true`);
-  await p.send('Page.reload');
-  await sleep(500);
+  await load(p);
   await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú aparece');
 }
 const scenes = (p) => p.page('return __t.scenes()');
@@ -314,9 +320,8 @@ const TOURS = {
     await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
     await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
     await run(p, 'game.scene.getScene("Credits").t >= 10', 30000, 'diez segundos de créditos');
-    await p.send('Page.reload');
-    await sleep(500);
-    await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
+    await load(p);
+    await until(() => p.page('return __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
     ok(await p.page('__t.click("toSettings"); return __t.visible("toCredits")'), 'tras recargar a los 10 s, los ajustes ofrecen "Ver créditos"');
     const [gone] = await p.page('return __t.creditos()');
     ok(gone && gone.end === 'salida' && gone.from === 'victoria' && gone.reached >= 7, `los créditos recargados a mitad llegan como "salida" al abrir otra vez (hasta ${gone?.reached} s)`);
@@ -413,11 +418,10 @@ const TOURS = {
   },
 
   async 'demo del piloto de arte: dos versiones alternadas, encuesta y datos marcados, sin tocar el juego'(p) {
-    await p.send('Page.navigate', { url: `${ORIGIN}/piloto-costa-verde/` });
-    await until(() => p.page('return typeof game !== "undefined"'), 15000, 'la demo carga');
+    await load(p, `${ORIGIN}/piloto-costa-verde/`);
     await p.page('localStorage.clear(); return true');
-    await p.send('Page.reload');
-    await until(() => p.page('return typeof game !== "undefined" && !document.getElementById("pStart").disabled'), 20000, 'el arte de la demo carga');
+    await load(p);
+    await until(() => p.page('return !document.getElementById("pStart").disabled'), 20000, 'el arte de la demo carga');
     ok(await p.page('return ["tico_sano", "jefe_danado", "gaviotas_huida_02", "carretilla_izq", "orilla_mar_arena"].every((k) => game.textures.exists(k))'), 'la demo carga las imágenes entregadas y arma las derivadas');
     const S = 'game.scene.getScene("PilotoStage")';
     // la textura del Tico dice qué arte se está usando: la del motor ("veh…") o la entregada ("tico_…")
@@ -461,6 +465,13 @@ const TOURS = {
     await run(p, `${S}.sys.isActive() && ${S}.G?.mode === "play"`, 15000, 'la segunda prueba empieza');
     ok(await p.page(`return ${S}.data0.variant !== ${JSON.stringify(a.variant)}`), 'la prueba siguiente en el mismo aparato empieza por la otra versión');
     ok(await p.page('return __errors.length === 0'), 'la demo no deja errores');
+    // con la etiqueta del equipo de pruebas en la dirección, la demo tampoco escribe el guardado (auditoría de la demo, F1)
+    const saved = JSON.stringify(SAVE({ unlocked: 3, settings: { share: false, tester: 'guardada' } }));
+    await p.page(`localStorage.setItem('limargeddon.save', ${JSON.stringify(saved)}); return true`);
+    for (const q of ['?prueba&tester=auditoria', '?tester=auditoria', '?tester=']) {
+      await load(p, `${ORIGIN}/piloto-costa-verde/${q}`);
+      ok(await p.page(`return localStorage.getItem('limargeddon.save') === ${JSON.stringify(saved)}`), `la demo abierta con ${q} no toca el guardado del juego`);
+    }
     await fresh(p, SAVE({ unlocked: 10 }));
     await p.page('document.querySelector(\'#stageSel [data-stage="costa-verde"]\').click(); return true');
     await play(p);

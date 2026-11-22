@@ -23,7 +23,8 @@ const show = (id: string | null) => { for (const s of screens) $(s).hidden = s !
 
 ui.touch = matchMedia('(pointer: coarse)').matches;
 installInput();
-installSharing(TEST_MODE);
+// la etiqueta de ?tester= queda en memoria: la demo no escribe el guardado del juego
+installSharing(TEST_MODE, { keepTester: false });
 fitStage();
 
 const game = new Phaser.Game({

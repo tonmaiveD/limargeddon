@@ -73,6 +73,23 @@ describe('Datos anónimos de partidas', () => {
     expect(cleanTester('Pablo_2026-XL')).toBe('pablo2026xl');
   });
 
+  it('en la demo del piloto la etiqueta va en los registros sin escribir el guardado (auditoría de la demo, F1)', () => {
+    setSettings({ share: true, tester: 'guardada' });
+    const before = localStorage.getItem('limargeddon.save');
+    try {
+      readTester('?prueba&tester=Auditoria', false);
+      track(false, (c) => fightEvent(fight(), c));
+      expect(queued()[0].tester).toBe('auditoria');
+      readTester('?tester=', false);
+      track(false, (c) => fightEvent(fight(), c));
+      expect(queued()[1].tester).toBe(DEV_TESTER); // sin etiqueta, en desarrollo va como equipo de pruebas
+      readTester('', false); // sin ?tester= vale la guardada
+      track(false, (c) => fightEvent(fight(), c));
+      expect(queued()[2].tester).toBe('guardada');
+      expect(localStorage.getItem('limargeddon.save')).toBe(before);
+    } finally { readTester('', false); }
+  });
+
   it('lo enviado sale de la cola solo si el receptor respondió bien', async () => {
     for (let i = 0; i < 3; i++) enqueue(fightEvent(fight(), CTX));
     expect(await flush('', ok)).toBe(0); // sin receptor no se manda nada

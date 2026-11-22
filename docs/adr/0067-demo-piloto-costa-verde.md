@@ -11,7 +11,7 @@
 ## Decisión
 - **Página aparte:** `piloto-costa-verde/index.html`, en `https://tonmaived.github.io/limargeddon/piloto-costa-verde/`.
   - Tiene su propio build (`vite.piloto.config.ts`), que corre después del del juego y escribe en el mismo `dist`. El juego conserva su paquete de siempre (`index-*.js`) y no lleva nada de la demo.
-  - No tiene menú, taller, guardado, medallas ni ranking, y no toca `limargeddon.save`.
+  - No tiene menú, taller, guardado, medallas ni ranking, y no toca `limargeddon.save`. Tampoco con `?tester=`, cuya etiqueta en la demo vale solo mientras la página está abierta y no queda en el guardado del juego.
 - **Arte:** los 76 PNG de la V2.1.1, copiados sin cambios a `public/piloto-costa-verde/arte/`, con su índice en `src/piloto/arte.json`.
   - Al cargar, la demo arma tres texturas derivadas: la carretilla espejada y las dos orillas de las transiciones, que cambian de piedra a arena a mitad del tramo.
 - **Ganchos en el motor (`src/core/art/skin.ts`):** el arte alterno se instala con `setSkin`.
@@ -56,10 +56,10 @@
   - se juegan las dos versiones y la nueva dibuja el Tico entregado;
   - las dos partidas y la encuesta quedan con la misma sesión, y la B se traduce bien;
   - la prueba siguiente empieza por la otra versión;
-  - el guardado del juego no cambia y no hay errores;
+  - el guardado del juego no cambia, tampoco al abrir la demo con `?tester=`, y no hay errores;
   - el juego sigue dibujando con su arte.
 - **Campaña:** `npm run campana` da exactamente lo mismo que en `main`.
-- **Juego intacto:** el paquete del juego tiene el mismo nombre de siempre, el CSS idéntico y nada de la demo.
+- **Juego intacto:** el paquete del juego no trae nada de la demo, ni sus imágenes ni su código, y su CSS es idéntico. El JavaScript del juego sí cambia, porque lleva los ganchos del motor, que en el juego quedan en `null` y dejan cada dibujo como en `main`. La campaña igual a la de `main` y la escena que confirma que el juego dibuja con su arte lo comprueban.
 
 ## Pendiente
 - **Publicar el receptor** con los dos registros nuevos antes de mandar la demo a las personas. Necesita el OK del dueño. Hasta entonces, el receptor descarta los registros "piloto" sin guardarlos.

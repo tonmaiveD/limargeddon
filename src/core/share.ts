@@ -12,7 +12,11 @@ export const sharing = (test: boolean): boolean => !test && getSettings().share 
 // pruebas de quien programa no se mezclen con el público en el informe.
 export const DEV_TESTER = 'dev';
 export const testerTag = (tester: string | undefined, dev: boolean): string | undefined => tester ?? (dev ? DEV_TESTER : undefined);
-const ctx = (): Ctx => ({ build: __BUILD__, tester: testerTag(getSettings().tester, import.meta.env.DEV) });
+// La demo del piloto (ADR 0067) no escribe el guardado del juego: su etiqueta de ?tester= vive solo en memoria.
+// null es "la URL no trae etiqueta", y entonces vale la guardada; '' es "?tester=", que la quita solo en esta página.
+let pageTester: string | null = null;
+const currentTester = (): string | undefined => (pageTester === null ? getSettings().tester : pageTester || undefined);
+const ctx = (): Ctx => ({ build: __BUILD__, tester: testerTag(currentTester(), import.meta.env.DEV) });
 
 // Anota un registro y prueba mandar lo pendiente.
 export function track(test: boolean, make: (c: Ctx) => DataEvent): void {
@@ -70,17 +74,19 @@ export function setSharing(on: boolean): void {
 export const leave = (test: boolean) => (): void => flushOnLeave(TELEMETRY_URL, () => sharing(test));
 
 // ?tester=nombre deja la etiqueta del equipo de pruebas en este teléfono; ?tester= la borra.
-export function readTester(search: string): void {
+// Con keep en false (la demo) la etiqueta vale solo mientras la página esté abierta y el guardado no se toca.
+export function readTester(search: string, keep = true): void {
   const q = new URLSearchParams(search);
-  if (!q.has('tester')) return;
+  if (!q.has('tester')) { if (!keep) pageTester = null; return; }
   const t = cleanTester(q.get('tester') ?? '');
-  setSettings({ tester: t || undefined });
+  if (keep) setSettings({ tester: t || undefined });
+  else pageTester = t;
 }
 
 // Al abrir el juego manda lo que quedó pendiente; al esconder o cerrar la app, un último intento.
 // Los manejadores quedan instalados siempre y miran la preferencia en el momento, así respetan un cambio posterior.
-export function installSharing(test: boolean): void {
-  if (typeof location !== 'undefined') readTester(location.search);
+export function installSharing(test: boolean, opts: { keepTester?: boolean } = {}): void {
+  if (typeof location !== 'undefined') readTester(location.search, opts.keepTester ?? true);
   recoverCredits(test);
   void flush(TELEMETRY_URL, globalThis.fetch, () => sharing(test));
   const onLeave = leave(test);
