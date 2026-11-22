@@ -1,0 +1,385 @@
+{
+"version": "2.1.1",
+"assets": [
+{
+"id": "tico_sano",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_muy_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_fierro_sano",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_fierro_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_fierro_muy_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_blindaje_sano",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_blindaje_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_blindaje_muy_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "jefe_sano",
+"w": 34,
+"h": 60
+},
+{
+"id": "jefe_danado",
+"w": 34,
+"h": 60
+},
+{
+"id": "fila_rojo_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_rojo_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_azul_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_azul_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_verde_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_verde_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_morado_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_morado_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_naranja_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_naranja_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_plata_sano",
+"w": 28,
+"h": 44
+},
+{
+"id": "fila_plata_danado",
+"w": 28,
+"h": 44
+},
+{
+"id": "serenazgo_sano",
+"w": 30,
+"h": 52
+},
+{
+"id": "serenazgo_danado",
+"w": 30,
+"h": 52
+},
+{
+"id": "combi_sano",
+"w": 30,
+"h": 60
+},
+{
+"id": "combi_danado",
+"w": 30,
+"h": 60
+},
+{
+"id": "mototaxi_sano",
+"w": 22,
+"h": 34
+},
+{
+"id": "mototaxi_danado",
+"w": 22,
+"h": 34
+},
+{
+"id": "aplicacion_sano",
+"w": 28,
+"h": 50
+},
+{
+"id": "aplicacion_danado",
+"w": 28,
+"h": 50
+},
+{
+"id": "taxi_sano",
+"w": 28,
+"h": 50
+},
+{
+"id": "taxi_danado",
+"w": 28,
+"h": 50
+},
+{
+"id": "repartidor_sano",
+"w": 12,
+"h": 24
+},
+{
+"id": "repartidor_danado",
+"w": 12,
+"h": 24
+},
+{
+"id": "acantilado_01",
+"w": 42,
+"h": 110
+},
+{
+"id": "acantilado_02",
+"w": 42,
+"h": 110
+},
+{
+"id": "acantilado_03",
+"w": 42,
+"h": 110
+},
+{
+"id": "acantilado_04",
+"w": 42,
+"h": 110
+},
+{
+"id": "mar_01",
+"w": 42,
+"h": 110
+},
+{
+"id": "mar_02",
+"w": 42,
+"h": 110
+},
+{
+"id": "mar_03",
+"w": 42,
+"h": 110
+},
+{
+"id": "acantilado_alto",
+"w": 42,
+"h": 110
+},
+{
+"id": "mar_lejano",
+"w": 42,
+"h": 110
+},
+{
+"id": "arena_base",
+"w": 42,
+"h": 110
+},
+{
+"id": "orilla_piedra",
+"w": 14,
+"h": 110
+},
+{
+"id": "orilla_arena",
+"w": 14,
+"h": 110
+},
+{
+"id": "hueco_sano",
+"w": 65,
+"h": 22
+},
+{
+"id": "hueco_golpeado",
+"w": 65,
+"h": 22
+},
+{
+"id": "barrera_sano",
+"w": 130,
+"h": 14
+},
+{
+"id": "barrera_golpeado",
+"w": 130,
+"h": 14
+},
+{
+"id": "carretilla",
+"w": 30,
+"h": 22
+},
+{
+"id": "gaviotas_01",
+"w": 70,
+"h": 28
+},
+{
+"id": "gaviotas_02",
+"w": 70,
+"h": 28
+},
+{
+"id": "hito_bajada",
+"w": 42,
+"h": 110
+},
+{
+"id": "hito_muelle",
+"w": 42,
+"h": 110
+},
+{
+"id": "hito_agua_dulce",
+"w": 42,
+"h": 110
+},
+{
+"id": "hito_morro_solar",
+"w": 42,
+"h": 110
+},
+{
+"id": "bonus_turbo",
+"w": 24,
+"h": 24
+},
+{
+"id": "bonus_cancha",
+"w": 24,
+"h": 24
+},
+{
+"id": "bonus_soat",
+"w": 24,
+"h": 24
+},
+{
+"id": "bonus_combi",
+"w": 24,
+"h": 24
+},
+{
+"id": "bonus_picaron",
+"w": 24,
+"h": 24
+},
+{
+"id": "bonus_metro",
+"w": 24,
+"h": 24
+},
+{
+"id": "jefe_balizas",
+"w": 34,
+"h": 60
+},
+{
+"id": "fila_balizas",
+"w": 28,
+"h": 44
+},
+{
+"id": "tico_fierro_blindaje_sano",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_fierro_blindaje_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "tico_fierro_blindaje_muy_danado",
+"w": 28,
+"h": 48
+},
+{
+"id": "gaviotas_huida_01",
+"w": 70,
+"h": 28
+},
+{
+"id": "gaviotas_huida_02",
+"w": 70,
+"h": 28
+},
+{
+"id": "piedra_01",
+"w": 14,
+"h": 14
+},
+{
+"id": "piedra_02",
+"w": 14,
+"h": 14
+},
+{
+"id": "piedra_03",
+"w": 14,
+"h": 14
+},
+{
+"id": "transicion_mar_arena",
+"w": 42,
+"h": 110
+},
+{
+"id": "transicion_arena_mar",
+"w": 42,
+"h": 110
+}
+]
+}

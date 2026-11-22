@@ -1,3 +1,4 @@
+import { SKIN_SCALE, skin } from './art/skin';
 import { Sfx } from './audio/sfx';
 import { H, W } from './constants';
 import type { Gfx } from './gfx';
@@ -111,6 +112,8 @@ export function drawHazards(g: Gfx, G: Game): void {
   const f = G.flock, B = G.cfg.hazards?.birds;
   if (B && f.on) g.rigid(f.x, f.y, () => { // la bandada y su sombra, rígidas sobre la curva (ADR 0040)
     if (!f.scared) { g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(f.x, f.y + 30, B.w / 2, 10, 0, 0, 7); g.fill(); } // sombra
+    const sk = skin()?.flock?.(G, f.scared); // arte del piloto (ADR 0067), en la misma caja que la V del motor
+    if (sk) { g.image(sk, f.x, f.y - 9, 1 / SKIN_SCALE); return; }
     g.strokeStyle = '#f4f6fb'; g.lineWidth = 1.6;
     for (let i = 0; i < 7; i++) { // gaviotas en V
       const bx = f.x + (i - 3) * 9, by = f.y - Math.abs(i - 3) * 6, flap = Math.sin(G.t * 16 + i) * 3;
@@ -123,6 +126,8 @@ export function drawHazards(g: Gfx, G: Game): void {
 
 // Carretilla de helados: amarilla, con franjas roja y azul, el toldo y el heladero empujando.
 export function drawCarretilla(g: Gfx, x: number, y: number, dir: number): void {
+  const sk = skin()?.cart?.(dir); // arte del piloto (ADR 0067)
+  if (sk) { g.image(sk, x, y, 1 / SKIN_SCALE); return; }
   const w = CART.w, h = CART.h;
   g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x - w / 2 + 2, y - h / 2 + 3, w, h);
   g.fillStyle = '#ffd400'; g.fillRect(x - w / 2, y - h / 2, w, h);

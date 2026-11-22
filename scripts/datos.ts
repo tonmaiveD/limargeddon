@@ -6,6 +6,7 @@
  * - "Salidas al menú" son los abandonos: volver al menú a mitad de pelea. Cerrar la app no se registra.
  * - Las victorias en menos de 10 s son pruebas forzadas y quedan fuera, contadas aparte.
  * - Créditos (ADR 0060): cómo terminaron y el mayor rato con la imagen quieta, por origen y por si era la primera vez.
+ * - Prueba de arte de la Costa Verde (ADR 0067): partidas por versión del arte, por orden y la encuesta.
  * - No hay jugadores únicos ni seguimiento de una persona, por diseño: todo se cuenta por partida.
  * Opciones: --desde AAAA-MM-DD, --build <versión>, --archivo <descarga.json> (sin red, desde una descarga guardada).
  * La lógica es pura (`report`) para probarla sin red; la descarga y los archivos solo corren al llamarlo desde la consola.
@@ -13,12 +14,13 @@
 
 export interface Frames { play?: { n: number; p95: number; p99: number; over33: number } | null; stallCount?: number; anomalies?: number[] }
 export interface Ev {
-  kind: 'pelea' | 'abandono' | 'compra' | 'creditos'; build: string; day: string; device: string; tester?: string;
+  kind: 'pelea' | 'abandono' | 'compra' | 'creditos' | 'piloto' | 'piloto-encuesta'; build: string; day: string; device: string; tester?: string;
   stage?: string; dk?: string; fireMode?: string; win?: boolean; t?: number; bossPct?: number; gross?: number; fines?: number;
   lastHit?: string; dmgBy?: Record<string, number>; frames?: Frames; phase?: number; hpPct?: number;
   upgrades?: Record<string, number>; walletStart?: number; cheapest?: number;
   upgrade?: string; level?: number; price?: number; wallet?: number;
-  from?: string; first?: boolean; reached?: number; maxStall?: number; skips?: number; end?: string;
+  from?: string; first?: boolean | string; reached?: number; maxStall?: number; skips?: number; end?: string;
+  session?: string; round?: number; variant?: string; prefer?: string; readable?: string; lima?: string; recognized?: string;
 }
 export interface Stage { id: string; name: string }
 export interface Opts { since?: string; build?: string; stages?: Stage[]; now?: string }
@@ -27,7 +29,7 @@ export const FEW = 5; // con menos peleas que esto, el porcentaje se marca como 
 // Ninguna etapa se gana jugando en menos de esto: una victoria más rápida es una prueba forzada (comandos de simulación o
 // créditos) y se deja fuera del informe, contada aparte.
 export const MIN_WIN_S = 10;
-export const forced = (e: Ev) => e.kind === 'pelea' && !!e.win && (e.t ?? 0) < MIN_WIN_S;
+export const forced = (e: Ev) => (e.kind === 'pelea' || e.kind === 'piloto') && !!e.win && (e.t ?? 0) < MIN_WIN_S;
 
 /* ---------- números ---------- */
 
@@ -143,6 +145,47 @@ function credits(ev: Ev[]): string {
 
 const DK = ['facil', 'normal', 'dificil'];
 
+// Prueba de arte de la Costa Verde (ADR 0067). Cada persona juega con el arte actual y con el nuevo, en orden alternado.
+const ART = [['actual', 'Actual'], ['nuevo', 'Nuevo']] as const;
+function pilot(ev: Ev[]): string {
+  const r = ev.filter((e) => e.kind === 'piloto'), q = ev.filter((e) => e.kind === 'piloto-encuesta');
+  if (!r.length && !q.length) return '_Sin datos._';
+  const play = (g: Ev[]) => g.filter((e) => e.frames?.play);
+  const rounds = ART.map(([v, label]) => {
+    const g = r.filter((e) => e.variant === v), fin = g.filter((e) => e.end !== 'abandono');
+    return [label, `${g.length}${few(g.length)}`, pct(fin.filter((e) => e.win).length, fin.length), `${g.length - fin.length}`, fmt(median(fin.map((e) => e.t ?? 0)), 0),
+      fmt(median(fin.map((e) => e.bossPct ?? 0))), fmt(median(fin.map((e) => e.hpPct ?? 0))),
+      fmt(median(play(g).map((e) => e.frames!.play!.p95)), 1), fmt(median(play(g).map((e) => e.frames!.play!.p99)), 1)];
+  });
+  const order = ART.map(([v, label]) => {
+    const g = (first: boolean) => r.filter((e) => e.variant === v && e.end !== 'abandono' && (e.first === v) === first);
+    return [label, ...[true, false].flatMap((f) => [`${g(f).length}`, pct(g(f).filter((e) => e.win).length, g(f).length)])];
+  });
+  const sources = [...new Set(r.flatMap((e) => Object.keys(e.dmgBy ?? {})))];
+  const dmg = sources.map((k) => [cell(k), ...ART.map(([v]) => {
+    const g = r.filter((e) => e.variant === v);
+    return g.length ? fmt(g.reduce((s, e) => s + (e.dmgBy?.[k] ?? 0), 0) / g.length, 1) : '·';
+  })]).sort((a, b) => Number(b[1].replace(',', '.')) - Number(a[1].replace(',', '.'))).slice(0, 8);
+  const count = (k: keyof Ev, vals: string[], g: Ev[]) => vals.map((x) => `${g.filter((e) => e[k] === x).length}`);
+  const survey = [['Se veía mejor', 'prefer'], ['Peligros y avisos más claros', 'readable']].map(([label, k]) =>
+    [label, ...count(k as keyof Ev, ['actual', 'nuevo', 'igual'], q)]);
+  const lima = [['Vive o vivió en Lima', 'si'], ['No', 'no']].map(([label, l]) => {
+    const g = q.filter((e) => e.lima === l);
+    return [label, `${g.length}`, ...count('recognized', ['si', 'no', 'nose'], g)];
+  });
+  return [
+    `${r.length} partidas y ${q.length} encuestas. Cada persona juega las dos versiones, así que cuenta dos veces en la primera tabla. Las victorias se cuentan sobre las partidas terminadas.`, '',
+    table(['Arte', 'Partidas', 'Victorias', 'Abandonos', 'Tiempo (s, mediana)', 'Jefe restante (%, mediana)', 'Vida restante (%, mediana)', 'p95 (ms)', 'p99 (ms)'], rounds), '',
+    'Por orden: jugar primero o segundo cambia el resultado, porque la segunda vez ya se conoce la pelea.', '',
+    table(['Arte', 'Jugada primero', 'Victorias', 'Jugada segundo', 'Victorias'], order), '',
+    'Daño recibido por partida, por fuente.', '',
+    sources.length ? table(['Fuente', 'Actual', 'Nuevo'], dmg) : '_Sin daño registrado._', '',
+    'Encuesta. Las respuestas A y B ya van traducidas al arte con que se jugó cada una.', '',
+    table(['Pregunta', 'Actual', 'Nuevo', 'Igual'], survey), '',
+    table(['Reconoció la Costa Verde', 'Respuestas', 'Sí', 'No', 'No sé'], lima),
+  ].join('\n');
+}
+
 function audience(title: string, ev: Ev[], name: (id: string) => string, order: (id: string) => number): string {
   if (!ev.length) return `## ${title}\n\n_Sin datos._`;
   return [`## ${title}`, '', '### Peleas', '', fights(ev, name, order), '', '### Daño recibido', '', damage(ev, name, order), '',
@@ -184,6 +227,7 @@ export function report(all: Ev[], o: Opts = {}): string {
     '### Versiones del juego', '', table(['Versión', 'Días', 'Peleas', 'Salidas', 'Compras'], builds), '',
     audience('Público', pub, name, order), '',
     audience(`Equipo de pruebas (${[...new Set(team.map((e) => e.tester))].sort().join(', ') || 'nadie'})`, team, name, order), '',
+    '## Prueba de arte de la Costa Verde', '', 'Demo aparte del juego (ADR 0067), con público y equipo de pruebas juntos.', '', pilot(ev), '',
   ].join('\n');
 }
 

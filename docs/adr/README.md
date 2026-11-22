@@ -69,3 +69,4 @@ Registros breves: contexto, decisión y consecuencias. Una decisión por archivo
 | [0063](0063-menu-y-taller.md) | Menú con hoja de ajustes y taller que dice cuánto falta | Aceptada |
 | [0064](0064-pista-por-distrito-y-efectos.md) | Pista por distrito y efectos de contacto | Aceptada |
 | [0065](0065-noche-en-la-costa-verde.md) | Noche en la Costa Verde | Aceptada |
+| [0067](0067-demo-piloto-costa-verde.md) | Demo del piloto de arte de la Costa Verde | Aceptada |

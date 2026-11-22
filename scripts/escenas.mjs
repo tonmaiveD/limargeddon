@@ -14,6 +14,7 @@
  * - Un guardado viejo en "acelerar es atacar" juega por toque y conserva su récord y medallas (ADR 0062).
  * - Menú con Taller, Ranking y Ajustes, la hoja de ajustes, "Jugar" a la vista y el taller que dice cuánto falta (ADR 0063).
  * - La Costa Verde de noche oscurece la pista, deja al jefe y al Tico encima y sobrevive a la revancha (ADR 0065).
+ * - La demo del piloto de arte juega las dos versiones, anota la encuesta y los datos marcados y no toca el juego (ADR 0067).
  * Sin dependencias: habla con Chrome por el protocolo de DevTools. Los datos anónimos no salen: el receptor está bloqueado.
  * Corre sobre el servidor de desarrollo, el único que expone `game` para manejarlo.
  * Uso: `npm run escenas`. Chrome se busca en CHROME o en las rutas habituales.
@@ -82,12 +83,18 @@ window.__t = {
 const checks = [];
 const ok = (cond, what) => { if (!cond) throw new Error(what); checks.push(what); };
 
+// Navega o recarga y espera el documento nuevo con el juego creado. La marca evita leer la página anterior, que todavía
+// tiene su `game` justo después de pedir la navegación (auditoría de la demo, F3).
+async function load(p, url) {
+  await p.page('window.__old = true; return true').catch(() => {});
+  await (url ? p.send('Page.navigate', { url }) : p.send('Page.reload'));
+  await until(() => p.page('return !window.__old && typeof game !== "undefined"'), 15000, `carga ${url ?? 'otra vez'} la página`);
+}
+
 async function fresh(p, save) {
-  await p.send('Page.navigate', { url: `${ORIGIN}/` });
-  await until(() => p.page('return typeof game !== "undefined"'), 15000, 'el juego carga');
+  await load(p, `${ORIGIN}/`);
   await p.page(`localStorage.clear(); ${save ? `localStorage.setItem('limargeddon.save', ${JSON.stringify(JSON.stringify(save))});` : ''} return true`);
-  await p.send('Page.reload');
-  await sleep(500);
+  await load(p);
   await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú aparece');
 }
 const scenes = (p) => p.page('return __t.scenes()');
@@ -313,9 +320,8 @@ const TOURS = {
     await p.page('const S = __t.stage(); S.G.t = 80; S.G.b.hp = 0; return true');
     await run(p, '__t.scenes().includes("Credits")', 60000, 'los créditos');
     await run(p, 'game.scene.getScene("Credits").t >= 10', 30000, 'diez segundos de créditos');
-    await p.send('Page.reload');
-    await sleep(500);
-    await until(() => p.page('return typeof game !== "undefined" && __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
+    await load(p);
+    await until(() => p.page('return __t.scenes().includes("Menu")'), 15000, 'el menú tras recargar');
     ok(await p.page('__t.click("toSettings"); return __t.visible("toCredits")'), 'tras recargar a los 10 s, los ajustes ofrecen "Ver créditos"');
     const [gone] = await p.page('return __t.creditos()');
     ok(gone && gone.end === 'salida' && gone.from === 'victoria' && gone.reached >= 7, `los créditos recargados a mitad llegan como "salida" al abrir otra vez (hasta ${gone?.reached} s)`);
@@ -409,6 +415,67 @@ const TOURS = {
     await p.page('document.querySelector(\'#stageSel [data-stage="san-isidro"]\').click(); return true');
     await play(p);
     ok(await p.page('return __t.stage().night === null'), 'las etapas de día no tienen noche');
+  },
+
+  async 'demo del piloto de arte: dos versiones alternadas, encuesta y datos marcados, sin tocar el juego'(p) {
+    await load(p, `${ORIGIN}/piloto-costa-verde/`);
+    await p.page('localStorage.clear(); return true');
+    await load(p);
+    await until(() => p.page('return !document.getElementById("pStart").disabled'), 20000, 'el arte de la demo carga');
+    ok(await p.page('return ["tico_sano", "jefe_danado", "gaviotas_huida_02", "carretilla_izq", "orilla_mar_arena"].every((k) => game.textures.exists(k))'), 'la demo carga las imágenes entregadas y arma las derivadas');
+    const S = 'game.scene.getScene("PilotoStage")';
+    // la textura del Tico dice qué arte se está usando: la del motor ("veh…") o la entregada ("tico_…")
+    const round = async (button, finish) => {
+      await p.page(`__t.click(${JSON.stringify(button)}); return true`);
+      await run(p, `${S}.sys.isActive() && ${S}.G?.mode === "play"`, 15000, 'la ronda empieza');
+      await p.page(`removeEventListener('blur', ${S}.onBlur); return true`);
+      await p.page('__t.adelantar(30); return true');
+      const info = await p.page(`const S = ${S}; return { variant: S.data0.variant, tico: S.L.me.imgs[0]?.texture.key ?? '', deck: __t.deck() }`);
+      await p.page(`const G = ${S}.G; ${finish}; return true`);
+      return info;
+    };
+    const a = await round('pStart', 'G.b.hp = 0');
+    // la versión A termina en tiempo real, sin dar cuadros a mano, como para una persona (con el cierre de Don Frío)
+    await until(() => p.page('return !document.getElementById("pBetween").hidden'), 30000, 'termina la versión A');
+    // la versión B corre sola, en tiempo real: terminar la A no puede dejar el reloj del juego detenido
+    await p.page('__t.click("pNext"); return true');
+    await until(() => p.page(`return ${S}.sys.isActive() && ${S}.G?.mode === "play"`), 15000, 'la versión B empieza');
+    const t0 = await p.page(`removeEventListener('blur', ${S}.onBlur); return ${S}.G.t`);
+    await sleep(1500 * SLOW);
+    ok(await p.page(`return ${S}.G.t`) > t0 + 0.3, 'la versión B avanza sola, sin quedarse detenida');
+    const b = await (async () => {
+      const info = await p.page(`const S = ${S}; return { variant: S.data0.variant, tico: S.L.me.imgs[0]?.texture.key ?? '', deck: __t.deck() }`);
+      await p.page(`const G = ${S}.G; G.p.pw.soat = 0; G.p.hp = 0; return true`);
+      return info;
+    })();
+    await run(p, '!document.getElementById("pSurvey").hidden', 30000, 'termina la versión B');
+    ok(a.variant !== b.variant && [a.variant, b.variant].includes('nuevo'), 'cada persona juega las dos versiones del arte');
+    ok(a.deck && b.deck, 'en las dos versiones se ven los controles táctiles');
+    const nuevo = a.variant === 'nuevo' ? a : b, actual = a.variant === 'nuevo' ? b : a;
+    ok(nuevo.tico.startsWith('tico_') && actual.tico.startsWith('veh'), 'la versión nueva dibuja el Tico entregado y la actual el del juego');
+    for (const [n, v] of [['prefer', 'B'], ['readable', 'A'], ['lima', 'si'], ['recognized', 'nose']]) await p.page(`document.querySelector('input[name=${n}][value=${v}]').click(); return true`);
+    await p.page('document.querySelector("#pSurvey button[type=submit]").click(); return true');
+    await run(p, '!document.getElementById("pThanks").hidden', 5000, 'el agradecimiento');
+    const q = await p.page('return JSON.parse(localStorage.getItem("limargeddon.datos") || "[]").map((e) => ({ kind: e.kind, variant: e.variant, first: e.first, round: e.round, prefer: e.prefer, session: e.session }))');
+    const rows = q.filter((e) => e.kind === 'piloto'), survey = q.find((e) => e.kind === 'piloto-encuesta');
+    ok(rows.length === 2 && survey && rows.every((e) => e.session === survey.session && e.first === a.variant), 'las dos partidas y la encuesta quedan anotadas con la misma sesión');
+    ok(survey.prefer === b.variant, 'la respuesta "B" se guarda traducida al arte de la segunda versión');
+    ok(await p.page('return localStorage.getItem("limargeddon.save") === null'), 'la demo no toca el guardado del juego');
+    await p.page('__t.click("pAgain"); return true');
+    await run(p, `${S}.sys.isActive() && ${S}.G?.mode === "play"`, 15000, 'la segunda prueba empieza');
+    ok(await p.page(`return ${S}.data0.variant !== ${JSON.stringify(a.variant)}`), 'la prueba siguiente en el mismo aparato empieza por la otra versión');
+    ok(await p.page('return __errors.length === 0'), 'la demo no deja errores');
+    // con la etiqueta del equipo de pruebas en la dirección, la demo tampoco escribe el guardado (auditoría de la demo, F1)
+    const saved = JSON.stringify(SAVE({ unlocked: 3, settings: { share: false, tester: 'guardada' } }));
+    await p.page(`localStorage.setItem('limargeddon.save', ${JSON.stringify(saved)}); return true`);
+    for (const q of ['?prueba&tester=auditoria', '?tester=auditoria', '?tester=']) {
+      await load(p, `${ORIGIN}/piloto-costa-verde/${q}`);
+      ok(await p.page(`return localStorage.getItem('limargeddon.save') === ${JSON.stringify(saved)}`), `la demo abierta con ${q} no toca el guardado del juego`);
+    }
+    await fresh(p, SAVE({ unlocked: 10 }));
+    await p.page('document.querySelector(\'#stageSel [data-stage="costa-verde"]\').click(); return true');
+    await play(p);
+    ok(await p.page('return __t.stage().L.me.imgs[0].texture.key.startsWith("veh")'), 'el juego sigue dibujando con su propio arte');
   },
 };
 
