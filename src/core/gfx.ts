@@ -101,8 +101,9 @@ export class Gfx implements Painter {
    * margen de mx a cada lado). Con pista curva se corta en franjas de 8 que siguen la curva (con franjas más altas el
    * borde del mar y los letreros se veían escalonados).
    */
-  tile(key: string, x: number, y: number, w: number, h: number, mx: number, scale: number): void {
-    const n = this.warp ? Math.max(1, Math.ceil(h / 8)) : 1, sh = h / n;
+  // step: alto de cada franja sobre la curva (8 por defecto; la orilla del piloto usa franjas más finas, ADR 0067)
+  tile(key: string, x: number, y: number, w: number, h: number, mx: number, scale: number, step = 8): void {
+    const n = this.warp ? Math.max(1, Math.ceil(h / step)) : 1, sh = h / n;
     for (let i = 0; i < n; i++) {
       let im = this.tiles[this.tileUsed];
       if (!im) { im = this.scene.add.image(0, 0, key).setOrigin(0, 0).setDepth(this.depth); this.tiles.push(im); }

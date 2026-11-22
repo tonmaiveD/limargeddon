@@ -39,7 +39,21 @@ export type CreditsEnd = typeof CREDITS_ENDS[number];
 export interface CreditsEvent extends Base {
   kind: 'creditos'; from: 'victoria' | 'menu'; first: boolean; reached: number; maxStall: number; skips: number; end: CreditsEnd;
 }
-export type DataEvent = FightEvent | AbandonEvent | BuyEvent | CreditsEvent;
+// Demo del piloto de arte de la Costa Verde (ADR 0067): una fila por partida y una por encuesta, unidas por la sesión
+// (un número al azar por persona y prueba, sin nada que la identifique). variant es el arte con que se jugó y first, el
+// que salió primero; en la encuesta las versiones se llaman A (la primera) y B, y se guardan ya traducidas.
+export const PILOT_VARIANTS = ['actual', 'nuevo'] as const;
+export type PilotVariant = typeof PILOT_VARIANTS[number];
+export interface PilotEvent extends Base {
+  kind: 'piloto'; stage: 'costa-verde'; session: string; round: number; variant: PilotVariant; first: PilotVariant; end: 'fin' | 'abandono';
+  win: boolean; t: number; bossPct: number; hpPct: number; fines?: number; lastHit?: string; dmgBy?: Record<string, number>;
+  frames?: Omit<FrameSummary, 'device'>;
+}
+export interface PilotSurveyEvent extends Base {
+  kind: 'piloto-encuesta'; stage: 'costa-verde'; session: string; first: PilotVariant;
+  prefer: PilotVariant | 'igual'; readable: PilotVariant | 'igual'; lima: 'si' | 'no'; recognized: 'si' | 'no' | 'nose';
+}
+export type DataEvent = FightEvent | AbandonEvent | BuyEvent | CreditsEvent | PilotEvent | PilotSurveyEvent;
 
 /* ---------- datos del equipo, sin identificarlo ---------- */
 
@@ -86,6 +100,9 @@ export function fightEvent(r: Omit<FightRecord, 'at'>, c: Ctx): FightEvent {
 export const abandonEvent = (a: Omit<AbandonEvent, keyof Base | 'kind'>, c: Ctx): AbandonEvent => ({ ...base(c), kind: 'abandono', ...a });
 export const buyEvent = (b: Omit<BuyEvent, keyof Base | 'kind'>, c: Ctx): BuyEvent => ({ ...base(c), kind: 'compra', ...b });
 export const creditsEvent = (x: Omit<CreditsEvent, keyof Base | 'kind'>, c: Ctx): CreditsEvent => ({ ...base(c), kind: 'creditos', ...x });
+export const pilotEvent = (x: Omit<PilotEvent, keyof Base | 'kind' | 'stage'>, c: Ctx): PilotEvent => ({ ...base(c), kind: 'piloto', stage: 'costa-verde', ...x });
+export const pilotSurveyEvent = (x: Omit<PilotSurveyEvent, keyof Base | 'kind' | 'stage'>, c: Ctx): PilotSurveyEvent =>
+  ({ ...base(c), kind: 'piloto-encuesta', stage: 'costa-verde', ...x });
 
 /* ---------- cola y envío ---------- */
 

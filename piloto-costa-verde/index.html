@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0e0a16">
+  <meta name="robots" content="noindex">
+  <title>Limargeddon · Prueba de arte de la Costa Verde</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/piloto/piloto.css">
+</head>
+<body class="sin-deck">
+  <!-- Demo del piloto de arte (ADR 0067): aparte del juego, sin menú, taller ni guardado -->
+  <div id="app">
+    <div id="stage">
+      <button id="pauseBtn" hidden aria-label="Pausa (P)" title="Pausa (P)">II</button>
+      <div class="overlay piloto" id="pIntro" hidden>
+        <p class="eyebrow">Prueba de arte</p>
+        <h1>Costa Verde</h1>
+        <p class="tip">Vas a jugar la misma pelea dos veces, con dos versiones del dibujo, la A y la B. Al final te hacemos cuatro preguntas cortas. Toma unos cinco minutos.</p>
+        <p class="tip small">Gira con las dos mitades del volante, dispara conos y usa el claxon. Pégale a la cabeza de la doble fila por la derecha y no toques la carretilla de Don Frío.</p>
+        <p class="tip small" id="pData"></p>
+        <div class="row"><button class="pick" id="pStart" type="button" disabled>Cargando el arte…</button></div>
+        <button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button>
+      </div>
+      <div class="overlay piloto" id="pBetween" hidden>
+        <p class="eyebrow">Versión A terminada</p>
+        <h2 id="pBetweenTitle"></h2>
+        <p class="tip">Ahora la misma pelea con la versión B. Fíjate en el dibujo, en especial en el tráfico, el jefe y los peligros.</p>
+        <div class="row"><button class="pick" id="pNext" type="button">Jugar la versión B</button></div>
+      </div>
+      <form class="overlay piloto" id="pSurvey" hidden>
+        <p class="eyebrow">Cuatro preguntas</p>
+        <fieldset><legend>¿Qué versión se veía mejor?</legend>
+          <label><input type="radio" name="prefer" value="A" required> A</label><label><input type="radio" name="prefer" value="B"> B</label><label><input type="radio" name="prefer" value="igual"> Igual</label></fieldset>
+        <fieldset><legend>¿En cuál veías mejor los peligros y los avisos?</legend>
+          <label><input type="radio" name="readable" value="A" required> A</label><label><input type="radio" name="readable" value="B"> B</label><label><input type="radio" name="readable" value="igual"> Igual</label></fieldset>
+        <fieldset><legend>¿Vives o viviste en Lima?</legend>
+          <label><input type="radio" name="lima" value="si" required> Sí</label><label><input type="radio" name="lima" value="no"> No</label></fieldset>
+        <fieldset><legend>¿Reconociste la Costa Verde en alguna de las dos?</legend>
+          <label><input type="radio" name="recognized" value="si" required> Sí</label><label><input type="radio" name="recognized" value="no"> No</label><label><input type="radio" name="recognized" value="nose"> No sé</label></fieldset>
+        <div class="row"><button class="pick" type="submit">Enviar</button></div>
+      </form>
+      <div class="overlay piloto" id="pThanks" hidden>
+        <p class="eyebrow">Listo</p>
+        <h2>Gracias por probar</h2>
+        <dl class="stats" id="pSummary"></dl>
+        <p class="tip small" id="pSent"></p>
+        <p class="tip small">Una de las dos versiones usa un dibujo nuevo hecho con un generador de imágenes. Este aviso va al final para no influir en tus respuestas.</p>
+        <div class="row"><button class="pick" id="pAgain" type="button">Hacer la prueba otra vez</button></div>
+        <a class="link" href="../">Ir al juego</a>
+      </div>
+      <div class="overlay" id="pause" hidden>
+        <h2>Pausa</h2>
+        <div class="row">
+          <button class="pick" id="resume" type="button">Continuar</button>
+          <button class="pick alt" id="quit" type="button">Terminar esta versión</button>
+        </div>
+        <button class="snd-toggle link" type="button" aria-pressed="true">♪ Sonido activado</button>
+      </div>
+    </div>
+    <div id="deck">
+      <div class="stick" id="stick" role="group" aria-label="Volante: mitad izquierda gira a la izquierda, mitad derecha a la derecha">
+        <span class="l" data-z="left">&#x25C0;&#xFE0E;</span>
+        <span class="r" data-z="right">&#x25B6;&#xFE0E;</span>
+      </div>
+      <div class="weap">
+        <button class="c2" data-k="oil" id="w-oil"><i>&#x25CF;&#xFE0E;</i>ACEITE</button>
+        <button class="c3" data-k="horn" id="w-horn"><i>&#x25C9;&#xFE0E;</i>CLAXON</button>
+        <button class="gas" data-k="up" id="w-gas"><i>&#x25B2;&#xFE0E;</i>ACELERAR</button>
+        <button class="c1" data-k="cone" id="w-cone"><i>&#x25B2;&#xFE0E;</i>CONOS<b class="ammo" id="ammo" aria-hidden="true"></b></button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/piloto/main.ts"></script>
+</body>
+</html>

@@ -53,6 +53,8 @@ function pick(o: Record<string, unknown>, schema: Schema): Record<string, unknow
 const DK = oneOf('facil', 'normal', 'dificil');
 const MODE = oneOf('toque', 'acelerar', 'mantener');
 const STAGE = str(32, /^[a-z-]+$/);
+const VARIANT = oneOf('actual', 'nuevo');
+const SESSION = str(64, /^[A-Za-z0-9-]+$/);
 const STATS: Schema = Object.fromEntries(['n', 'p50', 'p95', 'p99', 'max', 'over20', 'over33'].map((k) => [k, { f: num(0, 1e6), required: true }]));
 const FRAMES: Schema = {
   warm: { f: nullOr(obj(STATS)) }, play: { f: nullOr(obj(STATS)) },
@@ -60,7 +62,7 @@ const FRAMES: Schema = {
 };
 const COMMON: Schema = {
   id: { f: str(64, /^[A-Za-z0-9-]+$/), required: true }, v: { f: (x) => (x === 1 ? 1 : INVALID), required: true },
-  kind: { f: oneOf('pelea', 'abandono', 'compra', 'creditos'), required: true }, build: { f: str(40), required: true },
+  kind: { f: oneOf('pelea', 'abandono', 'compra', 'creditos', 'piloto', 'piloto-encuesta'), required: true }, build: { f: str(40), required: true },
   day: { f: str(10, /^\d{4}-\d{2}-\d{2}$/), required: true }, device: { f: str(80), required: true }, tester: { f: str(16, /^[a-z0-9]+$/) },
 };
 const SCHEMAS: Record<string, Schema> = {
@@ -84,6 +86,18 @@ const SCHEMAS: Record<string, Schema> = {
     ...COMMON, from: { f: oneOf('victoria', 'menu'), required: true }, first: { f: bool, required: true }, reached: { f: num(0, 600), required: true },
     maxStall: { f: num(0, 86400), required: true }, skips: { f: num(0, 10), required: true },
     end: { f: oneOf('completo', 'saltado', 'despues', 'salida', 'error'), required: true },
+  },
+  // demo del piloto de arte de la Costa Verde (ADR 0067): una fila por partida y una por encuesta, unidas por la sesión
+  piloto: {
+    ...COMMON, stage: { f: oneOf('costa-verde'), required: true }, session: { f: SESSION, required: true }, round: { f: num(1, 20), required: true },
+    variant: { f: VARIANT, required: true }, first: { f: VARIANT, required: true }, end: { f: oneOf('fin', 'abandono'), required: true },
+    win: { f: bool, required: true }, t: { f: num(0, 3600), required: true }, bossPct: { f: num(0, 100), required: true }, hpPct: { f: num(0, 100), required: true },
+    fines: { f: num(0, 1e6) }, lastHit: { f: str(32, LABEL) }, dmgBy: { f: numMap(40, LABEL) }, frames: { f: obj(FRAMES) },
+  },
+  'piloto-encuesta': {
+    ...COMMON, stage: { f: oneOf('costa-verde'), required: true }, session: { f: SESSION, required: true }, first: { f: VARIANT, required: true },
+    prefer: { f: oneOf('actual', 'nuevo', 'igual'), required: true }, readable: { f: oneOf('actual', 'nuevo', 'igual'), required: true },
+    lima: { f: oneOf('si', 'no'), required: true }, recognized: { f: oneOf('si', 'no', 'nose'), required: true },
   },
 };
 

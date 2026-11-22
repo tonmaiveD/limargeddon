@@ -4,6 +4,7 @@ import type { Gfx } from '../gfx';
 import type { Car } from '../state';
 import { C } from '../util';
 import { SIREN_Y, bakeCar, sirenHalf, damageStep, isSmall, type ArtKind, type CarArt } from './bake';
+import { SKIN_SCALE, skin } from './skin';
 
 /*
  * Vehículos en nivel B (ADR 0042): traduce cada auto del juego a su dibujo horneado, lo guarda como textura (una por
@@ -55,7 +56,10 @@ export function drawVehicle(img: Gfx, fx: Gfx, t: number, c: Car): void {
   const sway = { moto: 0.25, bici: 0.15, mototaxi: 0.12 } as Record<string, number>;
   const ang = isSmall(a.kind) ? (c.zz !== undefined ? Math.sin(c.zz) * (sway[a.kind] ?? 0) : 0)
     : (c.spin > 0 ? Math.sin(t * 14) * 0.5 : 0) + (d > 0.7 ? Math.sin(t * 30 + c.seed) * 0.025 : 0);
-  img.image(texture(img, a, d, c.seed), c.x, c.y, 1 / ART_SCALE, ang, c.flash && c.flash > 0 ? 0xffffff : undefined);
+  // con el arte del piloto (ADR 0067) la carrocería es la imagen entregada; las luces que cambian siguen siendo las del motor
+  const sk = skin()?.vehicle?.(c);
+  if (sk) img.image(sk, c.x, c.y, 1 / SKIN_SCALE, ang, c.flash && c.flash > 0 ? 0xffffff : undefined);
+  else img.image(texture(img, a, d, c.seed), c.x, c.y, 1 / ART_SCALE, ang, c.flash && c.flash > 0 ? 0xffffff : undefined);
   if (isSmall(a.kind)) return;
   fx.save(); fx.translate(c.x, c.y); fx.rotate(ang);
   lights(fx, t, a, d, (c.brakeT ?? 0) > 0, false, false);

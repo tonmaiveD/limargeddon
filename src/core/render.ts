@@ -14,6 +14,7 @@ import { cobrador } from '../bosses/combi-render';
 import { phaseDef } from '../bosses/phase-machine';
 import { C, clamp, reduceMotion } from './util';
 import { drawFx } from './fx';
+import { SKIN_SCALE, skin } from './art/skin';
 
 /* Dibujo de entidades, efectos, globo de diálogo y HUD. El paisaje y el jefe los aporta cada etapa. */
 
@@ -28,7 +29,12 @@ export const ui = { touch: false };
 // Obstáculos declarados en el JSON (ver ObstacleDef), en la capa del asfalto, rígidos sobre la curva (ADR 0040).
 // Nivel B (ADR 0044): cada uno es un sprite horneado; el peaje y los peatones tienen partes en vivo (art/props.ts).
 function drawObstacles(g: Gfx, G: Game): void {
-  for (const ob of G.obstacles) g.rigid(ob.x, ob.y, () => drawObstacle(g, G, ob));
+  const sk = skin()?.obstacle;
+  for (const ob of G.obstacles) g.rigid(ob.x, ob.y, () => {
+    const key = sk?.(G, ob); // arte del piloto (ADR 0067), del ancho del obstáculo
+    if (key) g.image(key, ob.x, ob.y, ob.w / (g.textures.get(key).getSourceImage().width as number));
+    else drawObstacle(g, G, ob);
+  });
 }
 
 // Aviso del lanzamiento (ataque 'throw'): líneas punteadas parpadeantes por donde van a pasar los proyectiles.
@@ -153,14 +159,17 @@ function drawJet(g: Gfx, G: Game): void {
 
 // Socio de la Combi: la combi aliada, horneada como el tráfico, con el cobrador colgado (ADR 0043).
 function drawCombi(L: Layers, G: Game, a: { x: number; y: number; w: number; h: number }): void {
+  const sk = skin()?.ally?.(); // arte del piloto (ADR 0067), del largo de la combi
+  if (sk) { L.cars.rigid(a.x, a.y, () => L.cars.image(sk, a.x, a.y, a.h / (L.cars.textures.get(sk).getSourceImage().height as number))); return; }
   const art = { kind: 'combi', w: a.w, h: a.h, body: '#f4f1e6', roof: '#d93b3b', band: '#2a7de1', label: 'JAVIER PRADO', labelCol: '#d93b3b' } as const;
   bossCar(L.cars, L.carsFx, G, a.x, a.y, art, 29, {}, (fx, w) => cobrador(fx, G.t, w, -4, false));
 }
 
 // El Tico con su pintura y sus mejoras visibles (imagen horneada, ADR 0042); también lo usa el cierre del carguero.
 export function drawTico(img: Gfx, fx: Gfx, G: Game, body: { x: number; y: number; w: number; h: number }, brake = false, flash = 0, dmg = 0): void {
-  const a = ticoArt(G.cfg.player.look), k = body.w / a.w;
-  img.image(texture(img, a, dmg, 7), body.x, body.y, k / ART_SCALE, 0, flash > 0 ? 0xffffff : undefined);
+  const a = ticoArt(G.cfg.player.look), k = body.w / a.w, sk = skin()?.tico?.(dmg); // arte del piloto (ADR 0067)
+  if (sk) img.image(sk, body.x, body.y, k / SKIN_SCALE, 0, flash > 0 ? 0xffffff : undefined);
+  else img.image(texture(img, a, dmg, 7), body.x, body.y, k / ART_SCALE, 0, flash > 0 ? 0xffffff : undefined);
   if (k === 1 && brake) { fx.save(); fx.translate(body.x, body.y); lights(fx, G.t, a, dmg, true, false, false); fx.restore(); }
 }
 
@@ -263,7 +272,12 @@ export function renderEntities(L: Layers, G: Game, drawBoss: (g: Gfx, G: Game, i
   // efectos de contacto y velocidad (ADR 0064) en el asfalto, debajo del aviso de embestida y de todo lo demás
   // de noche (ADR 0065) el aviso de embestida sube sobre la oscuridad, a la capa del jefe, para que nunca quede a oscuras
   drawLights(L.world, G); drawObstacles(L.world, G); drawFx(lo, G); drawChargeLane(G.cfg.night ? g : lo, G);
-  G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => drawPickupB(lo, G, u)));
+  G.pickups.forEach((u) => lo.rigid(u.x, u.y, () => {
+    const key = skin()?.pickup?.(G, u); // arte del piloto (ADR 0067): el halo del motor y el ícono entregado
+    if (!key) { drawPickupB(lo, G, u); return; }
+    lo.fillStyle = G.cfg.powers[u.k].col; lo.globalAlpha = 0.25 + Math.sin(G.t * 6) * 0.1; lo.beginPath(); lo.arc(u.x, u.y, 18, 0, 7); lo.fill(); lo.globalAlpha = 1;
+    lo.image(key, u.x, u.y, 1 / SKIN_SCALE, Math.sin(u.rot) * 0.2);
+  }));
   // tráfico en nivel B (ADR 0042): imagen horneada y, encima, sus luces; rígidos sobre la pista curva
   G.traffic.forEach((c) => L.cars.rigid(c.x, c.y, () => L.carsFx.rigid(c.x, c.y, () => drawVehicle(L.cars, L.carsFx, G.t, c))));
   for (const s of G.shots) g.rigid(s.x, s.y, () => drawShot(g, G, s));

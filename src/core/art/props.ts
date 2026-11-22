@@ -1,4 +1,5 @@
 import type { ObstacleDef } from '../config';
+import { skin } from './skin';
 import { FONT, parseColor, type Gfx, type Painter } from '../gfx';
 import type { Foe, Game, Obstacle, Pickup, Shot } from '../state';
 import { C } from '../util';
@@ -175,6 +176,8 @@ function paintFoe(g: Painter, look: Foe['look'], r: number, col: string, frame: 
 }
 
 export function drawFoe(g: Gfx, G: Game, f: Foe): void {
+  const sk = skin()?.foe?.(f); // arte del piloto (ADR 0067), del tamaño del proyectil
+  if (sk) { g.image(sk, f.x, f.y, (2 * f.r) / (g.textures.get(sk).getSourceImage().width as number), f.look === 'piedra' ? G.t * 4 + f.x : 0); return; }
   const frame = f.look === 'rollo' ? Math.floor((G.t * 10 + f.x) % 4) : 0;
   const size = Math.max(f.r * 3.4, 12);
   const key = sprite(g, `foe|${f.look ?? 'bola'}|${f.r}|${f.col}|${frame}`, size, size, 8, (p) => paintFoe(p, f.look, f.r, f.col, frame));

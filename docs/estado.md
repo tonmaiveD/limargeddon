@@ -7,6 +7,7 @@
 - Repo público: `tonmaiveD/limargeddon`. PR #1 a #61 fusionados. Cada PR corre `npm test` y `npm run escenas` en GitHub antes de fusionar (ADR 0055).
 - Selector de etapas: el menú muestra las ya desbloqueadas para volver a ellas (ADR 0039). Con `?prueba` en la dirección muestra todas.
 - Receptor de datos anónimos: https://limargeddon-datos.limargeddon-datos.workers.dev (Cloudflare Workers con D1, en la cuenta del dueño; código en `server/`).
+- Demo del piloto de arte de la Costa Verde: https://tonmaived.github.io/limargeddon/piloto-costa-verde/ (ADR 0067). Página aparte del juego, con el arte V2.1.1 entregado, dos versiones alternadas, encuesta y datos marcados "piloto". El informe de `npm run datos` trae su sección.
 - Parámetros de la dirección para revisar:
   - `?prueba`: todas las etapas, sin datos ni tutorial gastado.
   - `?graficos`: galería visual.
@@ -125,6 +126,7 @@ Plan del 10 de noviembre, con los primeros datos reales: 72 peleas de Noam y sus
 ### En paralelo (dueño y tester, sin código)
 - Partidas reales en el teléfono, con `?tester=pablo` y `?tester=noam` abiertos una vez. Hasta el 10 de noviembre Noam jugó sin etiqueta, así que sus partidas cuentan como público.
 - Confirmar en el iPad que los créditos llegan hasta "CONTINUARÁ" (ADR 0052).
+- Prueba de arte de la Costa Verde con 6 a 8 personas en la demo (ADR 0067), al menos en dos teléfonos distintos. Hay que mandar a cada persona la dirección de la demo, con `?tester=nombre` si es del equipo.
 - Correo en commits viejos: la API de GitHub todavía muestra el correo personal del dueño en tres commits de fusión antiguos (`e43f439`, `dcced2c`, `bea5938`). Solo el soporte de GitHub puede purgarlos.
 
 ## Deuda técnica
